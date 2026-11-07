@@ -3,18 +3,27 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/", "destination": "/frontend/index.html" },
-    { "source": "/dashboard", "destination": "/frontend/dashboard.html" },
-    { "source": "/upload", "destination": "/frontend/upload.html" },
-    { "source": "/results", "destination": "/frontend/results.html" },
-    { "source": "/history", "destination": "/frontend/history.html" },
-    { "source": "/admin", "destination": "/frontend/admin.html" },
-    { "source": "/review", "destination": "/frontend/review.html" },
-    { "source": "/css/(.*)", "destination": "/frontend/css/$1" },
-    { "source": "/js/(.*)", "destination": "/frontend/js/$1" },
-    { "source": "/assets/(.*)", "destination": "/frontend/assets/$1" },
-    { "source": "/tests/samples/(.*)", "destination": "/tests/samples/$1" },
-    { "source": "/backend/uploads/(.*)", "destination": "/backend/uploads/$1" }
+    { "source": "/api/scans/:id/pdf", "destination": "/api/scan-pdf?id=:id" },
+    { "source": "/api/scans/:id", "destination": "/api/scan-detail?id=:id" },
+    { "source": "/api/reviews/:id", "destination": "/api/review-scan?id=:id" },
+    { "source": "/api/admin/rules/:id/toggle", "destination": "/api/admin-toggle-rule?id=:id" },
+    { "source": "/api/admin/rules", "destination": "/api/admin-rules" },
+    { "source": "/frontend/(.*)", "destination": "/$1" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/results", "destination": "/results.html" },
+    { "source": "/history", "destination": "/history.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/review", "destination": "/review.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
   ]
 }
-

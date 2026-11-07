@@ -33,9 +33,13 @@ SRCS = $(LIB_DIR)/mongoose.c \
 
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
-.PHONY: all run clean test dirs
+.PHONY: all run clean test dirs sync-static
 
-all: dirs $(BIN)
+all: dirs sync-static $(BIN)
+
+sync-static:
+	@cp -f frontend/*.html . 2>/dev/null || true
+	@cp -rf frontend/css frontend/js frontend/assets . 2>/dev/null || true
 
 dirs:
 	@mkdir -p $(BUILD_DIR)/$(LIB_DIR)

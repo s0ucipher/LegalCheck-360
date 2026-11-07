@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Device View Switcher -->
+        <div class="segmented-control" id="viewModeToggle" title="Switch between Desktop & Smartphone layout">
+          <button type="button" class="seg-btn active" id="btnModeDesktop" onclick="setDeviceMode('desktop')">
+            <span>🖥️</span> Desktop
+          </button>
+          <button type="button" class="seg-btn" id="btnModeMobile" onclick="setDeviceMode('mobile')">
+            <span>📱</span> Smartphone
+          </button>
+        </div>
+
+        <!-- Theme Switcher -->
+        <div class="segmented-control" id="themeToggle" title="Toggle Dark / Regular Light Mode">
+          <button type="button" class="seg-btn active" id="btnThemeDark" onclick="setThemeMode('dark')">
+            <span>🌙</span> Dark
+          </button>
+          <button type="button" class="seg-btn" id="btnThemeLight" onclick="setThemeMode('light')">
+            <span>☀️</span> Regular
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">LegalCheck <span>360</span></div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link active">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">Upload & Inspect</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+          <li><a href="upload.html" class="nav-cta">New Inspection +</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1;">
+    <!-- Page Header -->
+    <div class="app-header">
+      <div class="app-title-group">
+        <h1>Inspector & Compliance Dashboard</h1>
+        <p>Operational overview of packaged commodities inspections and enforcement metrics</p>
+      </div>
+      <div>
+        <a href="upload.html" class="btn btn-primary">📸 Start New Scan</a>
+      </div>
+    </div>
+
+    <!-- Stats Summary Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Inspections</div>
+        <div class="stat-value" id="stat-total-scans">0</div>
+        <div class="stat-meta">Lifetime scans in SQLite</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed Checks</div>
+        <div class="stat-value" id="stat-completed" style="color: #60a5fa;">0</div>
+        <div class="stat-meta" id="stat-pass-count">0 passed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Human Review Needed</div>
+        <div class="stat-value" id="stat-reviews" style="color: #fbbf24;">0</div>
+        <div class="stat-meta warning">Unclear / Blurry packages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Overall Compliance Rate</div>
+        <div class="stat-value" id="stat-rate" style="color: #34d399;">0%</div>
+        <div class="stat-meta positive" id="stat-fail-count">0 violations</div>
+      </div>
+    </div>
+
+    <!-- Quick Action Banner -->
+    <div class="action-banner">
+      <div>
+        <h2>Have a new product package to inspect?</h2>
+        <p>Upload packaging photographs (front, back, and side panels) to automatically extract printed declarations and run rule-by-rule statutory checks.</p>
+      </div>
+      <a href="upload.html" class="btn btn-primary" style="white-space: nowrap;">
+        Launch Scanner →
+      </a>
+    </div>
+
+    <!-- Recent Inspections Table -->
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title">Recent Packaging Inspections</h3>
+        <a href="history.html" class="btn btn-outline btn-sm">View Full Audit Log →</a>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Scan ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Inspection Date</th>
+            <th>Overall Status</th>
+            <th>Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recent-scans-tbody">
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Connecting to C backend...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
+

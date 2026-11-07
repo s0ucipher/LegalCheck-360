@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Inspector Review | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Device View Switcher -->
+        <div class="segmented-control" id="viewModeToggle" title="Switch between Desktop & Smartphone layout">
+          <button type="button" class="seg-btn active" id="btnModeDesktop" onclick="setDeviceMode('desktop')">
+            <span>🖥️</span> Desktop
+          </button>
+          <button type="button" class="seg-btn" id="btnModeMobile" onclick="setDeviceMode('mobile')">
+            <span>📱</span> Smartphone
+          </button>
+        </div>
+
+        <!-- Theme Switcher -->
+        <div class="segmented-control" id="themeToggle" title="Toggle Dark / Regular Light Mode">
+          <button type="button" class="seg-btn active" id="btnThemeDark" onclick="setThemeMode('dark')">
+            <span>🌙</span> Dark
+          </button>
+          <button type="button" class="seg-btn" id="btnThemeLight" onclick="setThemeMode('light')">
+            <span>☀️</span> Regular
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">LegalCheck <span>360</span></div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">New Scan</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <div class="app-header">
+      <div class="app-title-group">
+        <h1>Authorized Inspector Review Interface</h1>
+        <p>Resolve uncertain readings, correct OCR errors, and record statutory inspection decisions</p>
+      </div>
+      <div>
+        <span style="font-size: 0.9rem; color: #9ca3af;">Inspection ID:</span>
+        <strong id="review-scan-id" style="color: #60a5fa; font-size: 1.1rem; margin-left: 6px;">-</strong>
+      </div>
+    </div>
+
+    <form id="human-review-form">
+      <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem;">
+        <!-- Left: Original Photographs -->
+        <div>
+          <div class="card" style="position: sticky; top: 90px;">
+            <h3 class="card-title" style="margin-bottom: 0.5rem;">Packaging Panel Photographs</h3>
+            <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1.25rem;">Inspect original packaging images to verify printed declarations.</p>
+            <div id="review-images-col">
+              <p style="color: #6b7280; text-align: center; padding: 2rem;">Loading packaging images...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Declaration Overrides & Final Decision -->
+        <div>
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 class="card-title" style="margin-bottom: 0.5rem;">Extracted Declarations & Manual Overrides</h3>
+            <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1.25rem;">
+              You may edit any declaration if OCR misread text due to curved packaging or foil reflection.
+            </p>
+            <div id="review-fields-col" style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="color: #6b7280; text-align: center; padding: 2rem;">Loading declarations...</p>
+            </div>
+          </div>
+
+          <!-- Decision Box -->
+          <div class="card">
+            <h3 class="card-title" style="margin-bottom: 1rem;">Statutory Inspection Determination</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="reviewer-name-input">Inspector / Auditor Name</label>
+                <input type="text" id="reviewer-name-input" class="form-control" value="Senior Metrology Auditor" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="reviewer-decision">Final Statutory Decision</label>
+                <select id="reviewer-decision" class="form-control">
+                  <option value="APPROVED">APPROVED (Pass Inspection)</option>
+                  <option value="REJECTED">REJECTED (Statutory Violation)</option>
+                  <option value="PASS_WITH_REMARKS">PASS WITH REMARKS</option>
+                  <option value="NEEDS_CORRECTION">NEEDS RE-PHOTOGRAPHING</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reviewer-comments">Inspection Audit Notes & Comments</label>
+              <textarea id="reviewer-comments" class="form-control" rows="3" placeholder="Enter notes justifying the verification decision..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+              💾 Record Statutory Review Decision
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/review.js"></script>
+</body>
+</html>
+
