@@ -18,25 +18,17 @@
         <span class="utility-hint">Official Regulatory Screening Engine</span>
       </div>
       <div class="utility-right">
-        <!-- Device View Switcher -->
-        <div class="segmented-control" id="viewModeToggle" title="Switch between Desktop & Smartphone layout">
-          <button type="button" class="seg-btn active" id="btnModeDesktop" onclick="setDeviceMode('desktop')">
-            <span>🖥️</span> Desktop
-          </button>
-          <button type="button" class="seg-btn" id="btnModeMobile" onclick="setDeviceMode('mobile')">
-            <span>📱</span> Smartphone
-          </button>
-        </div>
+        <!-- Single Button Device View Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Click to toggle Desktop / Smartphone layout">
+          <span class="toggle-icon" id="deviceToggleIcon">🖥️</span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
 
-        <!-- Theme Switcher -->
-        <div class="segmented-control" id="themeToggle" title="Toggle Dark / Regular Light Mode">
-          <button type="button" class="seg-btn active" id="btnThemeDark" onclick="setThemeMode('dark')">
-            <span>🌙</span> Dark
-          </button>
-          <button type="button" class="seg-btn" id="btnThemeLight" onclick="setThemeMode('light')">
-            <span>☀️</span> Regular
-          </button>
-        </div>
+        <!-- Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Click to toggle Dark / Regular mode">
+          <span class="toggle-icon" id="themeToggleIcon">🌙</span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
       </div>
     </div>
   </div>
@@ -124,10 +116,16 @@
         <!-- Drag & Drop Zone -->
         <div class="drop-zone" id="drop-zone">
           <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" style="display: none;">
+          <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
           <div class="drop-zone-icon">📷</div>
           <h3>Drag and drop packaging photographs here</h3>
           <p>or click to browse from your device</p>
-          <div style="margin-top: 1rem; font-size: 0.8rem; color: #6b7280;">
+          <div style="margin-top: 0.75rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="camera-btn" style="font-size: 0.85rem;">
+              📸 Capture with Phone Camera
+            </button>
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.8rem; color: #6b7280;">
             Supports JPG, PNG, WEBP (Max 15MB each) • Recommended: Upload both Front & Back views
           </div>
         </div>

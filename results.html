@@ -18,25 +18,17 @@
         <span class="utility-hint">Official Regulatory Screening Engine</span>
       </div>
       <div class="utility-right">
-        <!-- Device View Switcher -->
-        <div class="segmented-control" id="viewModeToggle" title="Switch between Desktop & Smartphone layout">
-          <button type="button" class="seg-btn active" id="btnModeDesktop" onclick="setDeviceMode('desktop')">
-            <span>🖥️</span> Desktop
-          </button>
-          <button type="button" class="seg-btn" id="btnModeMobile" onclick="setDeviceMode('mobile')">
-            <span>📱</span> Smartphone
-          </button>
-        </div>
+        <!-- Single Button Device View Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Click to toggle Desktop / Smartphone layout">
+          <span class="toggle-icon" id="deviceToggleIcon">🖥️</span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
 
-        <!-- Theme Switcher -->
-        <div class="segmented-control" id="themeToggle" title="Toggle Dark / Regular Light Mode">
-          <button type="button" class="seg-btn active" id="btnThemeDark" onclick="setThemeMode('dark')">
-            <span>🌙</span> Dark
-          </button>
-          <button type="button" class="seg-btn" id="btnThemeLight" onclick="setThemeMode('light')">
-            <span>☀️</span> Regular
-          </button>
-        </div>
+        <!-- Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Click to toggle Dark / Regular mode">
+          <span class="toggle-icon" id="themeToggleIcon">🌙</span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
       </div>
     </div>
   </div>

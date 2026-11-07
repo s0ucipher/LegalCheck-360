@@ -28,8 +28,22 @@ function setupViewTagButtons() {
 function setupDropZone() {
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
+  const cameraInput = document.getElementById('camera-input');
+  const cameraBtn = document.getElementById('camera-btn');
 
   if (!dropZone || !fileInput) return;
+
+  if (cameraBtn && cameraInput) {
+    cameraBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cameraInput.click();
+    });
+    cameraInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFiles(e.target.files);
+      }
+    });
+  }
 
   dropZone.addEventListener('click', () => fileInput.click());
 
