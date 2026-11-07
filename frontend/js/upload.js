@@ -239,3 +239,107 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Load Instant Academic Demonstration Presets
+ */
+async function loadSamplePreset(presetType) {
+  showToast(`Loading ${presetType} demonstration sample...`, 'info');
+  uploadedImages = [];
+
+  const nameInput = document.getElementById('product-name-input');
+  const catSelect = document.getElementById('category-select');
+
+  try {
+    if (presetType === 'compliant') {
+      if (nameInput) nameInput.value = 'Royal Butter Delights Biscuits';
+      if (catSelect) catSelect.value = 'packaged_food';
+
+      const frontB64 = await fetchImageAsBase64('tests/samples/biscuit_front.jpg');
+      const backB64 = await fetchImageAsBase64('tests/samples/biscuit_back.jpg');
+
+      uploadedImages.push({
+        file: { size: 45000 },
+        filename: 'biscuit_front.jpg',
+        mimeType: 'image/jpeg',
+        viewType: 'front',
+        dataBase64: frontB64
+      });
+
+      uploadedImages.push({
+        file: { size: 55000 },
+        filename: 'biscuit_back.jpg',
+        mimeType: 'image/jpeg',
+        viewType: 'back',
+        dataBase64: backB64
+      });
+    } else if (presetType === 'noncompliant') {
+      if (nameInput) nameInput.value = 'Imported Caramel Crunch';
+      if (catSelect) catSelect.value = 'packaged_food';
+
+      const ncB64 = await fetchImageAsBase64('tests/samples/noncompliant_snack.jpg');
+      uploadedImages.push({
+        file: { size: 48000 },
+        filename: 'noncompliant_snack.jpg',
+        mimeType: 'image/jpeg',
+        viewType: 'back',
+        dataBase64: ncB64
+      });
+    } else if (presetType === 'blurry') {
+      if (nameInput) nameInput.value = 'Wheat Crisps (Partially Obscured)';
+      if (catSelect) catSelect.value = 'packaged_food';
+
+      const blurB64 = await fetchImageAsBase64('tests/samples/blurry_sample.jpg');
+      uploadedImages.push({
+        file: { size: 38000 },
+        filename: 'blurry_sample.jpg',
+        mimeType: 'image/jpeg',
+        viewType: 'general',
+        dataBase64: blurB64
+      });
+    }
+
+    renderPreviews();
+    showToast(`Loaded ${presetType} preset. Click "Run Compliance Inspection" to evaluate!`, 'success');
+  } catch (err) {
+    console.error('Preset loading error:', err);
+    showToast('Failed to load sample image files.', 'error');
+  }
+}
+
+async function fetchImageAsBase64(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("File fetch failed");
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    // Canvas fallback if direct relative path has CORS or static fetch issues
+    return createSampleFallbackDataUrl(url);
+  }
+}
+
+function createSampleFallbackDataUrl(filename) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 400;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, 600, 400);
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText('LegalCheck 360 Sample Package', 40, 60);
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '16px monospace';
+  ctx.fillText(`Sample Reference: ${filename}`, 40, 120);
+  ctx.fillText('MRP: Rs. 30.00 incl. of all taxes', 40, 160);
+  ctx.fillText('Net Qty: 150 g', 40, 200);
+  ctx.fillText('Mfd by: Delight Foods India Pvt. Ltd.', 40, 240);
+  return canvas.toDataURL('image/jpeg', 0.9);
+}
+
+

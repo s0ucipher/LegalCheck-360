@@ -60,3 +60,63 @@ function formatStatusBadge(status) {
   }
 }
 
+/**
+ * Switch Theme: Dark (Default) vs Regular (Light Mode)
+ */
+function setThemeMode(mode) {
+  const isLight = (mode === 'light');
+  if (isLight) {
+    document.body.classList.add('theme-light');
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('legalcheck_theme', 'light');
+  } else {
+    document.body.classList.remove('theme-light');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('legalcheck_theme', 'dark');
+  }
+
+  // Update button active states
+  const btnDark = document.getElementById('btnThemeDark');
+  const btnLight = document.getElementById('btnThemeLight');
+  if (btnDark && btnLight) {
+    btnDark.classList.toggle('active', !isLight);
+    btnLight.classList.toggle('active', isLight);
+  }
+}
+
+/**
+ * Switch View: Desktop vs Smartphone Simulation Mode
+ */
+function setDeviceMode(mode) {
+  const isMobile = (mode === 'mobile');
+  if (isMobile) {
+    document.body.classList.add('device-mobile-mode');
+    localStorage.setItem('legalcheck_device', 'mobile');
+    showToast('Switched to Smartphone Simulation View (420px)', 'info');
+  } else {
+    document.body.classList.remove('device-mobile-mode');
+    localStorage.setItem('legalcheck_device', 'desktop');
+    showToast('Switched to Desktop View', 'info');
+  }
+
+  // Update button active states
+  const btnDesktop = document.getElementById('btnModeDesktop');
+  const btnMobile = document.getElementById('btnModeMobile');
+  if (btnDesktop && btnMobile) {
+    btnDesktop.classList.toggle('active', !isMobile);
+    btnMobile.classList.toggle('active', isMobile);
+  }
+}
+
+// Restore saved settings on initial load
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('legalcheck_theme') || 'dark';
+  setThemeMode(savedTheme);
+
+  const savedDevice = localStorage.getItem('legalcheck_device') || 'desktop';
+  if (savedDevice === 'mobile') {
+    setDeviceMode('mobile');
+  }
+});
+
+

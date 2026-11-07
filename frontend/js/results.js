@@ -1,9 +1,11 @@
 /**
  * ============================================================================
- * LegalCheck 360: Inspection Results & Compliance Matrix (Vanilla JS)
+ * LegalCheck 360: Inspection Results & Interactive Decision Matrix (Vanilla JS)
  * "Smart Packaging. Smarter Compliance."
  * ============================================================================
  */
+
+let currentScan = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
@@ -43,11 +45,11 @@ async function loadScanDetails(scanId) {
       return;
     }
 
-    const scan = res.data;
-    renderHeader(scan);
-    renderExtractedFields(scan.fields || []);
-    renderComplianceMatrix(scan.results || []);
-    renderPackagingImages(scan.images || [], scan.raw_ocr_text);
+    currentScan = res.data;
+    renderHeader(currentScan);
+    renderExtractedFields(currentScan.fields || []);
+    renderComplianceMatrix(currentScan.results || []);
+    renderPackagingImages(currentScan.images || [], currentScan.raw_ocr_text);
 
   } catch (err) {
     console.error('Error fetching scan details:', err);
@@ -61,20 +63,7 @@ function renderHeader(scan) {
   document.getElementById('header-category').textContent = (scan.category || 'all').replace('_', ' ');
   document.getElementById('header-date').textContent = formatDate(scan.created_at);
 
-  const statusContainer = document.getElementById('header-status-badge');
-  if (statusContainer) {
-    let badgeClass = 'badge-unclear';
-    let label = 'REVIEW REQUIRED';
-    if (scan.overall_status === 'PASS') {
-      badgeClass = 'badge-pass';
-      label = `PASS (Score: ${scan.compliance_score.toFixed(1)}%)`;
-    } else if (scan.overall_status === 'FAIL') {
-      badgeClass = 'badge-fail';
-      label = `FAIL (Score: ${scan.compliance_score.toFixed(1)}%)`;
-    }
-    statusContainer.className = `badge ${badgeClass} score-badge-large`;
-    statusContainer.innerHTML = label;
-  }
+  updateHeaderStatusBadge(scan.overall_status, scan.compliance_score);
 
   const pdfBtn = document.getElementById('download-pdf-btn');
   if (pdfBtn) {
@@ -85,6 +74,24 @@ function renderHeader(scan) {
   if (reviewBtn) {
     reviewBtn.href = `review.html?id=${scan.id}`;
   }
+}
+
+function updateHeaderStatusBadge(status, score) {
+  const statusContainer = document.getElementById('header-status-badge');
+  if (!statusContainer) return;
+
+  let badgeClass = 'badge-unclear';
+  let label = 'REVIEW REQUIRED';
+  if (status === 'PASS') {
+    badgeClass = 'badge-pass';
+    label = `PASS (Score: ${score.toFixed(1)}%)`;
+  } else if (status === 'FAIL') {
+    badgeClass = 'badge-fail';
+    label = `FAIL (Score: ${score.toFixed(1)}%)`;
+  }
+
+  statusContainer.className = `badge ${badgeClass} score-badge-large`;
+  statusContainer.innerHTML = label;
 }
 
 function renderExtractedFields(fields) {
@@ -103,17 +110,21 @@ function renderExtractedFields(fields) {
     tr.innerHTML = `
       <td><strong>${formatFieldName(f.field_name)}</strong></td>
       <td>
-        <span style="font-size: 1rem; color: #f9fafb;">${f.field_value}</span>
-        ${f.unit ? `<span style="color: #9ca3af; font-size: 0.85rem; margin-left: 4px;">(${f.unit})</span>` : ''}
+        <input type="text" class="field-input-inline field-override-input" 
+               data-field="${f.field_name}" 
+               value="${f.field_value || ''}" 
+               title="Click to edit/verify extracted value"
+               onchange="onFieldEdited('${f.field_name}', this.value)">
+        ${f.unit ? `<span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 4px;">(${f.unit})</span>` : ''}
       </td>
-      <td><span style="font-size: 0.8rem; color: #9ca3af; font-style: italic;">"${f.evidence_text || 'Declared on package'}"</span></td>
+      <td><span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">"${f.evidence_text || 'Declared on package'}"</span></td>
       <td><span class="badge badge-neutral">${f.extraction_source || 'AI'}</span></td>
       <td>
         <div style="display: flex; align-items: center; gap: 8px;">
           <div style="width: 60px; height: 6px; background: #374151; border-radius: 3px; overflow: hidden;">
             <div style="width: ${confPercent}%; height: 100%; background: #3b82f6;"></div>
           </div>
-          <span style="font-size: 0.75rem; color: #9ca3af;">${confPercent}%</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">${confPercent}%</span>
         </div>
       </td>
     `;
@@ -126,7 +137,7 @@ function renderComplianceMatrix(results) {
   if (!container) return;
 
   if (results.length === 0) {
-    container.innerHTML = `<p style="color: #9ca3af; text-align: center; padding: 2rem;">No applicable rules found for this category.</p>`;
+    container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No applicable rules found for this category.</p>`;
     return;
   }
 
@@ -144,20 +155,128 @@ function renderComplianceMatrix(results) {
       <div class="rule-card-header">
         <div>
           <span class="rule-citation">${r.rule_id}</span>
-          <span style="color: #6b7280; font-size: 0.8rem; margin-left: 8px;">(v${r.rule_version})</span>
+          <span style="color: var(--text-sub); font-size: 0.8rem; margin-left: 8px;">(v${r.rule_version})</span>
         </div>
-        <span class="badge ${badgeClass}">${r.result}</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge ${badgeClass}" id="badge-${r.rule_id}">${r.result}</span>
+        </div>
       </div>
       <div class="rule-explanation">
         ${r.explanation}
       </div>
-      ${r.evidence ? `<div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 0.5rem;"><strong>Evidence:</strong> ${r.evidence}</div>` : ''}
+      ${r.evidence ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;"><strong>Evidence:</strong> ${r.evidence}</div>` : ''}
       <div class="rule-recommendation">
         <strong>Statutory Guidance:</strong> ${r.recommendation}
+      </div>
+      
+      <!-- User Final Decision Quick Override Row -->
+      <div class="rule-decision-row">
+        <label style="font-weight: 600; color: var(--text-main);">Auditor Statutory Determination:</label>
+        <select class="rule-status-selector" data-rule="${r.rule_id}" data-status="${r.result}" onchange="onUserRuleDecisionChanged('${r.rule_id}', this.value)">
+          <option value="PASS" ${r.result === 'PASS' ? 'selected' : ''}>✓ PASS (Satisfies Requirement)</option>
+          <option value="FAIL" ${r.result === 'FAIL' ? 'selected' : ''}>✗ FAIL (Confirmed Violation)</option>
+          <option value="UNCLEAR" ${r.result === 'UNCLEAR' ? 'selected' : ''}>⚠️ UNCLEAR (Needs Verification)</option>
+          <option value="NOT_APPLICABLE" ${r.result === 'NOT_APPLICABLE' ? 'selected' : ''}>⚪ NOT APPLICABLE</option>
+        </select>
+        <span style="color: var(--text-sub); font-size: 0.75rem;">(You have final authority to override AI finding)</span>
       </div>
     `;
     container.appendChild(card);
   });
+}
+
+function onFieldEdited(fieldName, newVal) {
+  if (!currentScan) return;
+  const f = currentScan.fields.find(field => field.field_name === fieldName);
+  if (f) {
+    f.field_value = newVal;
+    f.is_verified = 1;
+    showToast(`Updated ${formatFieldName(fieldName)}: "${newVal}"`, 'info');
+  }
+}
+
+function onUserRuleDecisionChanged(ruleId, newResult) {
+  if (!currentScan || !currentScan.results) return;
+
+  const target = currentScan.results.find(r => r.rule_id === ruleId);
+  if (!target) return;
+
+  target.result = newResult;
+  target.reviewer_status = "OVERRIDDEN";
+
+  // Update badge UI
+  const badge = document.getElementById(`badge-${ruleId}`);
+  if (badge) {
+    let badgeClass = 'badge-unclear';
+    if (newResult === 'PASS') badgeClass = 'badge-pass';
+    else if (newResult === 'FAIL') badgeClass = 'badge-fail';
+    else if (newResult === 'NOT_APPLICABLE') badgeClass = 'badge-neutral';
+    badge.className = `badge ${badgeClass}`;
+    badge.textContent = newResult;
+  }
+
+  // Update select color data-status attribute
+  const select = document.querySelector(`.rule-status-selector[data-rule="${ruleId}"]`);
+  if (select) select.setAttribute('data-status', newResult);
+
+  // Recalculate score live
+  recalculateComplianceScore();
+  showToast(`Rule ${ruleId} updated to ${newResult}`, 'info');
+}
+
+function recalculateComplianceScore() {
+  if (!currentScan || !currentScan.results) return;
+
+  const applicable = currentScan.results.filter(r => r.result !== 'NOT_APPLICABLE');
+  const passes = applicable.filter(r => r.result === 'PASS').length;
+  const fails = applicable.filter(r => r.result === 'FAIL').length;
+  const unclears = applicable.filter(r => r.result === 'UNCLEAR').length;
+
+  const score = applicable.length > 0 ? (passes / applicable.length) * 100 : 0;
+  currentScan.compliance_score = score;
+
+  if (fails > 0) {
+    currentScan.overall_status = "FAIL";
+  } else if (unclears > 0) {
+    currentScan.overall_status = "REVIEW_REQUIRED";
+  } else {
+    currentScan.overall_status = "PASS";
+  }
+
+  updateHeaderStatusBadge(currentScan.overall_status, score);
+}
+
+async function finalizeUserDecision() {
+  if (!currentScan) return;
+
+  // Show verified pill
+  const pill = document.getElementById('user-verified-pill');
+  if (pill) pill.style.display = 'inline-flex';
+
+  // Gather field overrides
+  const overrides = [];
+  document.querySelectorAll('.field-override-input').forEach(input => {
+    const fName = input.getAttribute('data-field');
+    const fVal = input.value.trim();
+    const fieldObj = currentScan.fields.find(f => f.field_name === fName);
+    if (fieldObj) {
+      overrides.push({ field_id: fieldObj.id || 1, field_value: fVal });
+    }
+  });
+
+  const reviewPayload = {
+    reviewer_name: "Authorized Inspector / User",
+    decision: currentScan.overall_status === 'PASS' ? 'APPROVED' : (currentScan.overall_status === 'FAIL' ? 'REJECTED' : 'PASS_WITH_REMARKS'),
+    comments: `Auditor finalized determination with score ${currentScan.compliance_score.toFixed(1)}%. User verified declarations.`,
+    field_overrides: overrides
+  };
+
+  try {
+    const res = await API.submitReview(currentScan.id, reviewPayload);
+    showToast('✓ Final statutory compliance determination confirmed and saved!', 'success');
+  } catch (err) {
+    showToast('Failed to save final determination to server.', 'error');
+  }
 }
 
 function renderPackagingImages(images, rawText) {
@@ -173,7 +292,7 @@ function renderPackagingImages(images, rawText) {
         <img src="${img.file_path}" alt="${img.original_filename}" style="height: 180px; object-fit: cover;">
         <div class="preview-info">
           <strong style="text-transform: capitalize; color: #60a5fa;">${img.view_type} View</strong>
-          <span style="color: #6b7280; font-size: 0.75rem;">${(img.file_size / 1024).toFixed(0)} KB</span>
+          <span style="color: var(--text-muted); font-size: 0.75rem;">${(img.file_size / 1024).toFixed(0)} KB</span>
         </div>
       `;
       imgGrid.appendChild(card);
@@ -199,4 +318,3 @@ function formatFieldName(name) {
   };
   return map[name] || name.replace('_', ' ').toUpperCase();
 }
-

@@ -175,41 +175,70 @@ http://localhost:8080
 
 ---
 
-## 5. Academic Demonstration Walkthrough for Judges
+## 5. Deploying to Vercel (1-Click Cloud Hosting)
+
+**LegalCheck 360** has built-in universal deployment support for **Vercel** via [`vercel.json`](vercel.json):
+
+1. **Push this repository to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit: LegalCheck 360"
+   git branch -M main
+   git remote add origin https://github.com/your-username/legalcheck-360.git
+   git push -u origin main
+   ```
+2. **Import into Vercel**:
+   - Go to [vercel.com](https://vercel.com) and click **"Add New Project"**.
+   - Select your `legalcheck-360` repository.
+   - Framework Preset: **Other** (Root directory: `./`).
+   - Click **"Deploy"**.
+3. **Dual Execution Architecture**:
+   - **Local Environment:** When running locally via `./legalcheck360_server`, the high-performance native C server handles SQLite and C rules.
+   - **Vercel Cloud Deployment:** When accessed online on Vercel, [`frontend/js/api.js`](frontend/js/api.js) automatically activates the client-side serverless fallback engine. All inspections, Rule 6 compliance evaluations, preset loaders, and dark/light mode toggles function **100% in the browser with zero cloud server costs**!
+
+---
+
+## 6. Academic Demonstration Walkthrough for Judges
 
 To present **LegalCheck 360** before academic evaluators and judges, follow this step-by-step demonstration:
 
-1. **Introduce the Real-World Problem:**
-   - Open `http://localhost:8080` (Landing Page).
+1. **Upper Section Controls (Smartphone & Theme Mode):**
+   - Click **"📱 Smartphone"** in the top bar to show the pixel-perfect smartphone simulation view.
+   - Click **"☀️ Regular"** to switch to the crisp white professional light theme.
+   - Click **"🌙 Dark"** to switch back to the deep slate dark mode.
+2. **Introduce the Real-World Problem:**
+   - Open `index.html` (Landing Page).
    - Explain that Indian Legal Metrology laws mandate 8+ declarations on pre-packaged goods, but manual checking is slow and prone to errors.
-2. **Open the Dashboard:**
-   - Click **"Dashboard"** to display real SQLite inspection statistics, pass/fail ratios, and historical scans.
-3. **Inspect a Compliant Product:**
+3. **Open the Dashboard:**
+   - Click **"Dashboard"** to display real SQLite/Local inspection statistics, pass/fail ratios, and historical scans.
+4. **Inspect a Compliant Product using 1-Click Presets:**
    - Click **"Upload & Inspect"**.
-   - Select category `Packaged Food`.
-   - In the panel tag, select **Front Panel** and upload `tests/samples/biscuit_front.jpg`.
-   - Select **Back Panel** and upload `tests/samples/biscuit_back.jpg`.
+   - Under **Academic Demonstration Presets**, click **"🍪 Compliant Butter Biscuits"**.
+   - The Front and Back panel photographs are automatically loaded with tags!
    - Click **"Run Compliance Inspection"**.
    - Watch the interactive scanning pipeline animate through the 6 stages.
-4. **Explain the Results & Compliance Matrix:**
+5. **Explain the Results & User-in-Control Verification:**
    - Observe the overall status: **PASS (Score: 100%)**.
-   - Show the extracted fields table (MRP ₹30, Net Qty 150g, Manufacturer Delight Foods, Consumer Care 1800-425-9999).
-   - Switch to the **Statutory Compliance Matrix** tab to show Rule 6(1)(a), Rule 6(1)(c), Rule 6(1)(da) citations.
-5. **Download the Official PDF Report:**
+   - Show the **"Auditor Control & Final Determination"** banner:
+     - Point out: *"Because OCR and AI can make mistakes on curved or glossy packaging, LegalCheck 360 leaves the final statutory decision to the human user."*
+     - Demonstrate editing a field value or changing a rule determination from the dropdown.
+     - Click **"✓ Confirm & Finalize Determination"**.
+6. **Download the Official PDF Report:**
    - Click **"Download Official PDF Report"** to open the vector PDF compiled in pure C.
-6. **Inspect a Non-Compliant Product:**
-   - Click **"New Scan"** and upload `tests/samples/noncompliant_snack.jpg`.
+7. **Inspect a Non-Compliant Product:**
+   - Click **"Upload & Inspect"** and click **"🍬 Non-Compliant Snack"**.
    - Run the inspection and demonstrate how the rules engine catches violations:
      - Illegal non-metric unit (`16 oz` instead of `g/kg`)
      - Missing MRP in INR
      - Missing Indian manufacturer/importer address
    - Observe the outcome: **FAIL**.
-7. **Demonstrate Human Review:**
-   - Click **"Human Review Override"**. Show how an inspector can compare the physical packaging photo side-by-side, correct any OCR misreads, add auditor comments, and record a formal statutory review decision.
+8. **Inspect a Blurry Package (Human Review):**
+   - Click **"🔍 Blurry Package"** preset. Show how partially torn or blurred flaps are safely marked as **REVIEW_REQUIRED** rather than falsely penalizing the brand.
 
 ---
 
-## 6. Regulatory Disclaimer
+## 7. Regulatory Disclaimer
 
 > **IMPORTANT STATUTORY NOTICE:**  
 > **LegalCheck 360** is an automated educational and preliminary compliance audit platform designed for academic evaluation and pre-market compliance screening under the Legal Metrology (Packaged Commodities) Rules, 2011. This application does NOT issue official government certification, statutory approval, or legally binding determinations. In case of ambiguous or disputed markings, physical inspection by an authorized Legal Metrology Officer is mandatory.

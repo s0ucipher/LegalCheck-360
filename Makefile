@@ -71,8 +71,27 @@ test: dirs
 		$(SRC_DIR)/services/pdf_generator.c \
 		tests/test_compliance.c \
 		$(LDFLAGS) -o build/test_compliance
-	@echo "==> Running Legal Metrology Rules Compliance Tests..."
+	$(CC) $(CFLAGS) \
+		$(LIB_DIR)/cJSON.c \
+		$(SRC_DIR)/utils/file_validation.c \
+		$(SRC_DIR)/utils/json_utils.c \
+		$(SRC_DIR)/utils/error_handler.c \
+		$(SRC_DIR)/services/ai_service.c \
+		tests/test_extraction.c \
+		$(LDFLAGS) -o build/test_extraction
+	$(CC) $(CFLAGS) \
+		$(SRC_DIR)/utils/file_validation.c \
+		$(SRC_DIR)/utils/error_handler.c \
+		$(SRC_DIR)/services/ocr_service.c \
+		tests/test_ocr.c \
+		$(LDFLAGS) -o build/test_ocr
+	@echo "==> [Suite 1/3] Running Legal Metrology Compliance Tests..."
 	./build/test_compliance
+	@echo "==> [Suite 2/3] Running Declarations Extraction Tests..."
+	./build/test_extraction
+	@echo "==> [Suite 3/3] Running OCR & File Security Tests..."
+	./build/test_ocr
+	@echo "==> ALL 3 TEST SUITES PASSED CLEANLY!"
 
 clean:
 	@echo "==> Cleaning build artifacts..."

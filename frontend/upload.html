@@ -10,6 +10,37 @@
 </head>
 <body>
 
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Device View Switcher -->
+        <div class="segmented-control" id="viewModeToggle" title="Switch between Desktop & Smartphone layout">
+          <button type="button" class="seg-btn active" id="btnModeDesktop" onclick="setDeviceMode('desktop')">
+            <span>🖥️</span> Desktop
+          </button>
+          <button type="button" class="seg-btn" id="btnModeMobile" onclick="setDeviceMode('mobile')">
+            <span>📱</span> Smartphone
+          </button>
+        </div>
+
+        <!-- Theme Switcher -->
+        <div class="segmented-control" id="themeToggle" title="Toggle Dark / Regular Light Mode">
+          <button type="button" class="seg-btn active" id="btnThemeDark" onclick="setThemeMode('dark')">
+            <span>🌙</span> Dark
+          </button>
+          <button type="button" class="seg-btn" id="btnThemeLight" onclick="setThemeMode('light')">
+            <span>☀️</span> Regular
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="container nav-container">
@@ -38,6 +69,28 @@
     </div>
 
     <div class="upload-zone-wrapper">
+      <!-- Academic Demonstration Presets -->
+      <div class="academic-presets-bar">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <strong style="color: var(--primary);">⚡ Academic Demonstration Presets:</strong>
+            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 6px;">One-click sample loaders for college evaluation</span>
+          </div>
+          <span class="badge badge-neutral">Instant Sample Loaders</span>
+        </div>
+        <div class="preset-btn-group">
+          <button type="button" class="preset-btn" onclick="loadSamplePreset('compliant')">
+            <span>🍪</span> Compliant Butter Biscuits (Rule 6 Pass)
+          </button>
+          <button type="button" class="preset-btn" onclick="loadSamplePreset('noncompliant')">
+            <span>🍬</span> Non-Compliant Snack (Illegal oz unit)
+          </button>
+          <button type="button" class="preset-btn" onclick="loadSamplePreset('blurry')">
+            <span>🔍</span> Blurry Package (Requires Human Review)
+          </button>
+        </div>
+      </div>
+
       <form id="scan-upload-form">
         <!-- Product Metadata Inputs -->
         <div class="card" style="margin-bottom: 1.5rem;">
@@ -111,4 +164,3 @@
   <script src="js/upload.js"></script>
 </body>
 </html>
-
