@@ -20,3 +20,4 @@ module.exports = (req, res) => {
     data: scan
   });
 };
+

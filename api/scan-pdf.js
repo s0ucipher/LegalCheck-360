@@ -21,3 +21,4 @@ module.exports = (req, res) => {
   res.setHeader('Content-Length', pdfBuffer.length);
   return res.status(200).send(pdfBuffer);
 };
+
