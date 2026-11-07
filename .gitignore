@@ -1,0 +1,10 @@
+# LegalCheck 360: Git Ignore
+build/
+*.o
+*.dSYM/
+legalcheck360_server
+database/*.db-wal
+database/*.db-shm
+backend/.env
+.DS_Store
+

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Inspection Results | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">LegalCheck <span>360</span></div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">New Scan</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <!-- Results Header Card -->
+    <div class="results-header-card">
+      <div>
+        <div style="font-size: 0.85rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
+          INSPECTION RECORD: <span id="header-scan-id" style="color: #60a5fa;">Loading...</span>
+        </div>
+        <h1 id="header-product-name" style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Product Inspection</h1>
+        <div style="display: flex; gap: 1.5rem; color: #9ca3af; font-size: 0.9rem;">
+          <div>Category: <strong id="header-category" style="color: #f9fafb; text-transform: capitalize;">-</strong></div>
+          <div>Date: <strong id="header-date" style="color: #f9fafb;">-</strong></div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+        <div id="header-status-badge" class="badge badge-unclear score-badge-large">
+          EVALUATING...
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a id="download-pdf-btn" href="#" target="_blank" class="btn btn-primary btn-sm">
+            📄 Download Official PDF Report
+          </a>
+          <a id="human-review-btn" href="#" class="btn btn-secondary btn-sm">
+            👨‍⚖️ Human Review Override
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs-nav">
+      <button type="button" class="tab-btn active" data-tab="tab-declarations">Extracted Declarations</button>
+      <button type="button" class="tab-btn" data-tab="tab-rules">Statutory Compliance Matrix</button>
+      <button type="button" class="tab-btn" data-tab="tab-images">Original Photographs & Raw OCR</button>
+    </div>
+
+    <!-- Tab 1: Extracted Declarations -->
+    <div id="tab-declarations" class="tab-content active">
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Mandatory Declaration</th>
+              <th>Extracted Value</th>
+              <th>Verifiable Evidence Snippet</th>
+              <th>Source</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="fields-tbody">
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">Loading declarations...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: Compliance Matrix -->
+    <div id="tab-rules" class="tab-content">
+      <div id="rules-matrix-container">
+        <!-- Rendered by results.js -->
+      </div>
+    </div>
+
+    <!-- Tab 3: Images & OCR Text -->
+    <div id="tab-images" class="tab-content">
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3 class="card-title" style="margin-bottom: 1rem;">Uploaded Packaging Photographs</h3>
+        <div class="preview-grid" id="results-images-grid"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title" style="margin-bottom: 0.5rem;">Raw Packaging Text Extracted by OCR</h3>
+        <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">Unprocessed text stream captured from packaging typography.</p>
+        <pre id="raw-ocr-text-view" style="background: #111827; border: 1px solid #374151; padding: 1.25rem; border-radius: 8px; color: #93c5fd; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></pre>
+      </div>
+    </div>
+
+    <!-- Statutory Disclaimer -->
+    <div class="disclaimer-banner" style="margin-top: 3rem;">
+      <strong>⚠️ OFFICIAL STATUTORY DISCLAIMER:</strong>
+      This report represents an automated, preliminary compliance audit conducted under the provisions of the Legal Metrology (Packaged Commodities) Rules, 2011. This assessment does NOT constitute an official certificate, legal license, or binding governmental determination. Any disputed or unreadable markings require physical verification by an authorized Legal Metrology Inspector.
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/results.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit History | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">LegalCheck <span>360</span></div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">New Scan</a></li>
+          <li><a href="history.html" class="nav-link active">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <div class="app-header">
+      <div class="app-title-group">
+        <h1>Packaging Inspection Audit Trail</h1>
+        <p>Complete historical registry of inspected consumer goods and regulatory outcomes</p>
+      </div>
+      <div>
+        <a href="upload.html" class="btn btn-primary">📸 New Inspection</a>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.25rem;">
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+          <input type="text" id="search-input" class="form-control" placeholder="🔍 Search by Scan ID or Product Name...">
+        </div>
+        <div style="width: 200px;">
+          <select id="status-filter" class="form-control">
+            <option value="ALL">All Outcomes</option>
+            <option value="PASS">Compliant (PASS)</option>
+            <option value="FAIL">Non-Compliant (FAIL)</option>
+            <option value="REVIEW_REQUIRED">Unclear / Needs Review</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Scan ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Inspection Date</th>
+            <th>Overall Status</th>
+            <th>Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">Loading inspection records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>
+

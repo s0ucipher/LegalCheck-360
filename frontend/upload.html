@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Upload & Inspection | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">LegalCheck <span>360</span></div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link active">Upload & Inspect</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <div class="app-header" style="max-width: 800px; margin: 0 auto 2rem;">
+      <div class="app-title-group">
+        <h1>Inspect Packaged Commodity</h1>
+        <p>Upload packaging photographs to run automated Legal Metrology checks</p>
+      </div>
+    </div>
+
+    <div class="upload-zone-wrapper">
+      <form id="scan-upload-form">
+        <!-- Product Metadata Inputs -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="product-name-input">Product / Brand Name (Optional)</label>
+              <input type="text" id="product-name-input" class="form-control" placeholder="e.g. Britannia Good Day Cookies">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="category-select">Product Category</label>
+              <select id="category-select" class="form-control">
+                <option value="packaged_food">Packaged Food (Biscuits, Snacks, Confectionery)</option>
+                <option value="beverages">Beverages & Juices</option>
+                <option value="cosmetics">Cosmetics & Personal Care</option>
+                <option value="general_packaged_goods">General Consumer Packaged Goods</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- View Tag Selector -->
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <span style="font-size: 0.85rem; color: #9ca3af; font-weight: 600;">SELECT PACKAGING PANEL VIEW:</span>
+          <div class="view-tag-selector">
+            <button type="button" class="view-tag-btn active" data-view="front">Front Panel (PDP)</button>
+            <button type="button" class="view-tag-btn" data-view="back">Back Panel (Declarations / MRP)</button>
+            <button type="button" class="view-tag-btn" data-view="side">Side Flap / Nutrition</button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" style="display: none;">
+          <div class="drop-zone-icon">📷</div>
+          <h3>Drag and drop packaging photographs here</h3>
+          <p>or click to browse from your device</p>
+          <div style="margin-top: 1rem; font-size: 0.8rem; color: #6b7280;">
+            Supports JPG, PNG, WEBP (Max 15MB each) • Recommended: Upload both Front & Back views
+          </div>
+        </div>
+
+        <!-- Previews -->
+        <div class="preview-grid" id="preview-grid"></div>
+
+        <!-- Help Info Banner -->
+        <div class="disclaimer-banner" style="margin: 2rem 0 1.5rem; padding: 1rem 1.25rem;">
+          <strong>💡 TIPS FOR MAXIMUM ACCURACY:</strong>
+          Ensure packaging text is well illuminated without harsh glares. For complete statutory verification under Rule 6, include photographs clearly displaying the MRP flap, Net Quantity declaration, and Manufacturer's physical address.
+        </div>
+
+        <!-- Submit Button -->
+        <div style="text-align: center;">
+          <button type="submit" id="submit-scan-btn" class="btn btn-primary" style="padding: 0.85rem 2.5rem; font-size: 1.05rem;" disabled>
+            ⚡ Run Compliance Inspection
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/upload.js"></script>
+</body>
+</html>
+
