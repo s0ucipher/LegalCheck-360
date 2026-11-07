@@ -134,6 +134,18 @@ window.removeImage = function(index) {
   renderPreviews();
 };
 
+window.onCategoryChanged = function(val) {
+  const customBox = document.getElementById('custom-category-container');
+  if (!customBox) return;
+  if (val === 'others') {
+    customBox.style.display = 'block';
+    const input = document.getElementById('custom-category-input');
+    if (input) input.focus();
+  } else {
+    customBox.style.display = 'none';
+  }
+};
+
 function setupFormSubmit() {
   const form = document.getElementById('scan-upload-form');
   if (!form) return;
@@ -146,8 +158,9 @@ function setupFormSubmit() {
       return;
     }
 
-    const productName = document.getElementById('product-name-input').value.trim() || 'Packaged Commodity';
+    const productName = document.getElementById('product-name-input').value.trim();
     const category = document.getElementById('category-select').value || 'packaged_food';
+    const customCategory = (document.getElementById('custom-category-input') && document.getElementById('custom-category-input').value.trim()) || '';
 
     // Show Scanning Overlay & Interactive Stage Tracker
     showScanningOverlay();
@@ -155,6 +168,7 @@ function setupFormSubmit() {
     const payload = {
       product_name: productName,
       category: category,
+      custom_category: customCategory,
       images: uploadedImages.map(img => ({
         view_type: img.viewType,
         filename: img.filename,

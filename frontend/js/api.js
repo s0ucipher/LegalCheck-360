@@ -306,31 +306,113 @@ const API = {
         { id: 3, rule_id: "LMR-RULE-6-1-E", rule_version: "2011.amended.2022", result: "UNCLEAR", explanation: "MRP flap was torn or unreadable. Cannot confirm compliance.", recommendation: "Submit for authorized human inspector override.", reviewer_status: "UNREVIEWED" }
       ];
     } else {
-      // Compliant Biscuit / Standard Package
+      // Dynamic Commodity Intelligence Fallback
+      const cat = payload.category || "packaged_food";
+      const customCat = payload.custom_category || "";
+      const isFood = (
+        cat === "packaged_food" ||
+        cat === "beverages" ||
+        cat === "dairy" ||
+        cat === "edible_oils" ||
+        cat === "flour_grains" ||
+        cat === "spices_sugar"
+      );
+
+      const displayName = payload.product_name || (
+        cat === "beverages" ? "Premium Mineral Water / Cold Beverage" :
+        cat === "dairy" ? "Pure Cow Ghee / Table Butter" :
+        cat === "edible_oils" ? "Refined Sunflower Cooking Oil" :
+        cat === "flour_grains" ? "Shudh Chakki Whole Wheat Atta" :
+        cat === "spices_sugar" ? "Pure Vacuum Evaporated Iodized Salt" :
+        cat === "cosmetics" ? "Purifying Neem Face Wash & Skin Cream" :
+        cat === "cleaning_detergents" ? "Active Clean Front Load Detergent" :
+        cat === "pharma_otc" ? "Immunity Booster Ayurvedic Health Tonic" :
+        cat === "electronics" ? "Smart Fast Charging Adapter & Cable" :
+        cat === "apparel_textiles" ? "100% Combed Cotton Casual T-Shirt" :
+        cat === "baby_care" ? "Ultra Comfort Diaper Pants (Medium)" :
+        cat === "others" ? (customCat || "Consumer Packaged Product") :
+        "Royal Butter Delights Biscuits"
+      );
+
       overallStatus = "PASS";
       complianceScore = 100.0;
+
       fields = [
-        { id: 1, field_name: "product_name", field_value: payload.product_name || "Royal Butter Delights Biscuits", unit: "", confidence: 0.98, evidence_text: "Royal Butter Delights", extraction_source: "AI_CLIENT" },
-        { id: 2, field_name: "net_quantity", field_value: "150", unit: "g", confidence: 0.96, evidence_text: "Net Quantity: 150 g", extraction_source: "AI_CLIENT" },
-        { id: 3, field_name: "mrp", field_value: "30.00", unit: "INR", confidence: 0.97, evidence_text: "MRP Rs. 30.00 (Inclusive of all taxes)", extraction_source: "AI_CLIENT" },
-        { id: 4, field_name: "manufacturer", field_value: "Delight Foods India Pvt. Ltd., Plot 14, Phase II, Peenya Industrial Area, Bangalore - 560058, Karnataka", unit: "", confidence: 0.94, evidence_text: "Mfd by: Delight Foods India Pvt. Ltd., Bangalore", extraction_source: "AI_CLIENT" },
-        { id: 5, field_name: "mfg_date", field_value: "10/2026", unit: "", confidence: 0.92, evidence_text: "Date of Manufacture: 10/2026", extraction_source: "AI_CLIENT" },
-        { id: 6, field_name: "expiry_date", field_value: "04/2027", unit: "", confidence: 0.91, evidence_text: "Best Before: 04/2027", extraction_source: "AI_CLIENT" },
-        { id: 7, field_name: "consumer_care", field_value: "Helpline: 1800-425-9999, Email: care@delightfoods.in", unit: "", confidence: 0.95, evidence_text: "Consumer Care Helpline: 1800-425-9999", extraction_source: "AI_CLIENT" },
-        { id: 8, field_name: "country_of_origin", field_value: "India", unit: "", confidence: 0.99, evidence_text: "Country of Origin: India", extraction_source: "AI_CLIENT" },
-        { id: 9, field_name: "unit_sale_price", field_value: "Rs. 0.20 per g", unit: "", confidence: 0.93, evidence_text: "Unit Sale Price: Rs. 0.20 per g", extraction_source: "AI_CLIENT" }
+        { id: 1, field_name: "product_name", field_value: displayName, unit: "", confidence: 0.98, evidence_text: displayName, extraction_source: "AI_CLIENT" }
       ];
+
+      if (cat === "cosmetics") {
+        fields.push(
+          { id: 2, field_name: "net_quantity", field_value: "150 ml", unit: "ml", confidence: 0.96, evidence_text: "Net Vol: 150 ml", extraction_source: "AI_CLIENT" },
+          { id: 3, field_name: "mrp", field_value: "175.00 INR (incl. of all taxes)", unit: "INR", confidence: 0.97, evidence_text: "MRP Rs. 175.00 (Incl. of all taxes)", extraction_source: "AI_CLIENT" },
+          { id: 4, field_name: "manufacturer", field_value: "The Himalaya Drug Company, Makali, Bengaluru - 562162, Karnataka", unit: "", confidence: 0.94, evidence_text: "Mfd by: Himalaya, Bengaluru 562162", extraction_source: "AI_CLIENT" },
+          { id: 5, field_name: "mfg_date", field_value: "01/2026", unit: "", confidence: 0.92, evidence_text: "Mfg Date: 01/2026 (Use before: 36 months)", extraction_source: "AI_CLIENT" },
+          { id: 6, field_name: "consumer_care", field_value: "1800-208-1930 | contactus@himalayawellness.com", unit: "", confidence: 0.95, evidence_text: "Toll Free: 1800-208-1930", extraction_source: "AI_CLIENT" },
+          { id: 7, field_name: "country_of_origin", field_value: "India", unit: "", confidence: 0.99, evidence_text: "Country of Origin: India", extraction_source: "AI_CLIENT" },
+          { id: 8, field_name: "unit_sale_price", field_value: "Rs. 1.17 per ml", unit: "", confidence: 0.93, evidence_text: "USP: Rs. 1.17/ml", extraction_source: "AI_CLIENT" }
+        );
+      } else if (cat === "electronics") {
+        fields.push(
+          { id: 2, field_name: "net_quantity", field_value: "1 Unit (1 N)", unit: "Unit", confidence: 0.98, evidence_text: "Net Qty: 1 Unit", extraction_source: "AI_CLIENT" },
+          { id: 3, field_name: "mrp", field_value: "899.00 INR (incl. of all taxes)", unit: "INR", confidence: 0.97, evidence_text: "MRP Rs. 899.00 (Incl. of all taxes)", extraction_source: "AI_CLIENT" },
+          { id: 4, field_name: "manufacturer", field_value: "Syska E-Retails LLP, Syska House, Sakore Nagar, Pune - 411014, Maharashtra", unit: "", confidence: 0.94, evidence_text: "Marketed by: Syska, Pune 411014", extraction_source: "AI_CLIENT" },
+          { id: 5, field_name: "mfg_date", field_value: "01/2026", unit: "", confidence: 0.92, evidence_text: "Month & Year of Import/Mfg: 01/2026", extraction_source: "AI_CLIENT" },
+          { id: 6, field_name: "consumer_care", field_value: "1800-102-8787 | support@syska.co.in", unit: "", confidence: 0.95, evidence_text: "Helpline: 1800-102-8787", extraction_source: "AI_CLIENT" },
+          { id: 7, field_name: "country_of_origin", field_value: "India", unit: "", confidence: 0.99, evidence_text: "Country of Origin: India", extraction_source: "AI_CLIENT" },
+          { id: 8, field_name: "unit_sale_price", field_value: "Rs. 899.00 per Unit", unit: "", confidence: 0.93, evidence_text: "USP: Rs. 899.00/Unit", extraction_source: "AI_CLIENT" }
+        );
+      } else if (cat === "apparel_textiles") {
+        fields.push(
+          { id: 2, field_name: "net_quantity", field_value: "1 N (1 Piece)", unit: "N", confidence: 0.98, evidence_text: "Net Qty: 1 N", extraction_source: "AI_CLIENT" },
+          { id: 3, field_name: "mrp", field_value: "799.00 INR (incl. of all taxes)", unit: "INR", confidence: 0.97, evidence_text: "MRP Rs. 799.00 (Incl. of all taxes)", extraction_source: "AI_CLIENT" },
+          { id: 4, field_name: "manufacturer", field_value: "Page Industries Ltd., Umiya Business Bay, Bengaluru - 560103, Karnataka", unit: "", confidence: 0.94, evidence_text: "Mfd by: Page Industries, Bengaluru 560103", extraction_source: "AI_CLIENT" },
+          { id: 5, field_name: "mfg_date", field_value: "02/2026", unit: "", confidence: 0.92, evidence_text: "Packed: 02/2026", extraction_source: "AI_CLIENT" },
+          { id: 6, field_name: "consumer_care", field_value: "1800-572-1299 | care@jockeyindia.com", unit: "", confidence: 0.95, evidence_text: "Customer Care: 1800-572-1299", extraction_source: "AI_CLIENT" },
+          { id: 7, field_name: "country_of_origin", field_value: "India", unit: "", confidence: 0.99, evidence_text: "Country of Origin: India", extraction_source: "AI_CLIENT" },
+          { id: 8, field_name: "size_fabric_declaration", field_value: "Size: L (Chest 100 cm) | 100% Combed Cotton", unit: "", confidence: 0.95, evidence_text: "Size L (100cm) 100% Cotton", extraction_source: "AI_CLIENT" }
+        );
+      } else {
+        // Standard commodities & packaged foods
+        const customAffix = customCat ? ` (${customCat})` : "";
+        fields.push(
+          { id: 2, field_name: "net_quantity", field_value: "200", unit: "g", confidence: 0.96, evidence_text: "Net Quantity: 200 g", extraction_source: "AI_CLIENT" },
+          { id: 3, field_name: "mrp", field_value: "50.00", unit: "INR", confidence: 0.97, evidence_text: "MRP Rs. 50.00 (Inclusive of all taxes)", extraction_source: "AI_CLIENT" },
+          { id: 4, field_name: "manufacturer", field_value: `Consumer Commodities India Pvt. Ltd., Plot 18, Udyog Vihar, Gurugram - 122016, Haryana${customAffix}`, unit: "", confidence: 0.94, evidence_text: "Mfd by: CCIPL, Gurugram 122016", extraction_source: "AI_CLIENT" },
+          { id: 5, field_name: "mfg_date", field_value: "02/2026", unit: "", confidence: 0.92, evidence_text: "Date of Manufacture: 02/2026", extraction_source: "AI_CLIENT" },
+          { id: 6, field_name: "consumer_care", field_value: "Helpline: 1800-180-2222, Email: support@consumergoods.in", unit: "", confidence: 0.95, evidence_text: "Consumer Care Helpline: 1800-180-2222", extraction_source: "AI_CLIENT" },
+          { id: 7, field_name: "country_of_origin", field_value: "India", unit: "", confidence: 0.99, evidence_text: "Country of Origin: India", extraction_source: "AI_CLIENT" },
+          { id: 8, field_name: "unit_sale_price", field_value: "Rs. 0.25 per g", unit: "", confidence: 0.93, evidence_text: "Unit Sale Price: Rs. 0.25 per g", extraction_source: "AI_CLIENT" }
+        );
+        if (isFood) {
+          fields.push(
+            { id: 9, field_name: "expiry_date", field_value: "08/2026", unit: "", confidence: 0.91, evidence_text: "Best Before: 08/2026", extraction_source: "AI_CLIENT" },
+            { id: 10, field_name: "fssai_license", field_value: "10015043001129", unit: "", confidence: 0.97, evidence_text: "FSSAI Lic No. 10015043001129", extraction_source: "AI_CLIENT" }
+          );
+        }
+      }
+
       results = [
-        { id: 1, rule_id: "LMR-RULE-6-1-A", rule_version: "2011.amended.2022", result: "PASS", explanation: "Manufacturer name and complete physical address with PIN code verified.", recommendation: "Declaration satisfies statutory requirements under PCR 2011.", reviewer_status: "UNREVIEWED" },
-        { id: 2, rule_id: "LMR-RULE-6-1-B", rule_version: "2011.amended.2022", result: "PASS", explanation: "Generic commodity name declared prominently: 'Royal Butter Delights Biscuits'.", recommendation: "Declaration satisfies Rule 6(1)(b).", reviewer_status: "UNREVIEWED" },
-        { id: 3, rule_id: "LMR-RULE-6-1-C", rule_version: "2011.amended.2022", result: "PASS", explanation: "Net quantity declared in authorized metric unit: 150 g. Satisfies Rule 12 & 13.", recommendation: "Standard metric units verified.", reviewer_status: "UNREVIEWED" },
-        { id: 4, rule_id: "LMR-RULE-6-1-D", rule_version: "2011.amended.2022", result: "PASS", explanation: "Month and year of manufacture verified: 10/2026.", recommendation: "Satisfies Rule 6(1)(d).", reviewer_status: "UNREVIEWED" },
-        { id: 5, rule_id: "LMR-RULE-6-1-E", rule_version: "2011.amended.2022", result: "PASS", explanation: "Maximum Retail Price declared as ₹30.00 inclusive of all taxes.", recommendation: "Satisfies Rule 6(1)(da).", reviewer_status: "UNREVIEWED" },
-        { id: 6, rule_id: "LMR-RULE-6-1-N", rule_version: "2011.amended.2022", result: "PASS", explanation: "Customer helpline (1800-425-9999) and email verified.", recommendation: "Satisfies Rule 6(1)(n).", reviewer_status: "UNREVIEWED" },
-        { id: 7, rule_id: "LMR-RULE-6-10", rule_version: "2020.amendment", result: "PASS", explanation: "Country of Origin declared as India.", recommendation: "Satisfies Rule 6(10).", reviewer_status: "UNREVIEWED" },
-        { id: 8, rule_id: "LMR-RULE-6-1-USP", rule_version: "2021.amendment.2022", result: "PASS", explanation: "Unit Sale Price declared as Rs. 0.20 per g.", recommendation: "Satisfies G.S.R. 779(E) amendment.", reviewer_status: "UNREVIEWED" },
-        { id: 9, rule_id: "LMR-RULE-FOOD-SAFETY", rule_version: "2011.amended.2022", result: "PASS", explanation: "Best Before date and FSSAI declarations verified.", recommendation: "Satisfies Food Safety regulations.", reviewer_status: "UNREVIEWED" }
+        { id: 1, rule_id: "LMR-RULE-6-1-A", rule_name: "Manufacturer / Packer / Importer Name & Address", legal_reference: "Rule 6(1)(a), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Manufacturer name and complete physical address with PIN code verified.", recommendation: "Declaration satisfies statutory requirements under PCR 2011.", reviewer_status: "UNREVIEWED" },
+        { id: 2, rule_id: "LMR-RULE-6-1-B", rule_name: "Generic / Common Name of Commodity", legal_reference: "Rule 6(1)(b), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: `Generic commodity name declared prominently: '${displayName}'.`, recommendation: "Declaration satisfies Rule 6(1)(b).", reviewer_status: "UNREVIEWED" },
+        { id: 3, rule_id: "LMR-RULE-6-1-C", rule_name: "Net Quantity in Standard SI Metric Units", legal_reference: "Rule 6(1)(c), Rule 12 & 13, PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Net quantity declared in authorized metric unit. Satisfies Rule 12 & 13.", recommendation: "Standard metric units verified.", reviewer_status: "UNREVIEWED" },
+        { id: 4, rule_id: "LMR-RULE-6-1-D", rule_name: "Month & Year of Manufacture / Packing", legal_reference: "Rule 6(1)(d), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Month and year of manufacture or pre-packing verified.", recommendation: "Satisfies Rule 6(1)(d).", reviewer_status: "UNREVIEWED" },
+        { id: 5, rule_id: "LMR-RULE-6-1-E", rule_name: "Maximum Retail Price (MRP) & Taxes Clause", legal_reference: "Rule 6(1)(da), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Maximum Retail Price declared with mandatory 'inclusive of all taxes' clause.", recommendation: "Satisfies Rule 6(1)(da).", reviewer_status: "UNREVIEWED" },
+        { id: 6, rule_id: "LMR-RULE-6-1-N", rule_name: "Consumer Grievance Redressal Mechanism", legal_reference: "Rule 6(1)(n), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Customer helpline phone number and email verified.", recommendation: "Satisfies Rule 6(1)(n).", reviewer_status: "UNREVIEWED" },
+        { id: 7, rule_id: "LMR-RULE-6-10", rule_name: "Country of Origin Declaration", legal_reference: "Rule 6(10) / G.S.R. 529(E), PCR 2011", rule_version: "2020.amendment", result: "PASS", status: "PASS", explanation: "Country of Origin declared as India.", recommendation: "Satisfies Rule 6(10).", reviewer_status: "UNREVIEWED" },
+        { id: 8, rule_id: "LMR-RULE-6-1-USP", rule_name: "Unit Sale Price Declaration", legal_reference: "Rule 6(1)(11) amended via G.S.R. 779(E)", rule_version: "2021.amendment.2022", result: "PASS", status: "PASS", explanation: "Unit Sale Price declared prominently.", recommendation: "Satisfies G.S.R. 779(E) amendment.", reviewer_status: "UNREVIEWED" }
       ];
+
+      if (isFood) {
+        results.push({
+          id: 9, rule_id: "LMR-RULE-FOOD-SAFETY", rule_name: "Best Before / Expiry & FSSAI Declarations", legal_reference: "Rule 6(1)(d) proviso read with FSSAI Regulations", rule_version: "2011.amended.2022",
+          result: "PASS", status: "PASS", explanation: "Best Before date and FSSAI license declarations verified.", recommendation: "Satisfies Food Safety regulations.", reviewer_status: "UNREVIEWED"
+        });
+      } else {
+        results.push({
+          id: 9, rule_id: "LMR-RULE-FOOD-SAFETY", rule_name: "Best Before / Expiry & FSSAI Declarations", legal_reference: "Rule 6(1)(d) proviso read with FSSAI Regulations", rule_version: "2011.amended.2022",
+          result: "NOT_APPLICABLE", status: "NOT_APPLICABLE", explanation: `FSSAI license compliance only applies to edible food and beverage packages. Not applicable for ${cat.replace(/_/g, ' ')}.`, recommendation: "Statutory requirement exempt for non-food products under Legal Metrology.", reviewer_status: "UNREVIEWED"
+        });
+      }
     }
 
     const savedImages = (payload.images || []).map((img, idx) => ({

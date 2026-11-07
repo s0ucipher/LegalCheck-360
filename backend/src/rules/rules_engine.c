@@ -283,9 +283,16 @@ bool rules_engine_evaluate_scan(ScanRecord *scan) {
         }
         // 9. Food Safety / Best Before
         else if (strcmp(rules[i].rule_id, "LMR-RULE-FOOD-SAFETY") == 0) {
-            if (strcmp(scan->category, "packaged_food") == 0 || strcmp(scan->category, "beverages") == 0) {
+            bool is_food = (strcmp(scan->category, "packaged_food") == 0 ||
+                            strcmp(scan->category, "beverages") == 0 ||
+                            strcmp(scan->category, "dairy") == 0 ||
+                            strcmp(scan->category, "edible_oils") == 0 ||
+                            strcmp(scan->category, "flour_grains") == 0 ||
+                            strcmp(scan->category, "spices_sugar") == 0);
+            if (is_food) {
                 applicable_count++;
                 const ExtractedField *exp = find_field(scan, "expiry_date");
+                if (!exp) exp = find_field(scan, "best_before");
                 if (exp && strlen(exp->field_value) > 0) {
                     status = COMPLIANCE_PASS;
                     snprintf(evidence, sizeof(evidence), "%s", exp->field_value);

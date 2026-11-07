@@ -96,14 +96,28 @@
               <input type="text" id="product-name-input" class="form-control" placeholder="e.g. Britannia Good Day Cookies">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="category-select">Product Category</label>
-              <select id="category-select" class="form-control">
-                <option value="packaged_food">Packaged Food (Biscuits, Snacks, Confectionery)</option>
-                <option value="beverages">Beverages & Juices</option>
-                <option value="cosmetics">Cosmetics & Personal Care</option>
-                <option value="general_packaged_goods">General Consumer Packaged Goods</option>
+              <label for="category-select">Product Category (Legal Metrology)</label>
+              <select id="category-select" class="form-control" onchange="onCategoryChanged(this.value)">
+                <option value="packaged_food">Packaged Food & Confectionery (Biscuits, Snacks, Sweets)</option>
+                <option value="beverages">Beverages, Water & Juices (Soft Drinks, Packaged Drinking Water)</option>
+                <option value="dairy">Dairy & Milk Products (Milk, Ghee, Butter, Paneer, Cheese)</option>
+                <option value="edible_oils">Edible Oils & Vanaspati (Mustard, Sunflower, Cooking Oils)</option>
+                <option value="flour_grains">Flour, Cereals, Pulses & Grains (Atta, Rice, Dal, Besan)</option>
+                <option value="spices_sugar">Spices, Condiments, Salt & Sugar (Masalas, Iodized Salt)</option>
+                <option value="cosmetics">Cosmetics & Personal Care (Soaps, Shampoos, Lotions, Oils)</option>
+                <option value="cleaning_detergents">Household Cleaners & Detergents (Powders, Liquids, Dishwash)</option>
+                <option value="pharma_otc">Pharmaceuticals & OTC Healthcare (Supplements, Balms, Tonics)</option>
+                <option value="electronics">Electronics & Electrical Appliances (Cables, Chargers, Bulbs)</option>
+                <option value="apparel_textiles">Apparel, Garments & Textiles (Clothing, Hosiery, Fabric)</option>
+                <option value="baby_care">Baby Care & Infant Nutrition (Diapers, Wipes, Baby Foods)</option>
+                <option value="general_packaged_goods">General Consumer Packaged Goods (CPG / Hardware)</option>
+                <option value="others">Others / Custom Commodity (Not Listed Above)</option>
               </select>
             </div>
+          </div>
+          <div id="custom-category-container" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+            <label for="custom-category-input" style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Specify Custom Commodity Type / Description:</label>
+            <input type="text" id="custom-category-input" class="form-control" placeholder="e.g. Pet Food, Industrial Adhesive, Automotive Lubes, Toy Packaging">
           </div>
         </div>
 

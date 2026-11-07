@@ -146,19 +146,21 @@ function renderComplianceMatrix(results) {
     const card = document.createElement('div');
     card.className = 'rule-card';
 
+    const ruleRes = r.result || r.status || 'UNCLEAR';
+
     let badgeClass = 'badge-unclear';
-    if (r.result === 'PASS') badgeClass = 'badge-pass';
-    else if (r.result === 'FAIL') badgeClass = 'badge-fail';
-    else if (r.result === 'NOT_APPLICABLE') badgeClass = 'badge-neutral';
+    if (ruleRes === 'PASS') badgeClass = 'badge-pass';
+    else if (ruleRes === 'FAIL') badgeClass = 'badge-fail';
+    else if (ruleRes === 'NOT_APPLICABLE') badgeClass = 'badge-neutral';
 
     card.innerHTML = `
       <div class="rule-card-header">
         <div>
           <span class="rule-citation">${r.rule_id}</span>
-          <span style="color: var(--text-sub); font-size: 0.8rem; margin-left: 8px;">(v${r.rule_version})</span>
+          <span style="color: var(--text-sub); font-size: 0.8rem; margin-left: 8px;">(v${r.rule_version || '2011'})</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="badge ${badgeClass}" id="badge-${r.rule_id}">${r.result}</span>
+          <span class="badge ${badgeClass}" id="badge-${r.rule_id}">${ruleRes}</span>
         </div>
       </div>
       <div class="rule-explanation">
@@ -172,11 +174,11 @@ function renderComplianceMatrix(results) {
       <!-- User Final Decision Quick Override Row -->
       <div class="rule-decision-row">
         <label style="font-weight: 600; color: var(--text-main);">Auditor Statutory Determination:</label>
-        <select class="rule-status-selector" data-rule="${r.rule_id}" data-status="${r.result}" onchange="onUserRuleDecisionChanged('${r.rule_id}', this.value)">
-          <option value="PASS" ${r.result === 'PASS' ? 'selected' : ''}>✓ PASS (Satisfies Requirement)</option>
-          <option value="FAIL" ${r.result === 'FAIL' ? 'selected' : ''}>✗ FAIL (Confirmed Violation)</option>
-          <option value="UNCLEAR" ${r.result === 'UNCLEAR' ? 'selected' : ''}>⚠️ UNCLEAR (Needs Verification)</option>
-          <option value="NOT_APPLICABLE" ${r.result === 'NOT_APPLICABLE' ? 'selected' : ''}>⚪ NOT APPLICABLE</option>
+        <select class="rule-status-selector" data-rule="${r.rule_id}" data-status="${ruleRes}" onchange="onUserRuleDecisionChanged('${r.rule_id}', this.value)">
+          <option value="PASS" ${ruleRes === 'PASS' ? 'selected' : ''}>✓ PASS (Satisfies Requirement)</option>
+          <option value="FAIL" ${ruleRes === 'FAIL' ? 'selected' : ''}>✗ FAIL (Confirmed Violation)</option>
+          <option value="UNCLEAR" ${ruleRes === 'UNCLEAR' ? 'selected' : ''}>⚠️ UNCLEAR (Needs Verification)</option>
+          <option value="NOT_APPLICABLE" ${ruleRes === 'NOT_APPLICABLE' ? 'selected' : ''}>⚪ NOT APPLICABLE</option>
         </select>
         <span style="color: var(--text-sub); font-size: 0.75rem;">(You have final authority to override AI finding)</span>
       </div>
@@ -202,6 +204,7 @@ function onUserRuleDecisionChanged(ruleId, newResult) {
   if (!target) return;
 
   target.result = newResult;
+  target.status = newResult;
   target.reviewer_status = "OVERRIDDEN";
 
   // Update badge UI
@@ -227,10 +230,10 @@ function onUserRuleDecisionChanged(ruleId, newResult) {
 function recalculateComplianceScore() {
   if (!currentScan || !currentScan.results) return;
 
-  const applicable = currentScan.results.filter(r => r.result !== 'NOT_APPLICABLE');
-  const passes = applicable.filter(r => r.result === 'PASS').length;
-  const fails = applicable.filter(r => r.result === 'FAIL').length;
-  const unclears = applicable.filter(r => r.result === 'UNCLEAR').length;
+  const applicable = currentScan.results.filter(r => (r.result || r.status) !== 'NOT_APPLICABLE');
+  const passes = applicable.filter(r => (r.result || r.status) === 'PASS').length;
+  const fails = applicable.filter(r => (r.result || r.status) === 'FAIL').length;
+  const unclears = applicable.filter(r => (r.result || r.status) === 'UNCLEAR').length;
 
   const score = applicable.length > 0 ? (passes / applicable.length) * 100 : 0;
   currentScan.compliance_score = score;
