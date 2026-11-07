@@ -131,15 +131,31 @@
 
           <!-- Front Panel Drop Zone (shown when no photo) -->
           <div id="front-drop-container">
-            <div class="drop-zone" id="drop-zone-front" onclick="triggerFileInput('front')">
-              <input type="file" id="file-input-front" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('front', this.files)">
+            <div class="drop-zone" id="drop-zone-front" onclick="openSourceModal('front')">
+              <input type="file" id="file-input-front" accept="image/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
               <input type="file" id="camera-input-front" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('front', this.files)">
+              <input type="file" id="gallery-input-front" accept="image/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
+              <input type="file" id="files-input-front" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
               <div class="drop-zone-icon">📷</div>
-              <h3>Drag and drop Front Panel photograph here</h3>
-              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
-              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('front')">
-                  📸 Capture with Camera
+              <h3>Upload Front Panel Photograph</h3>
+              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              
+              <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
+              <div class="upload-options-row">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('front')" title="Take photo directly using camera">
+                  <span class="upload-opt-icon">📸</span>
+                  <span class="upload-opt-label">Camera</span>
+                  <span class="upload-opt-desc">Take Photo</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('front')" title="Choose photo from gallery / library">
+                  <span class="upload-opt-icon">🖼️</span>
+                  <span class="upload-opt-label">Gallery</span>
+                  <span class="upload-opt-desc">Photo Library</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('front')" title="Browse documents, iCloud or device files">
+                  <span class="upload-opt-icon">📁</span>
+                  <span class="upload-opt-label">Device Files</span>
+                  <span class="upload-opt-desc">Browse Storage</span>
                 </button>
               </div>
             </div>
@@ -162,7 +178,7 @@
                   <span id="front-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
                 <div id="front-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('front')">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('front')">
                   🔄 Change Photograph
                 </button>
               </div>
@@ -195,15 +211,31 @@
 
           <!-- Back Panel Drop Zone -->
           <div id="back-drop-container">
-            <div class="drop-zone" id="drop-zone-back" onclick="triggerFileInput('back')">
-              <input type="file" id="file-input-back" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('back', this.files)">
+            <div class="drop-zone" id="drop-zone-back" onclick="openSourceModal('back')">
+              <input type="file" id="file-input-back" accept="image/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
               <input type="file" id="camera-input-back" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('back', this.files)">
+              <input type="file" id="gallery-input-back" accept="image/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
+              <input type="file" id="files-input-back" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
               <div class="drop-zone-icon">📷</div>
-              <h3>Drag and drop Back Panel photograph here</h3>
-              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
-              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('back')">
-                  📸 Capture with Camera
+              <h3>Upload Back Panel Photograph</h3>
+              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              
+              <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
+              <div class="upload-options-row">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('back')" title="Take photo directly using camera">
+                  <span class="upload-opt-icon">📸</span>
+                  <span class="upload-opt-label">Camera</span>
+                  <span class="upload-opt-desc">Take Photo</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('back')" title="Choose photo from gallery / library">
+                  <span class="upload-opt-icon">🖼️</span>
+                  <span class="upload-opt-label">Gallery</span>
+                  <span class="upload-opt-desc">Photo Library</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('back')" title="Browse documents, iCloud or device files">
+                  <span class="upload-opt-icon">📁</span>
+                  <span class="upload-opt-label">Device Files</span>
+                  <span class="upload-opt-desc">Browse Storage</span>
                 </button>
               </div>
             </div>
@@ -229,7 +261,7 @@
                   <span id="back-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
                 <div id="back-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('back')">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('back')">
                   🔄 Change Photograph
                 </button>
               </div>
@@ -267,15 +299,31 @@
 
           <!-- Side Flap Drop Zone -->
           <div id="side-drop-container">
-            <div class="drop-zone" id="drop-zone-side" onclick="triggerFileInput('side')">
-              <input type="file" id="file-input-side" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('side', this.files)">
+            <div class="drop-zone" id="drop-zone-side" onclick="openSourceModal('side')">
+              <input type="file" id="file-input-side" accept="image/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
               <input type="file" id="camera-input-side" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('side', this.files)">
+              <input type="file" id="gallery-input-side" accept="image/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
+              <input type="file" id="files-input-side" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
               <div class="drop-zone-icon">📷</div>
-              <h3>Drag and drop Side Flap photograph here</h3>
-              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
-              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('side')">
-                  📸 Capture with Camera
+              <h3>Upload Side Flap / Auxiliary Photograph</h3>
+              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              
+              <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
+              <div class="upload-options-row">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('side')" title="Take photo directly using camera">
+                  <span class="upload-opt-icon">📸</span>
+                  <span class="upload-opt-label">Camera</span>
+                  <span class="upload-opt-desc">Take Photo</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('side')" title="Choose photo from gallery / library">
+                  <span class="upload-opt-icon">🖼️</span>
+                  <span class="upload-opt-label">Gallery</span>
+                  <span class="upload-opt-desc">Photo Library</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('side')" title="Browse documents, iCloud or device files">
+                  <span class="upload-opt-icon">📁</span>
+                  <span class="upload-opt-label">Device Files</span>
+                  <span class="upload-opt-desc">Browse Storage</span>
                 </button>
               </div>
             </div>
@@ -301,7 +349,7 @@
                   <span id="side-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
                 <div id="side-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('side')">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('side')">
                   🔄 Change Photograph
                 </button>
               </div>
@@ -417,6 +465,48 @@
       <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
     </div>
   </footer>
+
+  <!-- Upload Source Selection Sheet / Modal (Smartphone Action Sheet) -->
+  <div id="uploadSourceModal" class="modal-backdrop" style="display: none;" onclick="closeSourceModal()">
+    <div class="source-modal-sheet" onclick="event.stopPropagation()">
+      <div class="source-sheet-pill"></div>
+      <h3 id="sourceModalTitle" style="font-size: 1.15rem; margin: 0.5rem 0 0.25rem 0; font-weight: 700;">Select Packaging Photo Source</h3>
+      <p id="sourceModalSub" style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">Choose how you want to provide this packaging photograph:</p>
+      
+      <div class="source-options-list">
+        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('camera')">
+          <div class="source-btn-icon bg-blue-subtle">📸</div>
+          <div class="source-btn-text">
+            <strong>Take Photo with Camera</strong>
+            <span>Directly launch phone camera to snap packaging</span>
+          </div>
+          <span class="source-arrow">&rarr;</span>
+        </button>
+
+        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('gallery')">
+          <div class="source-btn-icon bg-purple-subtle">🖼️</div>
+          <div class="source-btn-text">
+            <strong>Photo Gallery / Library</strong>
+            <span>Choose from saved photos and camera roll</span>
+          </div>
+          <span class="source-arrow">&rarr;</span>
+        </button>
+
+        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('files')">
+          <div class="source-btn-icon bg-amber-subtle">📁</div>
+          <div class="source-btn-text">
+            <strong>Device Files & Documents</strong>
+            <span>Browse iCloud, Downloads, or Internal Storage</span>
+          </div>
+          <span class="source-arrow">&rarr;</span>
+        </button>
+      </div>
+
+      <button type="button" class="btn btn-outline" style="width: 100%; margin-top: 1.25rem; padding: 0.75rem;" onclick="closeSourceModal()">
+        ✕ Cancel
+      </button>
+    </div>
+  </div>
 
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>

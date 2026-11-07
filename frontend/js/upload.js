@@ -60,16 +60,67 @@ window.goToStep = function(stepNum) {
 };
 
 /**
- * File Input Triggers
+ * Multi-Source File Input Triggers & Modal Action Sheet
  */
-window.triggerFileInput = function(panel) {
-  const el = document.getElementById(`file-input-${panel}`);
-  if (el) el.click();
+let currentModalPanel = 'front';
+
+window.openSourceModal = function(panel) {
+  currentModalPanel = panel || 'front';
+  const modal = document.getElementById('uploadSourceModal');
+  const title = document.getElementById('sourceModalTitle');
+  const sub = document.getElementById('sourceModalSub');
+  const panelTitles = {
+    front: 'Front Panel (Principal Display Panel)',
+    back: 'Back Panel (Declarations / MRP)',
+    side: 'Side Flap / Auxiliary View'
+  };
+  if (title) title.textContent = `Upload ${panelTitles[panel] || panel}`;
+  if (sub) sub.textContent = `Choose your photo source for ${panelTitles[panel] || panel}:`;
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeSourceModal = function() {
+  const modal = document.getElementById('uploadSourceModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.selectSourceAction = function(sourceType) {
+  closeSourceModal();
+  if (sourceType === 'camera') {
+    triggerCameraInput(currentModalPanel);
+  } else if (sourceType === 'gallery') {
+    triggerGalleryInput(currentModalPanel);
+  } else if (sourceType === 'files') {
+    triggerFilesInput(currentModalPanel);
+  }
 };
 
 window.triggerCameraInput = function(panel) {
   const el = document.getElementById(`camera-input-${panel}`);
-  if (el) el.click();
+  if (el) {
+    el.value = '';
+    el.click();
+  }
+};
+
+window.triggerGalleryInput = function(panel) {
+  const el = document.getElementById(`gallery-input-${panel}`) || document.getElementById(`file-input-${panel}`);
+  if (el) {
+    el.value = '';
+    el.click();
+  }
+};
+
+window.triggerFilesInput = function(panel) {
+  const el = document.getElementById(`files-input-${panel}`);
+  if (el) {
+    el.value = '';
+    el.click();
+  }
+};
+
+window.triggerFileInput = function(panel) {
+  openSourceModal(panel);
 };
 
 /**
@@ -100,17 +151,19 @@ function setupDragAndDrop() {
 }
 
 /**
- * Handle File Upload for Specific Panel
+ * Handle File Upload for Specific Panel (Resilient to Camera, Gallery & Files App)
  */
 window.handlePanelFile = function(panel, files) {
   if (!files || files.length === 0) return;
   const file = files[0];
 
   const maxSizeBytes = 15 * 1024 * 1024; // 15MB limit
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const fileName = (file.name || "").toLowerCase();
+  const extMatch = /\.(jpe?g|png|webp|heic|heif|bmp|tiff?)$/i.test(fileName);
+  const isImageMime = file.type && file.type.toLowerCase().startsWith('image/');
 
-  if (!allowedTypes.includes(file.type.toLowerCase())) {
-    showToast(`Unsupported format: ${file.name}. Please upload JPG, PNG, or WEBP.`, 'error');
+  if (!isImageMime && !extMatch) {
+    showToast(`Unsupported format: ${file.name}. Please upload a packaging photo (JPG, PNG, WEBP, HEIC).`, 'error');
     return;
   }
 
@@ -125,12 +178,12 @@ window.handlePanelFile = function(panel, files) {
       file: file,
       dataBase64: event.target.result,
       filename: file.name,
-      mimeType: file.type,
+      mimeType: file.type || 'image/jpeg',
       status: 'uploaded'
     };
 
     renderPanelPreview(panel);
-    showToast(`${getPanelDisplayName(panel)} photograph uploaded successfully!`, 'success');
+    showToast(`${getPanelDisplayName(panel)} photo uploaded successfully!`, 'success');
   };
   reader.readAsDataURL(file);
 };
