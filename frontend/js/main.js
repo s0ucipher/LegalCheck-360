@@ -151,8 +151,87 @@ function toggleDeviceMode() {
   showToast(next === 'mobile' ? 'Mobile View activated' : 'Desktop View restored', 'info');
 }
 
-// Restore saved settings on initial load
+/**
+ * ============================================================================
+ * Session Navigation Breadcrumbs & Global Upper-Left Back Option
+ * ============================================================================
+ */
+function recordPageVisit() {
+  try {
+    const stackKey = 'legalcheck_nav_stack';
+    let stack = JSON.parse(sessionStorage.getItem(stackKey) || '[]');
+    const currentUrl = window.location.href;
+    // Avoid duplicate push on refresh
+    if (stack.length === 0 || stack[stack.length - 1] !== currentUrl) {
+      stack.push(currentUrl);
+      if (stack.length > 30) stack.shift();
+      sessionStorage.setItem(stackKey, JSON.stringify(stack));
+    }
+  } catch (e) {
+    console.warn('Could not record page visit in session', e);
+  }
+}
+
+window.handleGlobalBack = function() {
+  // 1. If currently on upload page and in multi-step wizard step > 1, step backwards
+  if (typeof window.currentStep !== 'undefined' && window.currentStep > 1) {
+    if (typeof window.goToStep === 'function') {
+      window.goToStep(window.currentStep - 1);
+      return;
+    }
+  }
+
+  const pathname = window.location.pathname;
+  const isHome = pathname === '/' || 
+                 pathname.endsWith('/index.html') || 
+                 pathname.endsWith('/index') || 
+                 pathname === '';
+
+  // 2. Pop navigation breadcrumb from session storage
+  let stack = [];
+  try {
+    stack = JSON.parse(sessionStorage.getItem('legalcheck_nav_stack') || '[]');
+  } catch (e) {}
+
+  // Pop current page if it is top of stack
+  if (stack.length > 0 && stack[stack.length - 1] === window.location.href) {
+    stack.pop();
+  }
+
+  // Navigate to previous page in session breadcrumb if available
+  if (stack.length > 0) {
+    const prevUrl = stack.pop();
+    sessionStorage.setItem('legalcheck_nav_stack', JSON.stringify(stack));
+    window.location.href = prevUrl;
+    return;
+  }
+
+  // 3. Fallback to browser history back if on same site
+  if (window.history.length > 1 && !isHome) {
+    window.history.back();
+    // Safety check: If still on same page after timeout (external history), go to index.html
+    setTimeout(() => {
+      if (window.location.pathname === pathname) {
+        window.location.href = 'index.html';
+      }
+    }, 350);
+    return;
+  }
+
+  // 4. If all back is completed or on home, arrive safely at homepage
+  if (!isHome) {
+    window.location.href = 'index.html';
+  } else {
+    if (typeof showToast === 'function') {
+      showToast('You are at the Home page', 'info');
+    }
+  }
+};
+
+// Restore saved settings on initial load and track visit
 document.addEventListener('DOMContentLoaded', () => {
+  recordPageVisit();
+
   const savedTheme = localStorage.getItem('legalcheck_theme') || 'dark';
   setThemeMode(savedTheme);
 

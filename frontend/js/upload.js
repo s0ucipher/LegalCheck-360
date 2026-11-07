@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.goToStep = function(stepNum) {
   if (stepNum < 1 || stepNum > 4) return;
   currentStep = stepNum;
+  window.currentStep = stepNum;
 
   // Update progress indicators
   for (let i = 1; i <= 4; i++) {
