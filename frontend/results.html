@@ -18,15 +18,19 @@
         <span class="utility-hint">Official Regulatory Screening Engine</span>
       </div>
       <div class="utility-right">
-        <!-- Single Button Device View Switcher -->
-        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Click to toggle Desktop / Smartphone layout">
-          <span class="toggle-icon" id="deviceToggleIcon">🖥️</span>
+        <!-- Compact Single Button Device Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Toggle Desktop / Mobile view">
+          <span class="toggle-icon" id="deviceToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </span>
           <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
         </button>
 
-        <!-- Single Button Theme Switcher -->
-        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Click to toggle Dark / Regular mode">
-          <span class="toggle-icon" id="themeToggleIcon">🌙</span>
+        <!-- Compact Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Toggle Dark / Light mode">
+          <span class="toggle-icon" id="themeToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
           <span class="toggle-label" id="themeToggleLabel">Dark</span>
         </button>
       </div>
