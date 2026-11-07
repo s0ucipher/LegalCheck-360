@@ -137,5 +137,61 @@ INSERT OR REPLACE INTO legal_rules (
     'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology',
     '2026-01-15',
     1
+),
+(
+    'LMR-RULE-6-1-LOT',
+    'Lot / Batch / Code Identification Number',
+    '2011.amended.2022',
+    'all',
+    'Every package shall bear a distinguishing lot, code, or batch identification number for traceability under Rule 6(1)(q).',
+    'Rule 6(1)(d) proviso read with Rule 6(1)(q), PCR 2011',
+    'Mandatory for all packaged goods.',
+    'None.',
+    '2011-03-01',
+    'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology',
+    '2026-01-15',
+    1
+),
+(
+    'LMR-RULE-NUTRITION',
+    'Mandatory Nutritional Information Declaration per 100g',
+    '2011.amended.2020',
+    'packaged_food',
+    'Pre-packaged edible food commodities must display nutritional facts per 100g or per serve, specifically stating energy, protein, carbohydrates, total and added sugars, and sodium.',
+    'Rule 6(1)(h) PCR 2011 & FSSAI Labelling Regulations',
+    'Edible foodstuffs and beverages.',
+    'Non-food commodities.',
+    '2020-11-17',
+    'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology',
+    '2026-01-15',
+    1
+),
+(
+    'LMR-RULE-VEG-LOGO',
+    'Dietary Classification Emblem (Veg / Non-Veg Logo)',
+    '2011.amended.2022',
+    'packaged_food',
+    'Prominent green filled circle inside green square outline for vegetarian, or brown triangle for non-vegetarian commodity on Principal Display Panel.',
+    'Food Safety and Standards (Labelling and Display) Regulations',
+    'Mandatory for food products.',
+    'Non-food commodities.',
+    '2020-11-17',
+    'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology',
+    '2026-01-15',
+    1
+),
+(
+    'LMR-RULE-9-FONT',
+    'Minimum Numeral & Lettering Height Standards',
+    '2011.amended.2022',
+    'all',
+    'Declaration numerals on PDP must adhere to minimum height table under Rule 9 (e.g. minimum 2.0mm to 4.0mm based on net package weight).',
+    'Rule 9 & Table thereunder, PCR 2011',
+    'Mandatory for all consumer packages.',
+    'Packages net weight <= 10g.',
+    '2011-03-01',
+    'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology',
+    '2026-01-15',
+    1
 );
 

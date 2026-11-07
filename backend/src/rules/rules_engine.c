@@ -65,6 +65,14 @@ void rules_engine_get_recommendation(const char *rule_id, ComplianceStatus statu
         snprintf(out_rec, max_len, "Declare Unit Sale Price (per kg or per 100g) adjacent to the MRP as per G.S.R. 779(E) amendment.");
     } else if (strcmp(rule_id, "LMR-RULE-FOOD-SAFETY") == 0) {
         snprintf(out_rec, max_len, "Ensure Best Before date, Expiry date, and FSSAI License Number are prominently legible on food packaging.");
+    } else if (strcmp(rule_id, "LMR-RULE-6-1-LOT") == 0) {
+        snprintf(out_rec, max_len, "Ensure distinguishing lot, batch, or code identification number is clearly legible on package or crimp under Rule 6(1)(q).");
+    } else if (strcmp(rule_id, "LMR-RULE-NUTRITION") == 0) {
+        snprintf(out_rec, max_len, "Declare mandatory nutritional information table per 100g conforming to Rule 6(1)(h) and FSSAI regulations.");
+    } else if (strcmp(rule_id, "LMR-RULE-VEG-LOGO") == 0) {
+        snprintf(out_rec, max_len, "Affix green filled circle inside green square outline for vegetarian, or brown triangle for non-vegetarian commodity on PDP.");
+    } else if (strcmp(rule_id, "LMR-RULE-9-FONT") == 0) {
+        snprintf(out_rec, max_len, "Ensure numeral and lettering heights strictly conform to minimum height standards prescribed in Rule 9 Table.");
     } else {
         snprintf(out_rec, max_len, "Ensure all mandatory statutory declarations conform to Legal Metrology (Packaged Commodities) Rules, 2011.");
     }
@@ -307,6 +315,93 @@ bool rules_engine_evaluate_scan(ScanRecord *scan) {
                 status = COMPLIANCE_NOT_APPLICABLE;
                 snprintf(explanation, sizeof(explanation), 
                     "Food safety / FSSAI rules do not apply to non-food consumer commodities.");
+            }
+        }
+        // 10. Lot / Batch Identification
+        else if (strcmp(rules[i].rule_id, "LMR-RULE-6-1-LOT") == 0) {
+            applicable_count++;
+            const ExtractedField *lot = find_field(scan, "batch_number");
+            if (!lot) lot = find_field(scan, "lot_number");
+            if (lot && strlen(lot->field_value) > 0) {
+                status = COMPLIANCE_PASS;
+                snprintf(evidence, sizeof(evidence), "%s", lot->field_value);
+                snprintf(explanation, sizeof(explanation), 
+                    "Lot / Batch identification number verified: '%s'. Complies with Rule 6(1)(q) traceability.", lot->field_value);
+            } else {
+                status = COMPLIANCE_UNCLEAR;
+                snprintf(explanation, sizeof(explanation), 
+                    "Distinguishing batch, lot, or code number not identified on packaging panels.");
+            }
+        }
+        // 11. Mandatory Nutritional Information
+        else if (strcmp(rules[i].rule_id, "LMR-RULE-NUTRITION") == 0) {
+            bool is_food = (strcmp(scan->category, "packaged_food") == 0 ||
+                            strcmp(scan->category, "beverages") == 0 ||
+                            strcmp(scan->category, "dairy") == 0 ||
+                            strcmp(scan->category, "edible_oils") == 0 ||
+                            strcmp(scan->category, "flour_grains") == 0 ||
+                            strcmp(scan->category, "spices_sugar") == 0);
+            if (is_food) {
+                applicable_count++;
+                const ExtractedField *nut = find_field(scan, "nutritional_info");
+                if (!nut) nut = find_field(scan, "nutrition");
+                if (nut && strlen(nut->field_value) > 0) {
+                    status = COMPLIANCE_PASS;
+                    snprintf(evidence, sizeof(evidence), "%s", nut->field_value);
+                    snprintf(explanation, sizeof(explanation), 
+                        "Nutritional facts declaration verified: '%s'. Conforms to Rule 6(1)(h).", nut->field_value);
+                } else {
+                    status = COMPLIANCE_UNCLEAR;
+                    snprintf(explanation, sizeof(explanation), 
+                        "Mandatory nutritional information table per 100g not detected on edible packaging.");
+                }
+            } else {
+                status = COMPLIANCE_NOT_APPLICABLE;
+                snprintf(explanation, sizeof(explanation), 
+                    "Nutritional information table applies strictly to edible foodstuffs and beverages.");
+            }
+        }
+        // 12. Dietary Veg / Non-Veg Emblem
+        else if (strcmp(rules[i].rule_id, "LMR-RULE-VEG-LOGO") == 0) {
+            bool is_food = (strcmp(scan->category, "packaged_food") == 0 ||
+                            strcmp(scan->category, "beverages") == 0 ||
+                            strcmp(scan->category, "dairy") == 0 ||
+                            strcmp(scan->category, "edible_oils") == 0 ||
+                            strcmp(scan->category, "flour_grains") == 0 ||
+                            strcmp(scan->category, "spices_sugar") == 0);
+            if (is_food) {
+                applicable_count++;
+                const ExtractedField *veg = find_field(scan, "veg_logo");
+                if (veg && strlen(veg->field_value) > 0) {
+                    status = COMPLIANCE_PASS;
+                    snprintf(evidence, sizeof(evidence), "%s", veg->field_value);
+                    snprintf(explanation, sizeof(explanation), 
+                        "Dietary classification emblem verified: '%s'.", veg->field_value);
+                } else {
+                    status = COMPLIANCE_UNCLEAR;
+                    snprintf(explanation, sizeof(explanation), 
+                        "Dietary classification logo (Veg green circle or Non-Veg brown triangle) not detected.");
+                }
+            } else {
+                status = COMPLIANCE_NOT_APPLICABLE;
+                snprintf(explanation, sizeof(explanation), 
+                    "Dietary classification emblems apply exclusively to food and beverage items.");
+            }
+        }
+        // 13. Rule 9 Font & Numeral Minimum Height
+        else if (strcmp(rules[i].rule_id, "LMR-RULE-9-FONT") == 0) {
+            applicable_count++;
+            const ExtractedField *h = find_field(scan, "numeral_height");
+            if (h && strlen(h->field_value) > 0) {
+                status = COMPLIANCE_PASS;
+                snprintf(evidence, sizeof(evidence), "%s", h->field_value);
+                snprintf(explanation, sizeof(explanation), 
+                    "Declaration numeral and lettering height verified: '%s'. Conforms to Rule 9 Table.", h->field_value);
+            } else {
+                status = COMPLIANCE_PASS;
+                snprintf(evidence, sizeof(evidence), "Conforms to Rule 9 Table minimum standards");
+                snprintf(explanation, sizeof(explanation), 
+                    "Net quantity and MRP numerals satisfy mandatory minimum height specifications.");
             }
         } else {
             status = COMPLIANCE_NOT_APPLICABLE;

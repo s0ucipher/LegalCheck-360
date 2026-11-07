@@ -57,6 +57,9 @@ int main(void) {
     add_field(&pass_scan, "expiry_date", "04/2027", "", 0.90, "Best Before 6 months from packaging");
     add_field(&pass_scan, "consumer_care", "Helpdesk: 1800-425-9999, Email: care@delightbakers.in", "", 0.94, "Consumer Care Toll Free 1800-425-9999");
     add_field(&pass_scan, "country_of_origin", "India", "", 0.98, "Made in India");
+    add_field(&pass_scan, "batch_number", "B# 26N042", "", 0.95, "Batch No: 26N042");
+    add_field(&pass_scan, "nutritional_info", "Energy 465 kcal, Carbohydrates 68g, Protein 6.5g per 100g", "", 0.94, "Nutritional Facts");
+    add_field(&pass_scan, "veg_logo", "Green Circle in Green Square", "", 0.98, "Veg Symbol");
 
     bool eval_pass = rules_engine_evaluate_scan(&pass_scan);
     assert(eval_pass && "Rules evaluation failed");
