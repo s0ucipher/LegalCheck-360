@@ -15,15 +15,21 @@ async function loadDashboardData() {
     const statsResp = await API.getDashboardStats();
     if (statsResp.success && statsResp.data) {
       const s = statsResp.data;
-      document.getElementById('stat-total-scans').textContent = s.total_scans;
-      document.getElementById('stat-completed').textContent = s.completed_inspections;
-      document.getElementById('stat-reviews').textContent = s.pending_reviews;
-      document.getElementById('stat-rate').textContent = `${s.compliance_rate.toFixed(1)}%`;
+      const completed = s.completed_inspections ?? ((s.pass_count || 0) + (s.fail_count || 0));
+      const reviews = s.pending_reviews ?? (s.review_required_count || 0);
+      const rate = typeof s.compliance_rate === 'number' ? s.compliance_rate.toFixed(1) : '0.0';
+      const pass = s.pass_count ?? (s.compliant_count || 0);
+      const fail = s.fail_count ?? (s.non_compliant_count || 0);
+
+      document.getElementById('stat-total-scans').textContent = s.total_scans ?? 0;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-reviews').textContent = reviews;
+      document.getElementById('stat-rate').textContent = `${rate}%`;
       
       const passEl = document.getElementById('stat-pass-count');
-      if (passEl) passEl.textContent = `${s.pass_count} passed`;
+      if (passEl) passEl.textContent = `${pass} passed`;
       const failEl = document.getElementById('stat-fail-count');
-      if (failEl) failEl.textContent = `${s.fail_count} violations`;
+      if (failEl) failEl.textContent = `${fail} violations`;
     }
 
     // 2. Fetch recent scans

@@ -60,8 +60,15 @@ function formatStatusBadge(status) {
   }
 }
 
+const SVG_ICONS = {
+  desktop: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
+  mobile: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`,
+  sun: `<svg class="toggle-svg sun-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>`,
+  moon: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+};
+
 /**
- * Switch Theme: Dark (Default) vs Regular (Light Mode)
+ * Switch Theme: Dark (Default) vs Light Mode
  */
 function setThemeMode(mode) {
   const isLight = (mode === 'light');
@@ -80,10 +87,10 @@ function setThemeMode(mode) {
   const themeLabel = document.getElementById('themeToggleLabel');
   const singleThemeBtn = document.getElementById('singleThemeToggle');
   if (themeIcon && themeLabel) {
-    themeIcon.textContent = isLight ? '☀️' : '🌙';
-    themeLabel.textContent = isLight ? 'Regular' : 'Dark';
+    themeIcon.innerHTML = isLight ? SVG_ICONS.sun : SVG_ICONS.moon;
+    themeLabel.textContent = isLight ? 'Light' : 'Dark';
     if (singleThemeBtn) {
-      singleThemeBtn.title = isLight ? 'Currently in Regular (Light) Mode. Click to switch to Dark Mode.' : 'Currently in Dark Mode. Click to switch to Regular (Light) Mode.';
+      singleThemeBtn.title = isLight ? 'Light Mode (Click for Dark)' : 'Dark Mode (Click for Light)';
     }
   }
 
@@ -100,7 +107,7 @@ function toggleThemeMode() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = (current === 'dark') ? 'light' : 'dark';
   setThemeMode(next);
-  showToast(next === 'light' ? '☀️ Regular Light Mode activated' : '🌙 Dark Mode activated', 'info');
+  showToast(next === 'light' ? 'Light Mode activated' : 'Dark Mode activated', 'info');
 }
 
 /**
@@ -121,10 +128,10 @@ function setDeviceMode(mode) {
   const devLabel = document.getElementById('deviceToggleLabel');
   const singleDevBtn = document.getElementById('singleDeviceToggle');
   if (devIcon && devLabel) {
-    devIcon.textContent = isMobile ? '📱' : '🖥️';
-    devLabel.textContent = isMobile ? 'Smartphone' : 'Desktop';
+    devIcon.innerHTML = isMobile ? SVG_ICONS.mobile : SVG_ICONS.desktop;
+    devLabel.textContent = isMobile ? 'Mobile' : 'Desktop';
     if (singleDevBtn) {
-      singleDevBtn.title = isMobile ? 'Currently in Smartphone Mode. Click to switch to Desktop.' : 'Currently in Desktop Mode. Click to switch to Smartphone.';
+      singleDevBtn.title = isMobile ? 'Mobile View (Click for Desktop)' : 'Desktop View (Click for Mobile)';
     }
   }
 
@@ -141,7 +148,7 @@ function toggleDeviceMode() {
   const isMobile = document.body.classList.contains('device-mobile-mode');
   const next = isMobile ? 'desktop' : 'mobile';
   setDeviceMode(next);
-  showToast(next === 'mobile' ? '📱 Smartphone Simulation View activated (430px)' : '🖥️ Desktop View restored', 'info');
+  showToast(next === 'mobile' ? 'Mobile View activated' : 'Desktop View restored', 'info');
 }
 
 // Restore saved settings on initial load

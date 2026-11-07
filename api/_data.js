@@ -499,12 +499,17 @@ module.exports = {
     const pass = scanRecords.filter(s => s.overall_status === 'PASS').length;
     const fail = scanRecords.filter(s => s.overall_status === 'FAIL').length;
     const review = scanRecords.filter(s => s.overall_status === 'REVIEW_REQUIRED').length;
+    const completed = pass + fail;
     const rate = total > 0 ? Math.round((pass / total) * 1000) / 10 : 0.0;
     return {
       total_scans: total,
+      completed_inspections: completed,
       compliant_count: pass,
+      pass_count: pass,
       non_compliant_count: fail,
+      fail_count: fail,
       review_required_count: review,
+      pending_reviews: review,
       compliance_rate: rate,
       recent_scans: scanRecords.slice(0, 10).map(s => ({
         id: s.id,
