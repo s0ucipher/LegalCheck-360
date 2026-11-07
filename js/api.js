@@ -239,12 +239,22 @@ const API = {
   },
 
   async getScan(scanId) {
+    // 1. Query network with resilient timeout
     try {
-      const res = await fetch(`${API_BASE_URL}/api/scans/${encodeURIComponent(scanId)}`, { signal: AbortSignal.timeout(2000) });
-      if (res.ok) return await res.json();
+      const res = await fetch(`${API_BASE_URL}/api/scans/${encodeURIComponent(scanId)}`, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const scans = getLocalScans();
+          const filtered = scans.filter(s => s.id !== json.data.id);
+          filtered.unshift(json.data);
+          saveLocalScans(filtered);
+          return json;
+        }
+      }
     } catch (e) {}
 
-    // Vercel fallback
+    // 2. Immediate local storage retrieval
     const scans = getLocalScans();
     const found = scans.find(s => s.id === scanId);
     if (found) {
@@ -261,7 +271,16 @@ const API = {
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(10000)
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const scans = getLocalScans();
+          const filtered = scans.filter(s => s.id !== json.data.id);
+          filtered.unshift(json.data);
+          saveLocalScans(filtered);
+        }
+        return json;
+      }
     } catch (e) {}
 
     // Vercel Client-Side Deterministic Rules Engine Fallback
@@ -392,25 +411,25 @@ const API = {
       }
 
       results = [
-        { id: 1, rule_id: "LMR-RULE-6-1-A", rule_name: "Manufacturer / Packer / Importer Name & Address", legal_reference: "Rule 6(1)(a), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Manufacturer name and complete physical address with PIN code verified.", recommendation: "Declaration satisfies statutory requirements under PCR 2011.", reviewer_status: "UNREVIEWED" },
-        { id: 2, rule_id: "LMR-RULE-6-1-B", rule_name: "Generic / Common Name of Commodity", legal_reference: "Rule 6(1)(b), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: `Generic commodity name declared prominently: '${displayName}'.`, recommendation: "Declaration satisfies Rule 6(1)(b).", reviewer_status: "UNREVIEWED" },
-        { id: 3, rule_id: "LMR-RULE-6-1-C", rule_name: "Net Quantity in Standard SI Metric Units", legal_reference: "Rule 6(1)(c), Rule 12 & 13, PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Net quantity declared in authorized metric unit. Satisfies Rule 12 & 13.", recommendation: "Standard metric units verified.", reviewer_status: "UNREVIEWED" },
-        { id: 4, rule_id: "LMR-RULE-6-1-D", rule_name: "Month & Year of Manufacture / Packing", legal_reference: "Rule 6(1)(d), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Month and year of manufacture or pre-packing verified.", recommendation: "Satisfies Rule 6(1)(d).", reviewer_status: "UNREVIEWED" },
-        { id: 5, rule_id: "LMR-RULE-6-1-E", rule_name: "Maximum Retail Price (MRP) & Taxes Clause", legal_reference: "Rule 6(1)(da), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Maximum Retail Price declared with mandatory 'inclusive of all taxes' clause.", recommendation: "Satisfies Rule 6(1)(da).", reviewer_status: "UNREVIEWED" },
-        { id: 6, rule_id: "LMR-RULE-6-1-N", rule_name: "Consumer Grievance Redressal Mechanism", legal_reference: "Rule 6(1)(n), PCR 2011", rule_version: "2011.amended.2022", result: "PASS", status: "PASS", explanation: "Customer helpline phone number and email verified.", recommendation: "Satisfies Rule 6(1)(n).", reviewer_status: "UNREVIEWED" },
-        { id: 7, rule_id: "LMR-RULE-6-10", rule_name: "Country of Origin Declaration", legal_reference: "Rule 6(10) / G.S.R. 529(E), PCR 2011", rule_version: "2020.amendment", result: "PASS", status: "PASS", explanation: "Country of Origin declared as India.", recommendation: "Satisfies Rule 6(10).", reviewer_status: "UNREVIEWED" },
-        { id: 8, rule_id: "LMR-RULE-6-1-USP", rule_name: "Unit Sale Price Declaration", legal_reference: "Rule 6(1)(11) amended via G.S.R. 779(E)", rule_version: "2021.amendment.2022", result: "PASS", status: "PASS", explanation: "Unit Sale Price declared prominently.", recommendation: "Satisfies G.S.R. 779(E) amendment.", reviewer_status: "UNREVIEWED" }
+        { id: 1, rule_id: "LMR-RULE-6-1-A", rule_name: "Manufacturer / Packer / Importer Name & Address", legal_reference: "Rule 6(1)(a), PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "Manufacturer details with PIN code", evidence: "Complete postal address with PIN code verified", explanation: "Manufacturer name and complete physical address with PIN code verified.", recommendation: "Declaration satisfies statutory requirements under PCR 2011.", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 2, rule_id: "LMR-RULE-6-1-B", rule_name: "Generic / Common Name of Commodity", legal_reference: "Rule 6(1)(b), PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "front", extracted_information: displayName, evidence: displayName, explanation: `Generic commodity name declared prominently: '${displayName}'.`, recommendation: "Declaration satisfies Rule 6(1)(b).", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 3, rule_id: "LMR-RULE-6-1-C", rule_name: "Net Quantity in Standard SI Metric Units", legal_reference: "Rule 6(1)(c), Rule 12 & 13, PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "front", extracted_information: "Standard SI Metric Units", evidence: "Net Quantity declared in SI metric units", explanation: "Net quantity declared in authorized metric unit. Satisfies Rule 12 & 13.", recommendation: "Standard metric units verified.", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 4, rule_id: "LMR-RULE-6-1-D", rule_name: "Month & Year of Manufacture / Packing", legal_reference: "Rule 6(1)(d), PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "02/2026", evidence: "Month & Year of packing declared", explanation: "Month and year of manufacture or pre-packing verified.", recommendation: "Satisfies Rule 6(1)(d).", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 5, rule_id: "LMR-RULE-6-1-E", rule_name: "Maximum Retail Price (MRP) & Taxes Clause", legal_reference: "Rule 6(1)(da), PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "MRP in INR (incl. of all taxes)", evidence: "MRP stated inclusive of all taxes", explanation: "Maximum Retail Price declared with mandatory 'inclusive of all taxes' clause.", recommendation: "Satisfies Rule 6(1)(da).", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 6, rule_id: "LMR-RULE-6-1-N", rule_name: "Consumer Grievance Redressal Mechanism", legal_reference: "Rule 6(1)(n), PCR 2011", rule_version: "2011.amended.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "Helpline & Email", evidence: "Customer grievance details present", explanation: "Customer helpline phone number and email verified.", recommendation: "Satisfies Rule 6(1)(n).", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 7, rule_id: "LMR-RULE-6-10", rule_name: "Country of Origin Declaration", legal_reference: "Rule 6(10) / G.S.R. 529(E), PCR 2011", rule_version: "2020.amendment", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "India", evidence: "Country of Origin: India", explanation: "Country of Origin declared as India.", recommendation: "Satisfies Rule 6(10).", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" },
+        { id: 8, rule_id: "LMR-RULE-6-1-USP", rule_name: "Unit Sale Price Declaration", legal_reference: "Rule 6(1)(11) amended via G.S.R. 779(E)", rule_version: "2021.amendment.2022", presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "Unit Sale Price declared", evidence: "USP declared adjacent to MRP", explanation: "Unit Sale Price declared prominently.", recommendation: "Satisfies G.S.R. 779(E) amendment.", original_ai_status: "PASS", reviewer_status: "UNREVIEWED" }
       ];
 
       if (isFood) {
         results.push({
           id: 9, rule_id: "LMR-RULE-FOOD-SAFETY", rule_name: "Best Before / Expiry & FSSAI Declarations", legal_reference: "Rule 6(1)(d) proviso read with FSSAI Regulations", rule_version: "2011.amended.2022",
-          result: "PASS", status: "PASS", explanation: "Best Before date and FSSAI license declarations verified.", recommendation: "Satisfies Food Safety regulations.", reviewer_status: "UNREVIEWED"
+          presence_status: "PRESENT", compliance_status: "COMPLIANT", result: "PASS", status: "PASS", source_panel: "back", extracted_information: "FSSAI License & Best Before", evidence: "FSSAI Lic & Best Before date present", explanation: "Best Before date and FSSAI license declarations verified.", recommendation: "Satisfies Food Safety regulations.", original_ai_status: "PASS", reviewer_status: "UNREVIEWED"
         });
       } else {
         results.push({
           id: 9, rule_id: "LMR-RULE-FOOD-SAFETY", rule_name: "Best Before / Expiry & FSSAI Declarations", legal_reference: "Rule 6(1)(d) proviso read with FSSAI Regulations", rule_version: "2011.amended.2022",
-          result: "NOT_APPLICABLE", status: "NOT_APPLICABLE", explanation: `FSSAI license compliance only applies to edible food and beverage packages. Not applicable for ${cat.replace(/_/g, ' ')}.`, recommendation: "Statutory requirement exempt for non-food products under Legal Metrology.", reviewer_status: "UNREVIEWED"
+          presence_status: "NOT_APPLICABLE", compliance_status: "NOT_APPLICABLE", result: "NOT_APPLICABLE", status: "NOT_APPLICABLE", source_panel: "none", extracted_information: "Exempt (Non-Food)", evidence: `Non-food commodity category (${cat.replace(/_/g, ' ')})`, explanation: `FSSAI license compliance only applies to edible food and beverage packages. Not applicable for ${cat.replace(/_/g, ' ')}.`, recommendation: "Statutory requirement exempt for non-food products under Legal Metrology.", original_ai_status: "NOT_APPLICABLE", reviewer_status: "UNREVIEWED"
         });
       }
     }

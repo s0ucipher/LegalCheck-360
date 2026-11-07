@@ -9,7 +9,7 @@ module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const id = req.query.id;
+  const id = (req.query && req.query.id) || (req.url ? req.url.split('?')[0].split('/').filter(Boolean).pop() : null);
   if (!id) return res.status(400).json({ error: "Missing scan ID" });
 
   const scan = getScanById(id);

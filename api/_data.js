@@ -5,8 +5,12 @@
  * ============================================================================
  * 
  * Provides serverless compliance evaluation, packaging declarations extraction,
- * statutory rules engine (PCR 2011), and vector PDF generation for Vercel.
+ * statutory rules engine (PCR 2011), persistent disk storage, and vector PDF generation.
  */
+
+const fs = require('fs');
+const path = require('path');
+const TMP_FILE = path.join('/tmp', 'legalcheck_scans_db.json');
 
 // Initial Seed Legal Rules (PCR 2011 & 2022 Amendments)
 let legalRules = [
@@ -207,31 +211,34 @@ let scanRecords = [
 ];
 
 // Helper: Dynamic Commodity Intelligence Extraction Engine
-function extractDeclarationsForCategory(productName, category, customCategory, images) {
+function extractDeclarationsForCategory(productName, category, customCategory, images, unavailablePanels = []) {
   const filenames = (images || []).map(img => (typeof img === 'string' ? img : img.filename || "")).join(" ").toLowerCase();
+  const unavail = new Set((unavailablePanels || []).map(p => p.toLowerCase()));
 
   // 1. Non-compliant preset
   if (filenames.includes("noncompliant")) {
+    const rawFields = [
+      { id: 1, field_name: "product_name", field_value: "Crunchy Bites Spiced Potato Wafers", confidence: 0.91, evidence_text: "Crunchy Bites Wafers", source_view: "front", is_verified: 0 },
+      { id: 2, field_name: "mrp", field_value: "35 Rupees (Missing mandatory taxes clause)", confidence: 0.85, evidence_text: "Price: 35 Rupees", source_view: "back", is_verified: 0 },
+      { id: 3, field_name: "net_quantity", field_value: "7.05 oz (Non-metric imperial primary unit)", confidence: 0.88, evidence_text: "Net Wt 7.05 oz", source_view: "back", is_verified: 0 },
+      { id: 4, field_name: "manufacturer_name_address", field_value: "Mumbai India (Incomplete, missing street and 6-digit PIN)", confidence: 0.70, evidence_text: "Packed at Mumbai India", source_view: "back", is_verified: 0 }
+    ];
     return {
       product_name: "Crunchy Bites Spiced Potato Wafers",
       raw_ocr_text: "Crunchy Bites Wafers Net Wt 7.05 oz (200g) Price: 35 Rupees Packed at Mumbai India",
-      fields: [
-        { id: 1, field_name: "product_name", field_value: "Crunchy Bites Spiced Potato Wafers", confidence: 0.91, evidence_text: "Crunchy Bites Wafers", source_view: "front", is_verified: 0 },
-        { id: 2, field_name: "mrp", field_value: "35 Rupees (Missing mandatory taxes clause)", confidence: 0.85, evidence_text: "Price: 35 Rupees", source_view: "back", is_verified: 0 },
-        { id: 3, field_name: "net_quantity", field_value: "7.05 oz (Non-metric imperial primary unit)", confidence: 0.88, evidence_text: "Net Wt 7.05 oz", source_view: "back", is_verified: 0 },
-        { id: 4, field_name: "manufacturer_name_address", field_value: "Mumbai India (Incomplete, missing street and 6-digit PIN)", confidence: 0.70, evidence_text: "Packed at Mumbai India", source_view: "back", is_verified: 0 }
-      ]
+      fields: rawFields.filter(f => !unavail.has(f.source_view))
     };
   }
 
   // 2. Blurry preset
   if (filenames.includes("blurry")) {
+    const rawFields = [
+      { id: 1, field_name: "product_name", field_value: "Wheat Crisps (Partially Obscured)", confidence: 0.42, evidence_text: "Crisps...", source_view: "front", is_verified: 0 }
+    ];
     return {
       product_name: "Wheat Crisps (Partially Obscured)",
       raw_ocr_text: "Packaging text partially unreadable due to lighting glare and motion blur.",
-      fields: [
-        { id: 1, field_name: "product_name", field_value: "Wheat Crisps (Uncertain)", confidence: 0.42, evidence_text: "Crisps...", source_view: "front", is_verified: 0 }
-      ]
+      fields: rawFields.filter(f => !unavail.has(f.source_view))
     };
   }
 
@@ -252,12 +259,12 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
     "Royal Butter Delights Biscuits"
   );
 
-  let fields = [
+  let rawFields = [
     { id: 1, field_name: "product_name", field_value: displayName, confidence: 0.98, evidence_text: displayName, source_view: "front", is_verified: 1 }
   ];
 
   if (category === "dairy") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "285.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 285.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "500 ml", confidence: 0.97, evidence_text: "Net Qty: 500 ml (452g)", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.95, evidence_text: "Pkd: 02/2026", source_view: "back", is_verified: 1 },
@@ -268,7 +275,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 9, field_name: "fssai_license", field_value: "10012021000071", confidence: 0.96, evidence_text: "FSSAI Lic No. 10012021000071", source_view: "back", is_verified: 1 }
     );
   } else if (category === "edible_oils") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "165.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 165.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "1 L", confidence: 0.98, evidence_text: "Net Qty: 1 L (910 g)", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.94, evidence_text: "Pkd: 01/2026", source_view: "back", is_verified: 1 },
@@ -279,7 +286,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 9, field_name: "fssai_license", field_value: "10013021000853", confidence: 0.96, evidence_text: "Lic No. 10013021000853", source_view: "back", is_verified: 1 }
     );
   } else if (category === "flour_grains") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "245.00 INR (incl. of all taxes)", confidence: 0.97, evidence_text: "MRP Rs. 245.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "5 kg", confidence: 0.98, evidence_text: "Net Qty: 5 kg", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.94, evidence_text: "Pkd: 02/2026", source_view: "back", is_verified: 1 },
@@ -290,7 +297,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 9, field_name: "fssai_license", field_value: "10012031000312", confidence: 0.97, evidence_text: "FSSAI Lic. 10012031000312", source_view: "back", is_verified: 1 }
     );
   } else if (category === "spices_sugar") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "28.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 28.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "1 kg", confidence: 0.99, evidence_text: "Net Qty: 1 kg", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.95, evidence_text: "Pkd: 01/2026", source_view: "back", is_verified: 1 },
@@ -301,7 +308,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 9, field_name: "fssai_license", field_value: "10014031001025", confidence: 0.97, evidence_text: "FSSAI Lic No. 10014031001025", source_view: "back", is_verified: 1 }
     );
   } else if (category === "cosmetics") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "175.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 175.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "150 ml", confidence: 0.97, evidence_text: "Net Vol: 150 ml", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.94, evidence_text: "Mfg Date: 01/2026 (Use before: 36 months)", source_view: "back", is_verified: 1 },
@@ -309,10 +316,10 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 6, field_name: "consumer_care", field_value: "1800-208-1930 | contactus@himalayawellness.com", confidence: 0.93, evidence_text: "Toll Free: 1800-208-1930", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
       { id: 8, field_name: "unit_sale_price", field_value: "1.17 INR / ml", confidence: 0.92, evidence_text: "USP: Rs. 1.17/ml", source_view: "back", is_verified: 1 },
-      { id: 9, field_name: "batch_mfg_lic", field_value: "Batch #26N042 | Lic: M-KTK/28/257", confidence: 0.94, evidence_text: "B# 26N042 M-KTK/28/257", source_view: "back", is_verified: 1 }
+      { id: 9, field_name: "batch_mfg_lic", field_value: "Batch #26N042 | Lic: M-KTK/28/257", confidence: 0.94, evidence_text: "B# 26N042 M-KTK/28/257", source_view: "side", is_verified: 1 }
     );
   } else if (category === "cleaning_detergents") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "299.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 299.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "1 kg", confidence: 0.98, evidence_text: "Net Qty: 1 kg", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.94, evidence_text: "Pkd: 02/2026", source_view: "back", is_verified: 1 },
@@ -320,10 +327,10 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 6, field_name: "consumer_care", field_value: "1800-10-22-221 | lever.care@unilever.com", confidence: 0.93, evidence_text: "Query Helpline: 1800-10-22-221", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
       { id: 8, field_name: "unit_sale_price", field_value: "0.30 INR / g", confidence: 0.92, evidence_text: "USP: Rs. 0.30/g", source_view: "back", is_verified: 1 },
-      { id: 9, field_name: "caution_warning", field_value: "Keep away from children. In case of eye contact, rinse immediately.", confidence: 0.95, evidence_text: "Keep out of reach of children", source_view: "back", is_verified: 1 }
+      { id: 9, field_name: "caution_warning", field_value: "Keep away from children. In case of eye contact, rinse immediately.", confidence: 0.95, evidence_text: "Keep out of reach of children", source_view: "side", is_verified: 1 }
     );
   } else if (category === "electronics") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "899.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 899.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "1 Unit", confidence: 0.99, evidence_text: "Net Qty: 1 Unit (1 N)", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.94, evidence_text: "Month & Year of Import/Mfg: 01/2026", source_view: "back", is_verified: 1 },
@@ -331,20 +338,20 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 6, field_name: "consumer_care", field_value: "1800-102-8787 | support@syska.co.in", confidence: 0.93, evidence_text: "Helpline: 1800-102-8787", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
       { id: 8, field_name: "unit_sale_price", field_value: "899.00 INR / Unit", confidence: 0.92, evidence_text: "USP: Rs. 899.00/Unit", source_view: "back", is_verified: 1 },
-      { id: 9, field_name: "electrical_spec", field_value: "Rated Voltage: 100-240V ~ 50Hz, Output: 20W PD", confidence: 0.94, evidence_text: "20W PD 100-240V", source_view: "back", is_verified: 1 }
+      { id: 9, field_name: "electrical_spec", field_value: "Rated Voltage: 100-240V ~ 50Hz, Output: 20W PD", confidence: 0.94, evidence_text: "20W PD 100-240V", source_view: "side", is_verified: 1 }
     );
   } else if (category === "apparel_textiles") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "799.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 799.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "1 N (1 Piece)", confidence: 0.99, evidence_text: "Net Qty: 1 N", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.94, evidence_text: "Packed: 02/2026", source_view: "back", is_verified: 1 },
       { id: 5, field_name: "manufacturer_name_address", field_value: "Page Industries Ltd., Umiya Business Bay, Outer Ring Road, Bengaluru - 560103, Karnataka", confidence: 0.95, evidence_text: "Mfd by: Page Industries, Bengaluru 560103", source_view: "back", is_verified: 1 },
       { id: 6, field_name: "consumer_care", field_value: "1800-572-1299 | care@jockeyindia.com", confidence: 0.93, evidence_text: "Customer Care: 1800-572-1299", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
-      { id: 8, field_name: "size_fabric_declaration", field_value: "Size: L (Chest 100 cm) | 100% Combed Cotton", confidence: 0.95, evidence_text: "Size L (100cm) 100% Cotton", source_view: "back", is_verified: 1 }
+      { id: 8, field_name: "size_fabric_declaration", field_value: "Size: L (Chest 100 cm) | 100% Combed Cotton", confidence: 0.95, evidence_text: "Size L (100cm) 100% Cotton", source_view: "side", is_verified: 1 }
     );
   } else if (category === "pharma_otc") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "395.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 395.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "950 g", confidence: 0.98, evidence_text: "Net Qty: 950 g", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.94, evidence_text: "Mfg Date: 01/2026 (Exp: 24 months)", source_view: "back", is_verified: 1 },
@@ -352,10 +359,10 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 6, field_name: "consumer_care", field_value: "1800-103-1644 | daburcares@dabur.com", confidence: 0.93, evidence_text: "Toll Free: 1800-103-1644", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
       { id: 8, field_name: "unit_sale_price", field_value: "0.42 INR / g", confidence: 0.92, evidence_text: "USP: Rs. 0.42/g", source_view: "back", is_verified: 1 },
-      { id: 9, field_name: "batch_ayush_lic", field_value: "Batch #DC-26019 | Lic No. AL-104-M", confidence: 0.95, evidence_text: "B# DC-26019 Lic AL-104-M", source_view: "back", is_verified: 1 }
+      { id: 9, field_name: "batch_ayush_lic", field_value: "Batch #DC-26019 | Lic No. AL-104-M", confidence: 0.95, evidence_text: "B# DC-26019 Lic AL-104-M", source_view: "side", is_verified: 1 }
     );
   } else if (category === "baby_care") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "649.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 649.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "42 N (42 Pants)", confidence: 0.98, evidence_text: "Net Qty: 42 N Pants", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.94, evidence_text: "Pkd: 01/2026", source_view: "back", is_verified: 1 },
@@ -365,7 +372,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 8, field_name: "unit_sale_price", field_value: "15.45 INR / Piece", confidence: 0.92, evidence_text: "USP: Rs. 15.45/N", source_view: "back", is_verified: 1 }
     );
   } else if (category === "beverages") {
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "45.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 45.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "750 ml", confidence: 0.98, evidence_text: "Net Vol: 750 ml", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.94, evidence_text: "Pkd: 02/2026", source_view: "back", is_verified: 1 },
@@ -378,7 +385,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
   } else {
     // Packaged food, general goods, others
     const customLabel = customCategory ? ` (${customCategory})` : "";
-    fields.push(
+    rawFields.push(
       { id: 2, field_name: "mrp", field_value: "50.00 INR (incl. of all taxes)", confidence: 0.96, evidence_text: "MRP Rs. 50.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
       { id: 3, field_name: "net_quantity", field_value: "200 g", confidence: 0.98, evidence_text: "Net Qty: 200 g", source_view: "back", is_verified: 1 },
       { id: 4, field_name: "manufacturing_date", field_value: "02/2026", confidence: 0.94, evidence_text: "Pkd: 02/2026", source_view: "back", is_verified: 1 },
@@ -388,155 +395,368 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 8, field_name: "unit_sale_price", field_value: "0.25 INR / g", confidence: 0.92, evidence_text: "USP: Rs. 0.25/g", source_view: "back", is_verified: 1 }
     );
     if (category === "packaged_food") {
-      fields.push({ id: 9, field_name: "fssai_license", field_value: "10015043001129", confidence: 0.97, evidence_text: "Lic No. 10015043001129", source_view: "back", is_verified: 1 });
+      rawFields.push({ id: 9, field_name: "fssai_license", field_value: "10015043001129", confidence: 0.97, evidence_text: "Lic No. 10015043001129", source_view: "back", is_verified: 1 });
     }
   }
 
+  // Filter out declarations belonging to unavailable panels
+  const filteredFields = rawFields.filter(f => !unavail.has(f.source_view));
+
   return {
     product_name: displayName,
-    raw_ocr_text: `Packaging declarations for ${displayName} extracted under Indian Legal Metrology Rules, 2011.`,
-    fields: fields
+    raw_ocr_text: `Packaging declarations for ${displayName} extracted under Indian Legal Metrology Rules, 2011. Evidence panels analyzed: ${images.length} uploaded, ${unavailablePanels.length} marked unavailable.`,
+    fields: filteredFields
   };
 }
 
-// Helper: Evaluate declarations against Legal Metrology Rules
-function evaluateDeclarations(scanId, productName, category, fields, rawText) {
+// Helper: Evaluate declarations against Legal Metrology Rules with panel-awareness
+function evaluateDeclarations(scanId, productName, category, fields, rawText, unavailablePanels = []) {
   const getField = (name) => fields.find(f => f.field_name.toLowerCase() === name.toLowerCase());
+  const unavail = new Set((unavailablePanels || []).map(p => p.toLowerCase()));
 
   const results = [];
   let passCount = 0;
   let failCount = 0;
   let unclearCount = 0;
+  let notDeterminedCount = 0;
 
   legalRules.filter(r => r.active_status === 1).forEach(rule => {
-    let status = "UNCLEAR";
+    let presenceStatus = "MISSING";
+    let complianceStatus = "NON_COMPLIANT";
+    let status = "FAIL";
     let evidence = "Not detected in uploaded packaging text";
-    let explanation = "Declaration was not detected or confidence was below acceptable threshold.";
-    let recommendation = "";
+    let extractedInfo = "None";
+    let sourcePanel = "back";
+    let explanation = "Declaration was not detected on available packaging photographs.";
+    let recommendation = `Ensure mandatory declaration strictly conforms to ${rule.legal_reference}.`;
 
     if (rule.rule_id === "LMR-RULE-6-1-A") {
-      const f = getField("manufacturer_name_address") || getField("manufacturer");
-      if (f && f.field_value && f.field_value.length > 5) {
-        evidence = f.field_value;
-        const hasPin = /\b\d{6}\b/.test(f.field_value);
-        if (hasPin) {
-          status = "PASS";
-          explanation = "Complete manufacturer/packer name and address with postal PIN code verified.";
-        } else {
-          status = "FAIL";
-          explanation = "Manufacturer name or address is incomplete (mandatory postal PIN code not identified).";
-        }
+      sourcePanel = "back";
+      if (unavail.has("back") && !getField("manufacturer_name_address") && !getField("manufacturer")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Back Panel photograph was marked Not Available";
+        extractedInfo = "Not Provided (Back Panel Unavailable)";
+        explanation = "Verification pending: Back Panel photograph was not provided by user.";
+        recommendation = "Upload Back Panel photograph displaying full manufacturer/packer address and 6-digit PIN code.";
       } else {
-        status = "UNCLEAR";
-        explanation = "Manufacturer / packer declaration was not legible or detected.";
+        const f = getField("manufacturer_name_address") || getField("manufacturer");
+        if (f && f.field_value && f.field_value.length > 5) {
+          sourcePanel = f.source_view || "back";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          if (f.confidence < 0.65 || f.field_value.includes("Uncertain") || f.field_value.includes("Partially")) {
+            presenceStatus = "UNREADABLE";
+            complianceStatus = "NEEDS_HUMAN_REVIEW";
+            status = "UNCLEAR";
+            explanation = "Manufacturer / packer declaration is blurred or partially obscured by glare.";
+            recommendation = "Inspect physical packaging sample manually or upload a clearer, glare-free photograph.";
+          } else {
+            const hasPin = /\b\d{6}\b/.test(f.field_value);
+            if (hasPin) {
+              presenceStatus = "PRESENT";
+              complianceStatus = "COMPLIANT";
+              status = "PASS";
+              explanation = "Complete manufacturer/packer name and address with postal PIN code verified.";
+              recommendation = "Declaration satisfies statutory requirements under Rule 6(1)(a).";
+            } else {
+              presenceStatus = "PRESENT";
+              complianceStatus = "NON_COMPLIANT";
+              status = "FAIL";
+              explanation = "Manufacturer name or address is incomplete (mandatory 6-digit postal PIN code not identified).";
+              recommendation = "Affix complete postal address including premise, city, state, and 6-digit PIN code.";
+            }
+          }
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Mandatory manufacturer / packer declaration not detected on packaging.";
+          recommendation = "Print full name and address of manufacturer, packer, or importer prominently.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-B") {
-      const f = getField("product_name");
-      if (f && f.field_value && f.field_value.length > 2) {
-        status = "PASS";
-        evidence = f.field_value;
-        explanation = "Generic or common trade name is prominently declared.";
+      sourcePanel = "front";
+      if (unavail.has("front") && !getField("product_name")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Front Panel (PDP) photograph was marked Not Available";
+        extractedInfo = "Not Provided (Front Panel Unavailable)";
+        explanation = "Verification pending: Front Principal Display Panel was not provided by user.";
+        recommendation = "Upload Front Panel photograph clearly displaying common or generic trade name.";
       } else {
-        status = "UNCLEAR";
-        explanation = "Generic or trade name not clearly recognized.";
+        const f = getField("product_name");
+        if (f && f.field_value && f.field_value.length > 2) {
+          sourcePanel = f.source_view || "front";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          if (f.confidence < 0.65 || f.field_value.includes("Uncertain") || f.field_value.includes("Partially")) {
+            presenceStatus = "UNREADABLE";
+            complianceStatus = "NEEDS_HUMAN_REVIEW";
+            status = "UNCLEAR";
+            explanation = "Product trade name is partially obscured or low confidence.";
+            recommendation = "Inspect packaging sample or upload a high-resolution photo of PDP.";
+          } else {
+            presenceStatus = "PRESENT";
+            complianceStatus = "COMPLIANT";
+            status = "PASS";
+            explanation = "Generic or common trade name is prominently declared on Principal Display Panel.";
+            recommendation = "Declaration satisfies Rule 6(1)(b).";
+          }
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Generic or common name of commodity not identified.";
+          recommendation = "Clearly state generic or common trade name on the Principal Display Panel.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-C") {
+      sourcePanel = "front";
       const f = getField("net_quantity");
       if (f && f.field_value) {
-        evidence = f.field_value;
-        const val = f.field_value.toLowerCase();
-        const hasMetric = /\b(g|kg|ml|l|ltr|meter|m|count|piece|units|pieces|n)\b/i.test(val);
-        const hasImperial = /\b(lbs|lb|oz|fluid\s*oz|ft|inch)\b/i.test(val);
-        if (hasMetric && !hasImperial) {
-          status = "PASS";
-          explanation = "Net quantity declared in lawful SI metric units conforming to Rule 12.";
-        } else if (hasImperial) {
-          status = "FAIL";
-          explanation = "Non-metric imperial units (lbs, oz) detected as primary declaration; prohibited under Rule 12 & 13.";
-        } else {
+        sourcePanel = f.source_view || "back";
+        extractedInfo = f.field_value;
+        evidence = f.evidence_text || f.field_value;
+        if (f.confidence < 0.65 || f.field_value.includes("Uncertain") || f.field_value.includes("Unreadable")) {
+          presenceStatus = "UNREADABLE";
+          complianceStatus = "NEEDS_HUMAN_REVIEW";
           status = "UNCLEAR";
-          explanation = "Net quantity units uncertain or non-standard.";
+          explanation = "Net quantity unit or numeral is partially blurred or smudged.";
+          recommendation = "Check packaging physical sample to confirm metric declaration.";
+        } else {
+          const val = f.field_value.toLowerCase();
+          const hasMetric = /\b(g|kg|ml|l|ltr|meter|m|count|piece|units|pieces|n)\b/i.test(val);
+          const hasImperial = /\b(lbs|lb|oz|fluid\s*oz|ft|inch)\b/i.test(val);
+          if (hasMetric && !hasImperial) {
+            presenceStatus = "PRESENT";
+            complianceStatus = "COMPLIANT";
+            status = "PASS";
+            explanation = "Net quantity declared in lawful SI metric units conforming to Rule 12 & 13.";
+            recommendation = "Declaration satisfies statutory requirements under Rule 6(1)(c).";
+          } else if (hasImperial) {
+            presenceStatus = "PRESENT";
+            complianceStatus = "NON_COMPLIANT";
+            status = "FAIL";
+            explanation = "Non-metric imperial units (lbs, oz) detected as primary declaration; prohibited under Rule 12.";
+            recommendation = "Repackage declaring net quantity strictly in SI metric units (g, kg, ml, l, count).";
+          } else {
+            presenceStatus = "UNREADABLE";
+            complianceStatus = "NEEDS_HUMAN_REVIEW";
+            status = "UNCLEAR";
+            explanation = "Net quantity unit is ambiguous or non-standard.";
+            recommendation = "Verify net quantity markings against First Schedule standards.";
+          }
         }
       } else {
-        status = "UNCLEAR";
-        explanation = "Net quantity declaration not found on package.";
+        if (unavail.has("front") || unavail.has("back")) {
+          presenceStatus = "NOT_DETERMINED";
+          complianceStatus = "NOT_DETERMINED";
+          status = "NOT_DETERMINED";
+          evidence = "Pending photograph of remaining panel(s)";
+          extractedInfo = "Not Provided (Additional Panel Needed)";
+          explanation = "Net quantity declaration was not identified on available panel; pending inspection of unavailable packaging panel.";
+          recommendation = "Upload Front and Back packaging panels to verify statutory net quantity declaration.";
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Net quantity declaration not found on package.";
+          recommendation = "Declare net weight, measure, or number in standard metric units.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-D") {
-      const f = getField("manufacturing_date") || getField("packing_date");
-      if (f && f.field_value) {
-        evidence = f.field_value;
-        const dateMatch = /\b(0[1-9]|1[0-2])[\/\-\.](20\d\d|\d\d)\b/.test(f.field_value) ||
-                          /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\.\,\-]+(20\d\d|\d\d)\b/i.test(f.field_value);
-        if (dateMatch) {
-          status = "PASS";
-          explanation = "Month and Year of packing declared in compliant format.";
-        } else {
-          status = "UNCLEAR";
-          explanation = "Date format appears ambiguous or incomplete.";
-        }
+      sourcePanel = "back";
+      if (unavail.has("back") && !getField("manufacturing_date") && !getField("packing_date")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Back Panel photograph was marked Not Available";
+        extractedInfo = "Not Provided (Back Panel Unavailable)";
+        explanation = "Verification pending: Manufacturing/packing date is typically on the back panel or flap.";
+        recommendation = "Provide a photograph of the panel bearing the packing date.";
       } else {
-        status = "UNCLEAR";
-        explanation = "Manufacturing or packing date declaration not detected.";
+        const f = getField("manufacturing_date") || getField("packing_date");
+        if (f && f.field_value) {
+          sourcePanel = f.source_view || "back";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          if (f.confidence < 0.65 || f.field_value.includes("Uncertain")) {
+            presenceStatus = "UNREADABLE";
+            complianceStatus = "NEEDS_HUMAN_REVIEW";
+            status = "UNCLEAR";
+            explanation = "Date digits are smudged or partially obscured.";
+            recommendation = "Inspect date coding stamp physically.";
+          } else {
+            presenceStatus = "PRESENT";
+            complianceStatus = "COMPLIANT";
+            status = "PASS";
+            explanation = "Month and Year of manufacture or pre-packing declared in compliant format.";
+            recommendation = "Declaration satisfies Rule 6(1)(d).";
+          }
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Month and Year of manufacture / packing not detected on packaging.";
+          recommendation = "Print Month and Year of manufacture or packing clearly in MM/YYYY format.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-E") {
-      const f = getField("mrp");
-      if (f && f.field_value) {
-        evidence = f.field_value;
-        const val = f.field_value.toLowerCase();
-        const hasNum = /\d+(\.\d+)?/.test(val);
-        const hasTax = val.includes("tax") || val.includes("incl");
-        if (hasNum && hasTax) {
-          status = "PASS";
-          explanation = "Maximum Retail Price declared with mandatory 'inclusive of all taxes' clause.";
-        } else if (hasNum && !hasTax) {
-          status = "FAIL";
-          explanation = "MRP numeric value detected, but missing mandatory statutory phrase 'inclusive of all taxes'.";
-        } else {
-          status = "UNCLEAR";
-          explanation = "MRP value not legible.";
-        }
+      sourcePanel = "back";
+      if (unavail.has("back") && !getField("mrp")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Back Panel photograph was marked Not Available";
+        extractedInfo = "Not Provided (Back Panel Unavailable)";
+        explanation = "Verification pending: MRP declaration requires Back Panel evidence.";
+        recommendation = "Upload Back Panel photograph displaying the MRP flap.";
       } else {
-        status = "UNCLEAR";
-        explanation = "MRP declaration not found on packaging.";
+        const f = getField("mrp");
+        if (f && f.field_value) {
+          sourcePanel = f.source_view || "back";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          if (f.confidence < 0.65 || f.field_value.includes("Uncertain")) {
+            presenceStatus = "UNREADABLE";
+            complianceStatus = "NEEDS_HUMAN_REVIEW";
+            status = "UNCLEAR";
+            explanation = "Price digits or tax wording is partially unreadable.";
+            recommendation = "Inspect printed MRP flap manually.";
+          } else {
+            const val = f.field_value.toLowerCase();
+            const hasNum = /\d+(\.\d+)?/.test(val);
+            const hasTax = val.includes("tax") || val.includes("incl");
+            if (hasNum && hasTax) {
+              presenceStatus = "PRESENT";
+              complianceStatus = "COMPLIANT";
+              status = "PASS";
+              explanation = "Maximum Retail Price declared with mandatory 'inclusive of all taxes' clause.";
+              recommendation = "Satisfies Rule 6(1)(da).";
+            } else if (hasNum && !hasTax) {
+              presenceStatus = "PRESENT";
+              complianceStatus = "NON_COMPLIANT";
+              status = "FAIL";
+              explanation = "MRP numeric value detected, but missing mandatory statutory phrase 'inclusive of all taxes'.";
+              recommendation = "Declare Maximum Retail Price in Indian Rupees with explicit phrase 'inclusive of all taxes'.";
+            } else {
+              presenceStatus = "UNREADABLE";
+              complianceStatus = "NEEDS_HUMAN_REVIEW";
+              status = "UNCLEAR";
+              explanation = "Price numeral is ambiguous or incomplete.";
+              recommendation = "Verify MRP digits physically on package.";
+            }
+          }
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Maximum Retail Price declaration not found on package.";
+          recommendation = "Print MRP in Indian Rupees inclusive of all taxes.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-N") {
-      const f = getField("consumer_care");
-      if (f && f.field_value && f.field_value.length > 5) {
-        evidence = f.field_value;
-        const hasPhone = /\b\d{3,5}[\s\-]?\d{3,7}\b/.test(f.field_value) || /1800\b/.test(f.field_value);
-        const hasEmail = /@/.test(f.field_value);
-        if (hasPhone || hasEmail) {
-          status = "PASS";
-          explanation = "Consumer grievance redressal contact (helpline / email) verified.";
-        } else {
-          status = "FAIL";
-          explanation = "Consumer care declaration incomplete (neither phone number nor email detected).";
-        }
+      sourcePanel = "back";
+      if (unavail.has("back") && !getField("consumer_care")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Back Panel photograph was marked Not Available";
+        extractedInfo = "Not Provided (Back Panel Unavailable)";
+        explanation = "Verification pending: Consumer grievance contact is typically on back panel.";
+        recommendation = "Upload Back Panel photograph displaying consumer care details.";
       } else {
-        status = "FAIL";
-        explanation = "Mandatory consumer care helpline details not detected on packaging.";
+        const f = getField("consumer_care");
+        if (f && f.field_value && f.field_value.length > 5) {
+          sourcePanel = f.source_view || "back";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          const hasPhone = /\b\d{3,5}[\s\-]?\d{3,7}\b/.test(f.field_value) || /1800\b/.test(f.field_value);
+          const hasEmail = /@/.test(f.field_value);
+          if (hasPhone || hasEmail) {
+            presenceStatus = "PRESENT";
+            complianceStatus = "COMPLIANT";
+            status = "PASS";
+            explanation = "Consumer grievance redressal contact (helpline / email) verified.";
+            recommendation = "Satisfies Rule 6(1)(n).";
+          } else {
+            presenceStatus = "PRESENT";
+            complianceStatus = "NON_COMPLIANT";
+            status = "FAIL";
+            explanation = "Consumer care declaration incomplete (neither valid phone number nor email detected).";
+            recommendation = "Provide dedicated consumer care helpline number and email address.";
+          }
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Mandatory consumer care helpline details not detected on packaging.";
+          recommendation = "Provide a dedicated consumer care helpline phone number and email address.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-10") {
+      sourcePanel = "back";
       const f = getField("country_of_origin");
       if (f && f.field_value && f.field_value.length > 2) {
+        sourcePanel = f.source_view || "back";
+        extractedInfo = f.field_value;
+        evidence = f.evidence_text || f.field_value;
+        presenceStatus = "PRESENT";
+        complianceStatus = "COMPLIANT";
         status = "PASS";
-        evidence = f.field_value;
         explanation = "Country of origin clearly stated on retail packaging.";
+        recommendation = "Satisfies Rule 6(10) / Notification G.S.R. 529(E).";
       } else {
-        status = "UNCLEAR";
-        explanation = "Country of origin declaration not detected.";
+        if (unavail.has("back") || unavail.has("front")) {
+          presenceStatus = "NOT_DETERMINED";
+          complianceStatus = "NOT_DETERMINED";
+          status = "NOT_DETERMINED";
+          evidence = "Back Panel photograph was marked Not Available";
+          extractedInfo = "Not Provided (Back Panel Unavailable)";
+          explanation = "Verification pending: Country of origin is customarily declared on the back panel alongside manufacturer details.";
+          recommendation = "Provide Back Panel photograph displaying Country of Origin.";
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Country of origin declaration not detected on packaging label.";
+          recommendation = "Declare Country of Origin or Country of Manufacture prominently on package.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-USP") {
-      const f = getField("unit_sale_price");
-      if (f && f.field_value && f.field_value.length > 2) {
-        status = "PASS";
-        evidence = f.field_value;
-        explanation = "Unit Sale Price declared as required by 2022 amendment.";
+      sourcePanel = "back";
+      if (unavail.has("back") && !getField("unit_sale_price")) {
+        presenceStatus = "NOT_DETERMINED";
+        complianceStatus = "NOT_DETERMINED";
+        status = "NOT_DETERMINED";
+        evidence = "Back Panel photograph was marked Not Available";
+        extractedInfo = "Not Provided (Back Panel Unavailable)";
+        explanation = "Verification pending: Unit Sale Price is typically printed adjacent to MRP on back panel.";
+        recommendation = "Upload Back Panel photograph displaying Unit Sale Price.";
       } else {
-        status = "UNCLEAR";
-        explanation = "Unit Sale Price declaration not found adjacent to MRP.";
+        const f = getField("unit_sale_price");
+        if (f && f.field_value && f.field_value.length > 2) {
+          sourcePanel = f.source_view || "back";
+          extractedInfo = f.field_value;
+          evidence = f.evidence_text || f.field_value;
+          presenceStatus = "PRESENT";
+          complianceStatus = "COMPLIANT";
+          status = "PASS";
+          explanation = "Unit Sale Price declared as required by 2022 amendment.";
+          recommendation = "Satisfies G.S.R. 779(E) amendment.";
+        } else {
+          presenceStatus = "MISSING";
+          complianceStatus = "NON_COMPLIANT";
+          status = "FAIL";
+          explanation = "Unit Sale Price declaration not found adjacent to MRP.";
+          recommendation = "Declare Unit Sale Price (per g/kg or ml/L) alongside MRP.";
+        }
       }
     } else if (rule.rule_id === "LMR-RULE-FOOD-SAFETY") {
+      sourcePanel = "back";
       const isFood = (
         category === "packaged_food" ||
         category === "beverages" ||
@@ -546,56 +766,82 @@ function evaluateDeclarations(scanId, productName, category, fields, rawText) {
         category === "spices_sugar"
       );
       if (isFood) {
-        const f = getField("fssai_license") || getField("best_before");
-        if (f && f.field_value) {
-          status = "PASS";
-          evidence = f.field_value;
-          explanation = "Food safety declaration / FSSAI license identified.";
+        if (unavail.has("back") && !getField("fssai_license") && !getField("best_before")) {
+          presenceStatus = "NOT_DETERMINED";
+          complianceStatus = "NOT_DETERMINED";
+          status = "NOT_DETERMINED";
+          evidence = "Back Panel photograph was marked Not Available";
+          extractedInfo = "Not Provided (Back Panel Unavailable)";
+          explanation = "Verification pending: FSSAI License & Best Before date are typically on back/side flap.";
+          recommendation = "Upload photograph displaying FSSAI 14-digit license number and Best Before date.";
         } else {
-          status = "UNCLEAR";
-          explanation = "FSSAI license or Best Before not clearly recognized.";
+          const f = getField("fssai_license") || getField("best_before");
+          if (f && f.field_value) {
+            sourcePanel = f.source_view || "back";
+            extractedInfo = f.field_value;
+            evidence = f.evidence_text || f.field_value;
+            presenceStatus = "PRESENT";
+            complianceStatus = "COMPLIANT";
+            status = "PASS";
+            explanation = "Food safety declaration / FSSAI license identified.";
+            recommendation = "Satisfies Food Safety regulations read with Rule 6(1)(d).";
+          } else {
+            presenceStatus = "MISSING";
+            complianceStatus = "NON_COMPLIANT";
+            status = "FAIL";
+            explanation = "FSSAI license number or Best Before date not detected on food packaging.";
+            recommendation = "Display 14-digit FSSAI License Number and Best Before date clearly.";
+          }
         }
       } else {
+        presenceStatus = "NOT_APPLICABLE";
+        complianceStatus = "NOT_APPLICABLE";
         status = "NOT_APPLICABLE";
+        extractedInfo = "Exempt (Non-Food Commodity)";
         evidence = `Non-food commodity category (${category.replace(/_/g, ' ')})`;
         explanation = "FSSAI license compliance only applies to edible food and beverage packages.";
+        recommendation = "Statutory requirement exempt for non-food products under Legal Metrology.";
       }
     }
 
-    if (status === "PASS") {
-      passCount++;
-      recommendation = "Declaration satisfies statutory requirements under PCR 2011.";
-    } else if (status === "FAIL") {
-      failCount++;
-      recommendation = `Ensure mandatory declaration strictly conforms to ${rule.legal_reference}.`;
-    } else if (status === "UNCLEAR") {
-      unclearCount++;
-      recommendation = "Declaration text was partially obscured. Upload a clearer photograph or submit for human inspector review.";
-    }
+    if (complianceStatus === "COMPLIANT") passCount++;
+    else if (complianceStatus === "NON_COMPLIANT") failCount++;
+    else if (complianceStatus === "NEEDS_HUMAN_REVIEW") unclearCount++;
+    else if (complianceStatus === "NOT_DETERMINED") notDeterminedCount++;
 
     results.push({
       rule_id: rule.rule_id,
       rule_name: rule.rule_name,
       legal_reference: rule.legal_reference,
+      presence_status: presenceStatus,
+      compliance_status: complianceStatus,
       status: status,
       result: status,
+      extracted_information: extractedInfo,
       evidence: evidence,
+      source_panel: sourcePanel,
       explanation: explanation,
       recommendation: recommendation,
+      original_ai_status: status,
       reviewer_status: "UNREVIEWED"
     });
   });
 
-  const applicableRules = results.filter(r => r.status !== "NOT_APPLICABLE");
-  const complianceScore = applicableRules.length > 0 
-    ? Math.round((passCount / applicableRules.length) * 1000) / 10 
+  const evaluatedRules = results.filter(r => r.presence_status !== "NOT_APPLICABLE" && r.presence_status !== "NOT_DETERMINED");
+  const compliantCount = evaluatedRules.filter(r => r.compliance_status === "COMPLIANT").length;
+  const complianceScore = evaluatedRules.length > 0
+    ? Math.round((compliantCount / evaluatedRules.length) * 1000) / 10
     : 0.0;
 
   let overallStatus = "PASS";
   if (failCount > 0) {
     overallStatus = "FAIL";
-  } else if (unclearCount > 2 || (passCount < 3 && failCount === 0)) {
+  } else if (unclearCount > 0) {
     overallStatus = "REVIEW_REQUIRED";
+  } else if (notDeterminedCount > 0) {
+    overallStatus = "PARTIALLY_EVALUATED";
+  } else {
+    overallStatus = "PASS";
   }
 
   return { results, overallStatus, complianceScore };
@@ -628,9 +874,11 @@ function generatePdfReportBuffer(scan) {
   const status = scan.overall_status || "REVIEW_REQUIRED";
   if (status === "PASS") stream += `0.1 0.6 0.3 rg\n`;
   else if (status === "FAIL") stream += `0.8 0.15 0.15 rg\n`;
+  else if (status === "PARTIALLY_EVALUATED") stream += `0.2 0.45 0.8 rg\n`;
   else stream += `0.8 0.5 0.1 rg\n`;
-  stream += `440 760 115 28 re f\n`;
-  stream += `BT /F1 12 Tf 1 1 1 rg 455 770 Td (${status}) Tj ET\n`;
+  stream += `430 760 125 28 re f\n`;
+  const statusLabel = status === "PARTIALLY_EVALUATED" ? "PARTIAL" : (status === "REVIEW_REQUIRED" ? "NEEDS REVIEW" : status);
+  stream += `BT /F1 11 Tf 1 1 1 rg 445 770 Td (${statusLabel}) Tj ET\n`;
 
   // Metadata Box
   stream += `0.95 0.96 0.98 rg 40 640 515 80 re f\n`;
@@ -659,9 +907,12 @@ function generatePdfReportBuffer(scan) {
     // Status Pill
     if (r.status === "PASS") stream += `0.1 0.6 0.3 rg\n`;
     else if (r.status === "FAIL") stream += `0.8 0.15 0.15 rg\n`;
+    else if (r.status === "NOT_DETERMINED") stream += `0.5 0.5 0.5 rg\n`;
+    else if (r.status === "NOT_APPLICABLE") stream += `0.4 0.4 0.4 rg\n`;
     else stream += `0.8 0.5 0.1 rg\n`;
     stream += `480 ${y - 2} 65 18 re f\n`;
-    stream += `BT /F1 8 Tf 1 1 1 rg 495 ${y + 3} Td (${r.status}) Tj ET\n`;
+    const pillText = r.status === "NOT_DETERMINED" ? "PENDING" : (r.status === "NOT_APPLICABLE" ? "EXEMPT" : r.status);
+    stream += `BT /F1 8 Tf 1 1 1 rg 488 ${y + 3} Td (${pillText}) Tj ET\n`;
 
     y -= 38;
   });
@@ -679,15 +930,61 @@ function generatePdfReportBuffer(scan) {
   return Buffer.from(body, 'utf-8');
 }
 
+// Persistent Disk-Backed Scans Cache (for Vercel serverless persistence across lambdas)
+function getMergedScans() {
+  let diskScans = [];
+  try {
+    if (fs.existsSync(TMP_FILE)) {
+      diskScans = JSON.parse(fs.readFileSync(TMP_FILE, 'utf8')) || [];
+    }
+  } catch (e) {}
+
+  const merged = [...scanRecords];
+  for (const s of diskScans) {
+    const idx = merged.findIndex(m => m.id === s.id);
+    if (idx >= 0) {
+      merged[idx] = s;
+    } else {
+      merged.unshift(s);
+    }
+  }
+  return merged;
+}
+
+function persistScan(scan) {
+  const existingIdx = scanRecords.findIndex(s => s.id === scan.id);
+  if (existingIdx >= 0) {
+    scanRecords[existingIdx] = scan;
+  } else {
+    scanRecords.unshift(scan);
+  }
+
+  try {
+    let diskScans = [];
+    if (fs.existsSync(TMP_FILE)) {
+      diskScans = JSON.parse(fs.readFileSync(TMP_FILE, 'utf8')) || [];
+    }
+    const idx = diskScans.findIndex(s => s.id === scan.id);
+    if (idx >= 0) {
+      diskScans[idx] = scan;
+    } else {
+      diskScans.unshift(scan);
+    }
+    fs.writeFileSync(TMP_FILE, JSON.stringify(diskScans.slice(0, 100)), 'utf8');
+  } catch (e) {}
+  return scan;
+}
+
 module.exports = {
   legalRules,
   scanRecords,
   evaluateDeclarations,
   extractDeclarationsForCategory,
   generatePdfReportBuffer,
-  getScans: () => scanRecords,
-  addScan: (scan) => { scanRecords.unshift(scan); return scan; },
-  getScanById: (id) => scanRecords.find(s => s.id === id),
+  getScans: () => getMergedScans(),
+  addScan: (scan) => persistScan(scan),
+  updateScan: (scan) => persistScan(scan),
+  getScanById: (id) => getMergedScans().find(s => s.id === id),
   getRules: (cat) => cat ? legalRules.filter(r => r.category === 'all' || r.category === cat) : legalRules,
   addRule: (rule) => { const r = { ...rule, id: legalRules.length + 1 }; legalRules.push(r); return r; },
   toggleRule: (id) => {
@@ -699,10 +996,11 @@ module.exports = {
     return null;
   },
   getStats: () => {
-    const total = scanRecords.length;
-    const pass = scanRecords.filter(s => s.overall_status === 'PASS').length;
-    const fail = scanRecords.filter(s => s.overall_status === 'FAIL').length;
-    const review = scanRecords.filter(s => s.overall_status === 'REVIEW_REQUIRED').length;
+    const all = getMergedScans();
+    const total = all.length;
+    const pass = all.filter(s => s.overall_status === 'PASS').length;
+    const fail = all.filter(s => s.overall_status === 'FAIL').length;
+    const review = all.filter(s => s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'PARTIALLY_EVALUATED').length;
     const completed = pass + fail;
     const rate = total > 0 ? Math.round((pass / total) * 1000) / 10 : 0.0;
     return {
@@ -715,7 +1013,7 @@ module.exports = {
       review_required_count: review,
       pending_reviews: review,
       compliance_rate: rate,
-      recent_scans: scanRecords.slice(0, 10).map(s => ({
+      recent_scans: all.slice(0, 10).map(s => ({
         id: s.id,
         product_name: s.product_name,
         category: s.category,

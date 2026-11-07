@@ -1,7 +1,7 @@
 /**
  * POST /api/reviews/:id
  */
-const { getScanById } = require('./_data');
+const { getScanById, updateScan } = require('./_data');
 
 module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,7 +9,7 @@ module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const id = req.query.id;
+  const id = (req.query && req.query.id) || (req.url ? req.url.split('?')[0].split('/').filter(Boolean).pop() : null);
   if (!id) return res.status(400).json({ error: "Missing scan ID" });
 
   const scan = getScanById(id);
@@ -19,8 +19,12 @@ module.exports = (req, res) => {
   if (body.decision === 'APPROVED') scan.overall_status = 'PASS';
   else if (body.decision === 'REJECTED') scan.overall_status = 'FAIL';
   else if (body.decision === 'NEEDS_CORRECTION') scan.overall_status = 'REVIEW_REQUIRED';
+  else if (body.decision === 'PARTIAL_INSPECTION') scan.overall_status = 'PARTIALLY_EVALUATED';
 
-  if (body.notes) scan.inspector_notes = body.notes;
+  scan.reviewer_name = body.reviewer_name || scan.reviewer_name || 'Legal Metrology Inspector';
+  scan.review_comments = body.comments || body.notes || scan.review_comments || '';
+  scan.is_human_reviewed = true;
+  scan.decision = body.decision;
 
   if (Array.isArray(body.field_overrides)) {
     body.field_overrides.forEach(ov => {
@@ -31,6 +35,20 @@ module.exports = (req, res) => {
       }
     });
   }
+
+  // Update rule determinations if passed
+  if (Array.isArray(body.rule_overrides)) {
+    body.rule_overrides.forEach(ro => {
+      const targetRule = scan.results.find(r => r.rule_id === ro.rule_id);
+      if (targetRule) {
+        targetRule.status = ro.status;
+        targetRule.result = ro.status;
+        targetRule.reviewer_status = 'OVERRIDDEN';
+      }
+    });
+  }
+
+  updateScan(scan);
 
   return res.status(200).json({
     success: true,

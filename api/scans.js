@@ -37,6 +37,8 @@ module.exports = (req, res) => {
     let productName = (body.product_name && body.product_name.trim()) || "";
     const category = body.category || "packaged_food";
     const customCategory = (body.custom_category && body.custom_category.trim()) || "";
+    const unavailablePanels = Array.isArray(body.unavailable_panels) ? body.unavailable_panels : [];
+    const images = Array.isArray(body.images) ? body.images : [];
     let rawText = body.raw_ocr_text || "";
 
     // Fields passed directly or extracted dynamically based on category/preset
@@ -53,13 +55,13 @@ module.exports = (req, res) => {
       }));
       if (!productName) productName = "Packaged Product Inspection";
     } else {
-      const extracted = extractDeclarationsForCategory(productName, category, customCategory, body.images);
+      const extracted = extractDeclarationsForCategory(productName, category, customCategory, images, unavailablePanels);
       productName = extracted.product_name;
       fields = extracted.fields;
       if (!rawText) rawText = extracted.raw_ocr_text;
     }
 
-    const { results, overallStatus, complianceScore } = evaluateDeclarations(scanId, productName, category, fields, rawText);
+    const { results, overallStatus, complianceScore } = evaluateDeclarations(scanId, productName, category, fields, rawText, unavailablePanels);
 
     const scanRecord = {
       id: scanId,
@@ -70,7 +72,10 @@ module.exports = (req, res) => {
       compliance_score: complianceScore,
       raw_ocr_text: rawText || "Packaging Declarations Analyzed Successfully under Legal Metrology Rules.",
       created_at: new Date().toISOString(),
-      images: Array.isArray(body.images) ? body.images.slice(0, 4) : [],
+      images: images.slice(0, 6),
+      unavailable_panels: unavailablePanels,
+      uploaded_images_count: images.length,
+      unavailable_panels_count: unavailablePanels.length,
       fields: fields,
       results: results
     };

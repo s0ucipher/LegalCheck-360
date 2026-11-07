@@ -57,10 +57,10 @@
   </header>
 
   <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
-    <div class="app-header" style="max-width: 800px; margin: 0 auto 2rem;">
+    <div class="app-header" style="max-width: 800px; margin: 0 auto 1.5rem;">
       <div class="app-title-group">
         <h1>Inspect Packaged Commodity</h1>
-        <p>Upload packaging photographs to run automated Legal Metrology checks</p>
+        <p>Guided sequential packaging inspection under Legal Metrology Rules, 2011</p>
       </div>
     </div>
 
@@ -87,9 +87,239 @@
         </div>
       </div>
 
-      <form id="scan-upload-form">
-        <!-- Product Metadata Inputs -->
+      <!-- Step-by-Step Guided Workflow Progress Bar -->
+      <div class="wizard-progress" id="wizard-progress">
+        <button type="button" class="wizard-step-indicator active" id="step-indicator-1" onclick="goToStep(1)">
+          <span class="step-num">1</span>
+          <span>Front Panel (PDP)</span>
+        </button>
+        <button type="button" class="wizard-step-indicator" id="step-indicator-2" onclick="goToStep(2)">
+          <span class="step-num">2</span>
+          <span>Back Panel (MRP / Declarations)</span>
+        </button>
+        <button type="button" class="wizard-step-indicator" id="step-indicator-3" onclick="goToStep(3)">
+          <span class="step-num">3</span>
+          <span>Side Flap / Nutrition</span>
+        </button>
+        <button type="button" class="wizard-step-indicator" id="step-indicator-4" onclick="goToStep(4)">
+          <span class="step-num">4</span>
+          <span>Review & Inspect</span>
+        </button>
+      </div>
+
+      <!-- STEP 1: Front Panel (PDP) -->
+      <div class="wizard-pane active" id="pane-step-1">
         <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 1 OF 3</span>
+              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Front Panel Photograph</h2>
+            </div>
+            <span style="font-size: 2rem;">🏷️</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem;">
+            <strong>Principal Display Panel (PDP):</strong> Captures common commodity trade name, brand identity, and primary net quantity declaration under Rule 6(1)(b) & Rule 6(1)(c).
+          </p>
+
+          <!-- Front Panel Drop Zone (shown when no photo) -->
+          <div id="front-drop-container">
+            <div class="drop-zone" id="drop-zone-front" onclick="triggerFileInput('front')">
+              <input type="file" id="file-input-front" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('front', this.files)">
+              <input type="file" id="camera-input-front" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('front', this.files)">
+              <div class="drop-zone-icon">📷</div>
+              <h3>Drag and drop Front Panel photograph here</h3>
+              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
+              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('front')">
+                  📸 Capture with Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Skip / Not Available Button -->
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1.25rem;">
+              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('front')">
+                ⚪ Not Available (Skip to Back Panel) →
+              </button>
+            </div>
+          </div>
+
+          <!-- Front Panel Uploaded Preview (shown when photo exists) -->
+          <div id="front-preview-container" style="display: none;">
+            <div class="panel-preview-card">
+              <img id="front-preview-img" src="" alt="Front Panel Preview">
+              <div class="panel-preview-details">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="badge badge-pass">✓ Front Panel Uploaded</span>
+                  <span id="front-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
+                </div>
+                <div id="front-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('front')">
+                  🔄 Change Photograph
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('front')">
+                Mark as Not Available Instead
+              </button>
+              <button type="button" class="btn btn-primary" onclick="goToStep(2)">
+                Continue to Step 2: Back Panel →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Back Panel (Declarations / MRP) -->
+      <div class="wizard-pane" id="pane-step-2">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 2 OF 3</span>
+              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Back Panel Photograph</h2>
+            </div>
+            <span style="font-size: 2rem;">📋</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem;">
+            <strong>Mandatory Declarations Panel:</strong> Captures MRP (inclusive of all taxes), complete manufacturer name and physical address with PIN code, packing/manufacturing date, and consumer care redressal details under Rule 6(1).
+          </p>
+
+          <!-- Back Panel Drop Zone -->
+          <div id="back-drop-container">
+            <div class="drop-zone" id="drop-zone-back" onclick="triggerFileInput('back')">
+              <input type="file" id="file-input-back" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('back', this.files)">
+              <input type="file" id="camera-input-back" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('back', this.files)">
+              <div class="drop-zone-icon">📷</div>
+              <h3>Drag and drop Back Panel photograph here</h3>
+              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
+              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('back')">
+                  📸 Capture with Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Skip / Back Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(1)">
+                ← Back to Front Panel
+              </button>
+              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('back')">
+                ⚪ Not Available (Skip to Side Flap) →
+              </button>
+            </div>
+          </div>
+
+          <!-- Back Panel Uploaded Preview -->
+          <div id="back-preview-container" style="display: none;">
+            <div class="panel-preview-card">
+              <img id="back-preview-img" src="" alt="Back Panel Preview">
+              <div class="panel-preview-details">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="badge badge-pass">✓ Back Panel Uploaded</span>
+                  <span id="back-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
+                </div>
+                <div id="back-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('back')">
+                  🔄 Change Photograph
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(1)">
+                ← Back to Front Panel
+              </button>
+              <div style="display: flex; gap: 0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('back')">
+                  Mark as Not Available Instead
+                </button>
+                <button type="button" class="btn btn-primary" onclick="goToStep(3)">
+                  Continue to Step 3: Side Flap →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Side Flap / Nutrition -->
+      <div class="wizard-pane" id="pane-step-3">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 3 OF 3</span>
+              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Side Flap / Nutrition Photograph</h2>
+            </div>
+            <span style="font-size: 2rem;">🔬</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem;">
+            <strong>Side Flaps & Auxiliary Panels:</strong> Captures nutritional tables, ingredients, batch numbers, FSSAI/manufacturing licenses, garment size/fabric composition, or electrical specifications.
+          </p>
+
+          <!-- Side Flap Drop Zone -->
+          <div id="side-drop-container">
+            <div class="drop-zone" id="drop-zone-side" onclick="triggerFileInput('side')">
+              <input type="file" id="file-input-side" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePanelFile('side', this.files)">
+              <input type="file" id="camera-input-side" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('side', this.files)">
+              <div class="drop-zone-icon">📷</div>
+              <h3>Drag and drop Side Flap photograph here</h3>
+              <p>or click to browse from device (JPG, PNG, WEBP up to 15MB)</p>
+              <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); triggerCameraInput('side')">
+                  📸 Capture with Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Skip / Back Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(2)">
+                ← Back to Back Panel
+              </button>
+              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('side')">
+                ⚪ Not Available (Proceed to Review) →
+              </button>
+            </div>
+          </div>
+
+          <!-- Side Flap Uploaded Preview -->
+          <div id="side-preview-container" style="display: none;">
+            <div class="panel-preview-card">
+              <img id="side-preview-img" src="" alt="Side Flap Preview">
+              <div class="panel-preview-details">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="badge badge-pass">✓ Side Flap Uploaded</span>
+                  <span id="side-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
+                </div>
+                <div id="side-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="triggerFileInput('side')">
+                  🔄 Change Photograph
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(2)">
+                ← Back to Back Panel
+              </button>
+              <div style="display: flex; gap: 0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('side')">
+                  Mark as Not Available Instead
+                </button>
+                <button type="button" class="btn btn-primary" onclick="goToStep(4)">
+                  Proceed to Evidence Review →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review Evidence & Start AI Inspection -->
+      <div class="wizard-pane" id="pane-step-4">
+        <!-- Product Commodity Identity Card -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">1. Commodity Identity & Statutory Category</h3>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
             <div class="form-group" style="margin-bottom: 0;">
               <label for="product-name-input">Product / Brand Name (Optional)</label>
@@ -121,49 +351,54 @@
           </div>
         </div>
 
-        <!-- View Tag Selector -->
-        <div style="text-align: center; margin-bottom: 1rem;">
-          <span style="font-size: 0.85rem; color: #9ca3af; font-weight: 600;">SELECT PACKAGING PANEL VIEW:</span>
-          <div class="view-tag-selector">
-            <button type="button" class="view-tag-btn active" data-view="front">Front Panel (PDP)</button>
-            <button type="button" class="view-tag-btn" data-view="back">Back Panel (Declarations / MRP)</button>
-            <button type="button" class="view-tag-btn" data-view="side">Side Flap / Nutrition</button>
-          </div>
+        <!-- Packaging Evidence Summary Card -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--primary);">2. Packaging Evidence Review</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            The compliance evaluation will analyze all available photographs together in one unified inspection record. Unprovided panels will be evaluated as Not Determined without blocking your results.
+          </p>
+
+          <table class="summary-evidence-table">
+            <thead>
+              <tr>
+                <th>Packaging Panel</th>
+                <th>Evidence Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Front Panel (PDP)</strong></td>
+                <td id="summary-front-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
+                <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(1)">Change / Add</button></td>
+              </tr>
+              <tr>
+                <td><strong>Back Panel (Declarations / MRP)</strong></td>
+                <td id="summary-back-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
+                <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(2)">Change / Add</button></td>
+              </tr>
+              <tr>
+                <td><strong>Side Flap / Nutrition</strong></td>
+                <td id="summary-side-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
+                <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(3)">Change / Add</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Validation Feedback Banner -->
+          <div id="evidence-validation-banner" style="margin-top: 1rem;"></div>
         </div>
 
-        <!-- Drag & Drop Zone -->
-        <div class="drop-zone" id="drop-zone">
-          <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" style="display: none;">
-          <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
-          <div class="drop-zone-icon">📷</div>
-          <h3>Drag and drop packaging photographs here</h3>
-          <p>or click to browse from your device</p>
-          <div style="margin-top: 0.75rem;">
-            <button type="button" class="btn btn-secondary btn-sm" id="camera-btn" style="font-size: 0.85rem;">
-              📸 Capture with Phone Camera
-            </button>
-          </div>
-          <div style="margin-top: 0.75rem; font-size: 0.8rem; color: #6b7280;">
-            Supports JPG, PNG, WEBP (Max 15MB each) • Recommended: Upload both Front & Back views
-          </div>
-        </div>
-
-        <!-- Previews -->
-        <div class="preview-grid" id="preview-grid"></div>
-
-        <!-- Help Info Banner -->
-        <div class="disclaimer-banner" style="margin: 2rem 0 1.5rem; padding: 1rem 1.25rem;">
-          <strong>💡 TIPS FOR MAXIMUM ACCURACY:</strong>
-          Ensure packaging text is well illuminated without harsh glares. For complete statutory verification under Rule 6, include photographs clearly displaying the MRP flap, Net Quantity declaration, and Manufacturer's physical address.
-        </div>
-
-        <!-- Submit Button -->
-        <div style="text-align: center;">
-          <button type="submit" id="submit-scan-btn" class="btn btn-primary" style="padding: 0.85rem 2.5rem; font-size: 1.05rem;" disabled>
-            ⚡ Run Compliance Inspection
+        <!-- Submit & Navigation Controls -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <button type="button" class="btn btn-ghost" onclick="goToStep(3)">
+            ← Back to Side Flap
+          </button>
+          <button type="button" id="submit-inspection-btn" class="btn btn-primary btn-lg" onclick="startUnifiedAiInspection()" style="padding: 0.85rem 2.5rem; font-size: 1.05rem;" disabled>
+            🚀 Start AI Inspection
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </main>
 
