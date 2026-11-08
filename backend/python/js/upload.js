@@ -452,25 +452,24 @@ window.startUnifiedAiInspection = async function() {
   };
 
   try {
-    simulateStep(1, `Uploading ${uploadedImages.length} packaging photograph(s)...`);
-    await delay(450);
+    simulateStep(1, `Analyzing ${uploadedImages.length} packaging photograph(s)... Please wait patiently.`, 20);
+    await delay(500);
 
-    simulateStep(2, 'Validating multi-panel geometry, formats & signatures...');
-    await delay(450);
-
-    simulateStep(3, 'Reading printed packaging text via OCR...');
+    simulateStep(2, 'Extracting printed declarations via high-accuracy OCR...', 40);
     
-    // Execute inspection API call
-    const res = await API.createScan(payload);
+    // Execute inspection API call concurrently with visual progress simulation
+    const resPromise = API.createScan(payload);
 
-    simulateStep(4, 'AI multimodal declaration extraction...');
-    await delay(400);
+    await delay(600);
+    simulateStep(3, 'Auditing MRP, taxes clause, unit sale price & metric units...', 65);
 
-    simulateStep(5, 'Matching Legal Metrology (PCR 2011) statutory requirements...');
-    await delay(400);
+    await delay(600);
+    simulateStep(4, 'Evaluating manufacturer address, PIN code & consumer care...', 85);
 
-    simulateStep(6, 'Compiling compliance assessment & vector PDF report...');
-    await delay(400);
+    const res = await resPromise;
+
+    simulateStep(5, 'Compiling official inspection report & statutory certificate...', 100);
+    await delay(450);
 
     if (res.success && res.data && res.data.id) {
       // Save locally as safety cache so results.html loads instantly with zero cold-start delay
@@ -589,46 +588,52 @@ window.loadSamplePreset = async function(presetType) {
  */
 function showScanningOverlay(imagesCount, unavailCount) {
   let overlay = document.getElementById('scan-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'scan-overlay';
-    overlay.className = 'scan-overlay-backdrop';
-    overlay.innerHTML = `
-      <div class="scan-overlay-card">
-        <div class="scan-spinner-large"></div>
-        <h3 id="scan-overlay-title" style="margin-top: 1rem; font-size: 1.3rem;">Evaluating Packaging Compliance</h3>
-        <p id="scan-overlay-subtitle" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
-          Evaluating ${imagesCount} uploaded panel(s) under Legal Metrology Rules...
-        </p>
-        <div class="scan-steps-list">
-          <div class="scan-step-item" id="sim-step-1"><span class="step-indicator">1</span><span class="step-label">Receiving Packaging Photographs</span></div>
-          <div class="scan-step-item" id="sim-step-2"><span class="step-indicator">2</span><span class="step-label">Validating Panel Geometries & Standards</span></div>
-          <div class="scan-step-item" id="sim-step-3"><span class="step-indicator">3</span><span class="step-label">Extracting Declarations via OCR</span></div>
-          <div class="scan-step-item" id="sim-step-4"><span class="step-indicator">4</span><span class="step-label">AI Multimodal Information Parsing</span></div>
-          <div class="scan-step-item" id="sim-step-5"><span class="step-indicator">5</span><span class="step-label">Evaluating Legal Metrology Rules, 2011</span></div>
-          <div class="scan-step-item" id="sim-step-6"><span class="step-indicator">6</span><span class="step-label">Generating Statutory Inspection Report</span></div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
+  if (overlay) {
+    overlay.style.display = 'flex';
   }
-  overlay.style.display = 'flex';
+  const title = document.getElementById('scan-overlay-title');
+  if (title) {
+    title.textContent = 'Evaluating Packaging Compliance';
+  }
+  const sub = document.getElementById('scan-overlay-subtitle');
+  if (sub) {
+    sub.textContent = 'Please wait patiently, your compliance results are being prepared...';
+  }
+  const prog = document.getElementById('scan-progress-bar');
+  if (prog) {
+    prog.style.width = '15%';
+  }
+  // Reset all step indicators
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`sim-step-${i}`);
+    if (el) {
+      el.className = 'scan-step-item';
+      const indicator = el.querySelector('.step-indicator');
+      if (indicator) indicator.textContent = i;
+    }
+  }
 }
 
-function simulateStep(stepNum, subtitle) {
+function simulateStep(stepNum, subtitle, percent) {
   const sub = document.getElementById('scan-overlay-subtitle');
   if (sub && subtitle) sub.textContent = subtitle;
 
-  for (let i = 1; i <= 6; i++) {
+  const bar = document.getElementById('scan-progress-bar');
+  if (bar && percent !== undefined) bar.style.width = `${percent}%`;
+
+  for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`sim-step-${i}`);
     if (!el) continue;
+    const indicator = el.querySelector('.step-indicator');
     if (i < stepNum) {
       el.className = 'scan-step-item completed';
-      el.querySelector('.step-indicator').textContent = '✓';
+      if (indicator) indicator.textContent = '✓';
     } else if (i === stepNum) {
       el.className = 'scan-step-item active';
+      if (indicator) indicator.textContent = i;
     } else {
       el.className = 'scan-step-item';
+      if (indicator) indicator.textContent = i;
     }
   }
 }
