@@ -12,6 +12,22 @@
 
 const API_BASE_URL = window.location.origin;
 
+// Helper: Get auth headers for API calls
+async function getApiHeaders(extraHeaders = {}) {
+  const headers = { 'Content-Type': 'application/json', ...extraHeaders };
+  try {
+    if (window.LegalCheckAuth && typeof window.LegalCheckAuth.getIdToken === 'function') {
+      const token = await window.LegalCheckAuth.getIdToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not retrieve auth token for request:', e);
+  }
+  return headers;
+}
+
 // Authentic Indian Legal Metrology Rules (Seed Reference)
 const SEED_LEGAL_RULES = [
   {
@@ -203,16 +219,31 @@ const API = {
   },
 
   async listScans(statusFilter = '') {
+    const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
     try {
-      const url = statusFilter ? `${API_BASE_URL}/api/scans?status=${encodeURIComponent(statusFilter)}` : `${API_BASE_URL}/api/scans`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+      const headers = await getApiHeaders();
+      let url = `${API_BASE_URL}/api/scans`;
+      const params = new URLSearchParams();
+      if (statusFilter && statusFilter !== 'ALL') params.append('status', statusFilter);
+      if (user && user.uid) params.append('user_uid', user.uid);
+      const queryString = params.toString();
+      if (queryString) url += `?${queryString}`;
+
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(3000) });
       if (res.ok) return await res.json();
     } catch (e) {}
 
-    // Vercel fallback
+    // Vercel fallback with User Isolation
     let scans = getLocalScans();
-    if (scans.length === 0) {
-      // Seed sample scan so dashboard isn't completely empty on fresh Vercel visit
+    if (user && user.uid) {
+      scans = scans.filter(s => s.user_uid === user.uid);
+    } else {
+      // Guest view: show guest scans only
+      scans = scans.filter(s => s.is_guest !== false && (!s.user_uid || s.is_guest === true));
+    }
+
+    if (scans.length === 0 && !user) {
+      // Seed sample scan for guest showcase
       scans = [
         {
           id: "LMC-2026-DEMO-01",
@@ -221,7 +252,8 @@ const API = {
           brand_name: "Royal Delights",
           overall_status: "PASS",
           compliance_score: 100.0,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          is_guest: true
         }
       ];
       saveLocalScans(scans);
@@ -319,10 +351,21 @@ const API = {
   },
 
   async createScan(payload) {
+    const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+    if (user && user.uid) {
+      payload.user_uid = user.uid;
+      payload.user_email = user.email || '';
+      payload.is_guest = false;
+    } else {
+      payload.user_uid = null;
+      payload.is_guest = true;
+    }
+
     try {
+      const headers = await getApiHeaders();
       const res = await fetch(`${API_BASE_URL}/api/scans`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(10000)
       });
@@ -500,6 +543,9 @@ const API = {
 
     const scanRecord = {
       id: scanId,
+      user_uid: user ? user.uid : null,
+      user_email: user ? (user.email || '') : '',
+      is_guest: !user,
       product_name: payload.product_name || "Packaged Commodity",
       category: payload.category || "packaged_food",
       brand_name: payload.product_name || "",
@@ -611,5 +657,88 @@ const API = {
 
   getPdfUrl(scanId) {
     return `${API_BASE_URL}/api/scans/${encodeURIComponent(scanId)}/pdf`;
+  },
+
+  async claimScan(scanId) {
+    const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+    if (!user) {
+      return { success: false, error: "Authentication required to claim inspection." };
+    }
+
+    try {
+      const headers = await getApiHeaders();
+      const res = await fetch(`${API_BASE_URL}/api/user/claim-scan`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ scan_id: scanId, user_uid: user.uid, user_email: user.email }),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    // Fallback: claim in localStorage
+    const scans = getLocalScans();
+    const target = scans.find(s => s.id === scanId);
+    if (target) {
+      target.user_uid = user.uid;
+      target.user_email = user.email || '';
+      target.is_guest = false;
+      saveLocalScans(scans);
+      return { success: true, message: "Inspection saved to your account history." };
+    }
+    return { success: false, error: "Scan not found" };
+  },
+
+  async getUserStats() {
+    const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    try {
+      const headers = await getApiHeaders();
+      const res = await fetch(`${API_BASE_URL}/api/user/stats?user_uid=${encodeURIComponent(user.uid)}`, {
+        headers,
+        signal: AbortSignal.timeout(3000)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    // Fallback from localStorage
+    const scans = getLocalScans().filter(s => s.user_uid === user.uid);
+    const total = scans.length;
+    const pass = scans.filter(s => s.overall_status === 'PASS').length;
+    const fail = scans.filter(s => s.overall_status === 'FAIL').length;
+    const review = scans.filter(s => s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'PARTIALLY_EVALUATED').length;
+    const rate = total > 0 ? Math.round((pass / total) * 1000) / 10 : 0.0;
+
+    return {
+      success: true,
+      data: {
+        total_inspections: total,
+        compliant_inspections: pass,
+        non_compliant_inspections: fail,
+        inspections_requiring_review: review,
+        compliance_rate: rate,
+        recent_inspections: scans.slice(0, 5)
+      }
+    };
+  },
+
+  async deleteScan(scanId) {
+    const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+    try {
+      const headers = await getApiHeaders();
+      const res = await fetch(`${API_BASE_URL}/api/user/delete-scan`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ scan_id: scanId, user_uid: user ? user.uid : null }),
+        signal: AbortSignal.timeout(4000)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    // Fallback in localStorage
+    const scans = getLocalScans().filter(s => s.id !== scanId);
+    saveLocalScans(scans);
+    return { success: true, message: "Inspection record deleted." };
   }
 };

@@ -8,9 +8,14 @@
     { "source": "/api/reviews/:id", "destination": "/api/review-scan?id=:id" },
     { "source": "/api/admin/rules/:id/toggle", "destination": "/api/admin-toggle-rule?id=:id" },
     { "source": "/api/admin/rules", "destination": "/api/admin-rules" },
+    { "source": "/api/user/claim-scan", "destination": "/api/user/claim-scan" },
+    { "source": "/api/user/stats", "destination": "/api/user/stats" },
+    { "source": "/api/user/delete-scan", "destination": "/api/user/delete-scan" },
     { "source": "/frontend/(.*)", "destination": "/$1" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/login", "destination": "/dashboard.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/register", "destination": "/register.html" },
+    { "source": "/profile", "destination": "/profile.html" },
     { "source": "/upload", "destination": "/upload.html" },
     { "source": "/results", "destination": "/results.html" },
     { "source": "/history", "destination": "/history.html" },
@@ -23,7 +28,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
   ]

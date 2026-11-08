@@ -1172,6 +1172,68 @@ function getScanByIdWithFallback(id) {
   return null;
 }
 
+function getUserScans(userUid) {
+  if (!userUid) return [];
+  const merged = getMergedScans();
+  return merged.filter(s => s.user_uid === userUid);
+}
+
+function claimScanForUser(scanId, userUid, userEmail) {
+  if (!scanId || !userUid) return null;
+  const merged = getMergedScans();
+  const scan = merged.find(s => s.id === scanId);
+  if (!scan) return null;
+
+  scan.user_uid = userUid;
+  scan.user_email = userEmail || scan.user_email || '';
+  scan.is_guest = false;
+  persistScan(scan);
+  return scan;
+}
+
+function deleteUserScan(scanId, userUid) {
+  if (!scanId || !userUid) return false;
+  const idx = scanRecords.findIndex(s => s.id === scanId && s.user_uid === userUid);
+  if (idx >= 0) {
+    scanRecords.splice(idx, 1);
+  }
+
+  try {
+    if (fs.existsSync(TMP_FILE)) {
+      let diskScans = JSON.parse(fs.readFileSync(TMP_FILE, 'utf8')) || [];
+      diskScans = diskScans.filter(s => !(s.id === scanId && s.user_uid === userUid));
+      fs.writeFileSync(TMP_FILE, JSON.stringify(diskScans), 'utf8');
+    }
+  } catch (e) {}
+
+  return true;
+}
+
+function getUserStats(userUid) {
+  const scans = getUserScans(userUid);
+  const total = scans.length;
+  const pass = scans.filter(s => s.overall_status === 'PASS').length;
+  const fail = scans.filter(s => s.overall_status === 'FAIL').length;
+  const review = scans.filter(s => s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'PARTIALLY_EVALUATED').length;
+  const rate = total > 0 ? Math.round((pass / total) * 1000) / 10 : 0.0;
+
+  return {
+    total_inspections: total,
+    compliant_inspections: pass,
+    non_compliant_inspections: fail,
+    inspections_requiring_review: review,
+    compliance_rate: rate,
+    recent_inspections: scans.slice(0, 5).map(s => ({
+      id: s.id,
+      product_name: s.product_name,
+      category: s.category,
+      overall_status: s.overall_status,
+      compliance_score: s.compliance_score,
+      created_at: s.created_at
+    }))
+  };
+}
+
 module.exports = {
   legalRules,
   scanRecords,
@@ -1179,6 +1241,10 @@ module.exports = {
   extractDeclarationsForCategory,
   generatePdfReportBuffer,
   getScans: () => getMergedScans(),
+  getUserScans,
+  claimScanForUser,
+  deleteUserScan,
+  getUserStats,
   addScan: (scan) => persistScan(scan),
   updateScan: (scan) => persistScan(scan),
   getScanById: (id) => getScanByIdWithFallback(id),

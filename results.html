@@ -107,6 +107,23 @@
     <!-- MAIN REPORT CONTENT (Shown once loaded) -->
     <div id="results-main-content" style="display: none;">
 
+      <!-- Guest-to-Account Persistent Transition Banner -->
+      <div id="guestClaimBanner" class="guest-claim-card" style="display: none;">
+        <div class="guest-claim-info">
+          <div class="guest-claim-title">
+            <span>💾</span> Save this inspection report permanently
+          </div>
+          <div class="guest-claim-desc" id="guestClaimDesc">
+            This inspection was run in a temporary session. Save it to your LegalCheck 360 account to retain this compliance certificate permanently.
+          </div>
+        </div>
+        <div class="guest-claim-actions" id="guestClaimActions">
+          <button type="button" class="btn btn-primary btn-sm" id="btnClaimInspection" onclick="handleClaimInspection()">
+            💾 Save to My Account
+          </button>
+        </div>
+      </div>
+
       <!-- SECTION A: INSPECTION SUMMARY (Executive Header Card) -->
       <section class="results-header-card" style="margin-bottom: 2rem;">
         <div>
@@ -386,6 +403,11 @@
     </div>
   </footer>
 
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/api.js"></script>
   <script src="js/pdf-generator.js"></script>
   <script src="js/main.js"></script>

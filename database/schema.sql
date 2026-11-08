@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS scans (
     id TEXT PRIMARY KEY,                       -- UUID or formatted ID (e.g. LMC-2026-XXXX)
     user_id INTEGER,
+    user_uid TEXT,                             -- Firebase Auth UID
+    user_email TEXT,                           -- Authenticated user email
+    is_guest INTEGER DEFAULT 1,                -- 1 = Guest inspection, 0 = Authenticated permanent
     product_name TEXT DEFAULT 'Unknown Product',
     category TEXT DEFAULT 'general_packaged_goods',
     brand_name TEXT DEFAULT '',

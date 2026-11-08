@@ -1,7 +1,8 @@
 /**
  * GET & POST /api/scans
  */
-const { getScans, addScan, evaluateDeclarations, extractDeclarationsForCategory } = require('./_data');
+const { getScans, getUserScans, addScan, evaluateDeclarations, extractDeclarationsForCategory } = require('./_data');
+const { getAuthenticatedUser } = require('./_auth');
 
 function generateScanId() {
   const hex = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
@@ -11,22 +12,38 @@ function generateScanId() {
 module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // GET: List Scans
+  // GET: List Scans (User-isolated if authenticated)
   if (req.method === 'GET') {
-    const scans = getScans().map(s => ({
+    const user = getAuthenticatedUser(req);
+    const queryUid = (req.query && req.query.user_uid) || null;
+    const targetUid = user ? user.uid : queryUid;
+
+    let scans = [];
+    if (targetUid) {
+      // Return only this authenticated user's persistent scans
+      scans = getUserScans(targetUid);
+    } else {
+      // Guest view: only guest scans or empty personal history
+      scans = getScans().filter(s => s.is_guest);
+    }
+
+    const formatted = scans.map(s => ({
       id: s.id,
       product_name: s.product_name,
       category: s.category,
       overall_status: s.overall_status,
       compliance_score: s.compliance_score,
-      created_at: s.created_at
+      created_at: s.created_at,
+      user_uid: s.user_uid || null,
+      is_guest: !!s.is_guest
     }));
+
     return res.status(200).json({
       success: true,
-      data: scans
+      data: formatted
     });
   }
 
@@ -70,8 +87,16 @@ module.exports = (req, res) => {
 
     const { results, overallStatus, complianceScore } = evaluateDeclarations(scanId, productName, category, fields, rawText, unavailablePanels);
 
+    const authUser = getAuthenticatedUser(req);
+    const userUid = authUser ? authUser.uid : (body.user_uid || null);
+    const userEmail = authUser ? authUser.email : (body.user_email || '');
+    const isGuest = !userUid;
+
     const scanRecord = {
       id: scanId,
+      user_uid: userUid,
+      user_email: userEmail,
+      is_guest: isGuest,
       product_name: productName,
       category: category,
       custom_category: customCategory,

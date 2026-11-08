@@ -100,6 +100,13 @@ async function loadScanDetails(scanId) {
     currentScan = res.data;
     showMainContent();
 
+    // Check if coming back from login/register with ?claimed=1
+    if (params.get('claimed') === '1' && window.LegalCheckAuth && window.LegalCheckAuth.isLoggedIn()) {
+      handleClaimInspection(scanId);
+    } else {
+      renderClaimBanner(currentScan);
+    }
+
     // Render Sections A through G
     renderSectionA(currentScan);
     renderSectionB(currentScan.fields || [], currentScan.unavailable_panels || []);
@@ -198,6 +205,84 @@ function updateHeaderStatusBadge(status, score) {
 
   statusContainer.className = `badge ${badgeClass} score-badge-large`;
   statusContainer.textContent = label;
+}
+
+/**
+ * Guest-to-Account Persistent Transition Banner Controller
+ */
+function renderClaimBanner(scan) {
+  const banner = document.getElementById('guestClaimBanner');
+  const actions = document.getElementById('guestClaimActions');
+  const desc = document.getElementById('guestClaimDesc');
+  if (!banner || !actions) return;
+
+  const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+
+  if (user) {
+    if (scan.user_uid === user.uid) {
+      // Already owned by this user
+      banner.style.display = 'none';
+      return;
+    }
+    // Logged in, but this scan is not yet saved to their account
+    banner.style.display = 'flex';
+    desc.textContent = `This inspection is currently stored in guest session. Save it to your account (${user.email}) to keep it in your permanent audit history.`;
+    actions.innerHTML = `
+      <button type="button" class="btn btn-primary btn-sm" id="btnClaimInspection" onclick="handleClaimInspection('${scan.id}')">
+        💾 Save to My Account
+      </button>
+    `;
+  } else {
+    // Visitor / Guest
+    banner.style.display = 'flex';
+    desc.textContent = `This inspection was run in Guest Mode. Inspections without an account are temporary. Sign in or register to permanently save this compliance audit to your history.`;
+    actions.innerHTML = `
+      <a href="login.html" onclick="sessionStorage.setItem('pending_claim_scan', '${scan.id}')" class="btn btn-outline btn-sm">Sign In to Save</a>
+      <a href="register.html" onclick="sessionStorage.setItem('pending_claim_scan', '${scan.id}')" class="btn btn-primary btn-sm">Register & Save</a>
+    `;
+  }
+}
+
+async function handleClaimInspection(scanId) {
+  const targetId = scanId || (currentScan && currentScan.id);
+  if (!targetId) return;
+
+  if (!window.LegalCheckAuth || !window.LegalCheckAuth.isLoggedIn()) {
+    sessionStorage.setItem('pending_claim_scan', targetId);
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const btn = document.getElementById('btnClaimInspection');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving to Account...';
+  }
+
+  try {
+    const res = await LegalCheckAPI.claimScan(targetId);
+    if (res && res.success) {
+      if (typeof showToast === 'function') {
+        showToast('Inspection saved permanently to your account history!', 'success');
+      }
+      const banner = document.getElementById('guestClaimBanner');
+      if (banner) {
+        const user = window.LegalCheckAuth.getCurrentUser();
+        banner.innerHTML = `
+          <div style="color: #10b981; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+            <span>✅</span>
+            <span>Saved to your permanent account history (${user ? user.email : 'Logged In'})</span>
+          </div>
+        `;
+      }
+    }
+  } catch (e) {
+    console.error('Error claiming scan:', e);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '💾 Save to My Account';
+    }
+  }
 }
 
 /**
