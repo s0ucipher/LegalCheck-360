@@ -441,8 +441,8 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
       { id: 6, field_name: "consumer_care", field_value: "1800-180-2222 | support@consumergoods.in", confidence: 0.93, evidence_text: "Consumer Care: 1800-180-2222 support@consumergoods.in", source_view: "back", is_verified: 1 },
       { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
       { id: 8, field_name: "unit_sale_price", field_value: "0.25 INR / g", confidence: 0.92, evidence_text: "USP: Rs. 0.25/g", source_view: "back", is_verified: 1 },
-      { id: 9, field_name: "batch_number", field_value: "Batch #26N042 | B# 26N042", confidence: 0.95, evidence_text: "Batch No: 26N042", source_view: "side", is_verified: 1 },
-      { id: 10, field_name: "nutritional_info", field_value: "Energy: 465 kcal, Carbohydrates: 68g, Added Sugar: 24g, Protein: 6.5g, Sodium: 280mg per 100g", confidence: 0.94, evidence_text: "Nutritional Facts Per 100g", source_view: "side", is_verified: 1 },
+      { id: 9, field_name: "batch_number", field_value: "Batch #26N042 | B# 26N042", confidence: 0.95, evidence_text: "Batch No: 26N042", source_view: "side2", is_verified: 1 },
+      { id: 10, field_name: "nutritional_info", field_value: "Energy: 465 kcal, Carbohydrates: 68g, Added Sugar: 24g, Protein: 6.5g, Sodium: 280mg per 100g", confidence: 0.94, evidence_text: "Nutritional Facts Per 100g", source_view: "side1", is_verified: 1 },
       { id: 11, field_name: "veg_logo", field_value: "Green Circle inside Green Square (Vegetarian Emblem)", confidence: 0.98, evidence_text: "Veg Green Symbol", source_view: "front", is_verified: 1 },
       { id: 12, field_name: "numeral_height", field_value: "3.2 mm (Complies with Rule 9 Table minimum 2.0mm for 200g net weight)", confidence: 0.95, evidence_text: "Height: 3.2mm", source_view: "front", is_verified: 1 }
     );
@@ -451,8 +451,13 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
     }
   }
 
-  // Filter out declarations belonging to unavailable panels
-  const filteredFields = rawFields.filter(f => !unavail.has(f.source_view));
+  // Filter out declarations belonging to unavailable panels (supporting front, back, side1, side2, and legacy side)
+  const filteredFields = rawFields.filter(f => {
+    if (unavail.has(f.source_view)) return false;
+    if (unavail.has("side") && (f.source_view === "side1" || f.source_view === "side2")) return false;
+    if ((unavail.has("side1") && unavail.has("side2")) && f.source_view === "side") return false;
+    return true;
+  });
 
   return {
     product_name: displayName,
@@ -888,19 +893,20 @@ function evaluateDeclarations(scanId, productName, category, fields, rawText, un
         recommendation = "Statutory requirement exempt for non-food products under Legal Metrology.";
       }
     } else if (rule.rule_id === "LMR-RULE-6-1-LOT") {
-      sourcePanel = "side";
-      if (unavail.has("side") && !getField("batch_number") && !getField("lot_number")) {
+      sourcePanel = "side2";
+      const isLotUnavail = unavail.has("side2") || unavail.has("side");
+      if (isLotUnavail && !getField("batch_number") && !getField("lot_number")) {
         presenceStatus = "NOT_DETERMINED";
         complianceStatus = "NOT_DETERMINED";
         status = "NOT_DETERMINED";
-        evidence = "Side Flap photograph was marked Not Available";
-        extractedInfo = "Not Provided (Side Flap Unavailable)";
-        explanation = "Verification pending: Lot / Batch / Code identification number is customarily printed on the packaging side flap or crimp seal.";
-        recommendation = "Upload photograph of packaging side flap or crimp seal to verify batch traceability under Rule 6(1)(q).";
+        evidence = "Side Panel 2 (Batch/Barcode Flap) photograph was marked Not Available";
+        extractedInfo = "Not Provided (Side Panel 2 Unavailable)";
+        explanation = "Verification pending: Lot / Batch / Code identification number is customarily printed on Side Panel 2 or crimp seal.";
+        recommendation = "Upload photograph of packaging Side Panel 2 or crimp seal to verify batch traceability under Rule 6(1)(q).";
       } else {
         const f = getField("batch_number") || getField("lot_number");
         if (f && f.field_value) {
-          sourcePanel = f.source_view || "side";
+          sourcePanel = f.source_view || "side2";
           extractedInfo = f.field_value;
           evidence = f.evidence_text || f.field_value;
           presenceStatus = "PRESENT";
@@ -917,7 +923,7 @@ function evaluateDeclarations(scanId, productName, category, fields, rawText, un
         }
       }
     } else if (rule.rule_id === "LMR-RULE-NUTRITION") {
-      sourcePanel = "side";
+      sourcePanel = "side1";
       const isFood = (
         category === "packaged_food" ||
         category === "beverages" ||
@@ -927,18 +933,19 @@ function evaluateDeclarations(scanId, productName, category, fields, rawText, un
         category === "spices_sugar"
       );
       if (isFood) {
-        if (unavail.has("side") && !getField("nutritional_info") && !getField("nutrition")) {
+        const isNutrUnavail = unavail.has("side1") || unavail.has("side");
+        if (isNutrUnavail && !getField("nutritional_info") && !getField("nutrition")) {
           presenceStatus = "NOT_DETERMINED";
           complianceStatus = "NOT_DETERMINED";
           status = "NOT_DETERMINED";
-          evidence = "Side Flap photograph was marked Not Available";
-          extractedInfo = "Not Provided (Side Flap Unavailable)";
-          explanation = "Verification pending: Mandatory Nutritional Information table per 100g is located on packaging side flap.";
-          recommendation = "Provide side flap photograph displaying energy, protein, carbohydrates, sugars, and sodium per 100g.";
+          evidence = "Side Panel 1 (Nutrition Flap) photograph was marked Not Available";
+          extractedInfo = "Not Provided (Side Panel 1 Unavailable)";
+          explanation = "Verification pending: Mandatory Nutritional Information table per 100g is located on packaging Side Panel 1.";
+          recommendation = "Provide Side Panel 1 photograph displaying energy, protein, carbohydrates, sugars, and sodium per 100g.";
         } else {
           const f = getField("nutritional_info") || getField("nutrition");
           if (f && f.field_value) {
-            sourcePanel = f.source_view || "side";
+            sourcePanel = f.source_view || "side1";
             extractedInfo = f.field_value;
             evidence = f.evidence_text || f.field_value;
             presenceStatus = "PRESENT";

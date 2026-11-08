@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Upload & Inspection | LegalCheck 360</title>
+  <title>Inspect Packaged Commodity | LegalCheck 360</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
@@ -95,22 +95,26 @@
         </div>
       </div>
 
-      <!-- Step-by-Step Guided Workflow Progress Bar -->
+      <!-- Step-by-Step Guided Workflow Progress Bar (5 Steps) -->
       <div class="wizard-progress" id="wizard-progress">
         <button type="button" class="wizard-step-indicator active" id="step-indicator-1" onclick="goToStep(1)">
           <span class="step-num">1</span>
-          <span>Front Panel (PDP)</span>
+          <span>Front Panel</span>
         </button>
         <button type="button" class="wizard-step-indicator" id="step-indicator-2" onclick="goToStep(2)">
           <span class="step-num">2</span>
-          <span>Back Panel (MRP / Declarations)</span>
+          <span>Back Panel</span>
         </button>
         <button type="button" class="wizard-step-indicator" id="step-indicator-3" onclick="goToStep(3)">
           <span class="step-num">3</span>
-          <span>Side Flap / Nutrition</span>
+          <span>Side Panel 1</span>
         </button>
         <button type="button" class="wizard-step-indicator" id="step-indicator-4" onclick="goToStep(4)">
           <span class="step-num">4</span>
+          <span>Side Panel 2</span>
+        </button>
+        <button type="button" class="wizard-step-indicator" id="step-indicator-5" onclick="goToStep(5)">
+          <span class="step-num">5</span>
           <span>Review & Inspect</span>
         </button>
       </div>
@@ -120,7 +124,7 @@
         <div class="card" style="margin-bottom: 1.5rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div>
-              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 1 OF 3</span>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 1 OF 4</span>
               <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Front Panel Photograph</h2>
             </div>
             <span style="font-size: 2rem;">🏷️</span>
@@ -129,16 +133,17 @@
             <strong>Principal Display Panel (PDP):</strong> Captures common commodity trade name, brand identity, and primary net quantity declaration under Rule 6(1)(b) & Rule 6(1)(c).
           </p>
 
+          <!-- Hidden File Inputs for Front Panel -->
+          <input type="file" id="camera-input-front" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('front', this.files)">
+          <input type="file" id="gallery-input-front" accept="image/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
+          <input type="file" id="files-input-front" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
+
           <!-- Front Panel Drop Zone (shown when no photo) -->
           <div id="front-drop-container">
-            <div class="drop-zone" id="drop-zone-front" onclick="openSourceModal('front')">
-              <input type="file" id="file-input-front" accept="image/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
-              <input type="file" id="camera-input-front" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('front', this.files)">
-              <input type="file" id="gallery-input-front" accept="image/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
-              <input type="file" id="files-input-front" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('front', this.files)">
+            <div class="drop-zone" id="drop-zone-front" onclick="triggerGalleryInput('front')">
               <div class="drop-zone-icon">📷</div>
               <h3>Upload Front Panel Photograph</h3>
-              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              <p>Select your photo source below (auto-advances upon upload):</p>
               
               <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
               <div class="upload-options-row">
@@ -178,8 +183,8 @@
                   <span id="front-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
                 <div id="front-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('front')">
-                  🔄 Change Photograph
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearPanel('front')">
+                  🔄 Retake / Change Photograph
                 </button>
               </div>
             </div>
@@ -200,7 +205,7 @@
         <div class="card" style="margin-bottom: 1.5rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div>
-              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 2 OF 3</span>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 2 OF 4</span>
               <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Back Panel Photograph</h2>
             </div>
             <span style="font-size: 2rem;">📋</span>
@@ -209,16 +214,17 @@
             <strong>Mandatory Declarations Panel:</strong> Captures MRP (inclusive of all taxes), complete manufacturer name and physical address with PIN code, packing/manufacturing date, and consumer care redressal details under Rule 6(1).
           </p>
 
+          <!-- Hidden File Inputs for Back Panel -->
+          <input type="file" id="camera-input-back" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('back', this.files)">
+          <input type="file" id="gallery-input-back" accept="image/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
+          <input type="file" id="files-input-back" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
+
           <!-- Back Panel Drop Zone -->
           <div id="back-drop-container">
-            <div class="drop-zone" id="drop-zone-back" onclick="openSourceModal('back')">
-              <input type="file" id="file-input-back" accept="image/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
-              <input type="file" id="camera-input-back" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('back', this.files)">
-              <input type="file" id="gallery-input-back" accept="image/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
-              <input type="file" id="files-input-back" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('back', this.files)">
+            <div class="drop-zone" id="drop-zone-back" onclick="triggerGalleryInput('back')">
               <div class="drop-zone-icon">📷</div>
               <h3>Upload Back Panel Photograph</h3>
-              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              <p>Select your photo source below (auto-advances upon upload):</p>
               
               <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
               <div class="upload-options-row">
@@ -246,7 +252,7 @@
                 ← Back to Front Panel
               </button>
               <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('back')">
-                ⚪ Not Available (Skip to Side Flap) →
+                ⚪ Not Available (Skip to Side Panel 1) →
               </button>
             </div>
           </div>
@@ -261,8 +267,8 @@
                   <span id="back-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
                 <div id="back-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('back')">
-                  🔄 Change Photograph
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearPanel('back')">
+                  🔄 Retake / Change Photograph
                 </button>
               </div>
             </div>
@@ -275,7 +281,7 @@
                   Mark as Not Available Instead
                 </button>
                 <button type="button" class="btn btn-primary" onclick="goToStep(3)">
-                  Continue to Step 3: Side Flap →
+                  Continue to Step 3: Side Panel 1 →
                 </button>
               </div>
             </div>
@@ -283,44 +289,45 @@
         </div>
       </div>
 
-      <!-- STEP 3: Side Flap / Nutrition -->
+      <!-- STEP 3: Side Panel 1 (Left Flap / Nutrition & Ingredients) -->
       <div class="wizard-pane" id="pane-step-3">
         <div class="card" style="margin-bottom: 1.5rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div>
-              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 3 OF 3</span>
-              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Side Flap / Nutrition Photograph</h2>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 3 OF 4</span>
+              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Side Panel 1 (Nutrition & Ingredients)</h2>
             </div>
             <span style="font-size: 2rem;">🔬</span>
           </div>
           <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem;">
-            <strong>Side Flaps & Auxiliary Panels:</strong> Captures nutritional tables, ingredients, batch numbers, FSSAI/manufacturing licenses, garment size/fabric composition, or electrical specifications.
+            <strong>Side Panel 1 (Left Flap):</strong> Captures nutritional tables per 100g/serve, ingredients list, allergen warnings, veg/non-veg green emblem, and consumer dietary markings.
           </p>
 
-          <!-- Side Flap Drop Zone -->
-          <div id="side-drop-container">
-            <div class="drop-zone" id="drop-zone-side" onclick="openSourceModal('side')">
-              <input type="file" id="file-input-side" accept="image/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
-              <input type="file" id="camera-input-side" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('side', this.files)">
-              <input type="file" id="gallery-input-side" accept="image/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
-              <input type="file" id="files-input-side" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('side', this.files)">
+          <!-- Hidden File Inputs for Side Panel 1 -->
+          <input type="file" id="camera-input-side1" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('side1', this.files)">
+          <input type="file" id="gallery-input-side1" accept="image/*" style="display: none;" onchange="handlePanelFile('side1', this.files)">
+          <input type="file" id="files-input-side1" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('side1', this.files)">
+
+          <!-- Side Panel 1 Drop Zone -->
+          <div id="side1-drop-container">
+            <div class="drop-zone" id="drop-zone-side1" onclick="triggerGalleryInput('side1')">
               <div class="drop-zone-icon">📷</div>
-              <h3>Upload Side Flap / Auxiliary Photograph</h3>
-              <p>Drag and drop or select your photo source below (JPG, PNG, WEBP up to 15MB):</p>
+              <h3>Upload Side Panel 1 Photograph</h3>
+              <p>Select your photo source below (auto-advances upon upload):</p>
               
               <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
               <div class="upload-options-row">
-                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('side')" title="Take photo directly using camera">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('side1')" title="Take photo directly using camera">
                   <span class="upload-opt-icon">📸</span>
                   <span class="upload-opt-label">Camera</span>
                   <span class="upload-opt-desc">Take Photo</span>
                 </button>
-                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('side')" title="Choose photo from gallery / library">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('side1')" title="Choose photo from gallery / library">
                   <span class="upload-opt-icon">🖼️</span>
                   <span class="upload-opt-label">Gallery</span>
                   <span class="upload-opt-desc">Photo Library</span>
                 </button>
-                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('side')" title="Browse documents, iCloud or device files">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('side1')" title="Browse documents, iCloud or device files">
                   <span class="upload-opt-icon">📁</span>
                   <span class="upload-opt-label">Device Files</span>
                   <span class="upload-opt-desc">Browse Storage</span>
@@ -333,24 +340,24 @@
               <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(2)">
                 ← Back to Back Panel
               </button>
-              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('side')">
-                ⚪ Not Available (Proceed to Review) →
+              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('side1')">
+                ⚪ Not Available (Skip to Side Panel 2) →
               </button>
             </div>
           </div>
 
-          <!-- Side Flap Uploaded Preview -->
-          <div id="side-preview-container" style="display: none;">
+          <!-- Side Panel 1 Uploaded Preview -->
+          <div id="side1-preview-container" style="display: none;">
             <div class="panel-preview-card">
-              <img id="side-preview-img" src="" alt="Side Flap Preview">
+              <img id="side1-preview-img" src="" alt="Side Panel 1 Preview">
               <div class="panel-preview-details">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                  <span class="badge badge-pass">✓ Side Flap Uploaded</span>
-                  <span id="side-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
+                  <span class="badge badge-pass">✓ Side Panel 1 Uploaded</span>
+                  <span id="side1-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
                 </div>
-                <div id="side-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openSourceModal('side')">
-                  🔄 Change Photograph
+                <div id="side1-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearPanel('side1')">
+                  🔄 Retake / Change Photograph
                 </button>
               </div>
             </div>
@@ -359,10 +366,99 @@
                 ← Back to Back Panel
               </button>
               <div style="display: flex; gap: 0.75rem;">
-                <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('side')">
+                <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('side1')">
                   Mark as Not Available Instead
                 </button>
                 <button type="button" class="btn btn-primary" onclick="goToStep(4)">
+                  Continue to Step 4: Side Panel 2 →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Side Panel 2 (Right Flap / Batch, Barcode & Specifications) -->
+      <div class="wizard-pane" id="pane-step-4">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">STEP 4 OF 4</span>
+              <h2 style="font-size: 1.35rem; margin-top: 4px;">Upload Side Panel 2 (Batch, Barcode & USP)</h2>
+            </div>
+            <span style="font-size: 2rem;">📦</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem;">
+            <strong>Side Panel 2 (Right Flap / Crimp Seal):</strong> Captures distinguishing lot/batch number for statutory traceability under Rule 6(1)(q), barcode, Unit Sale Price (USP), FSSAI license, or commodity specifications.
+          </p>
+
+          <!-- Hidden File Inputs for Side Panel 2 -->
+          <input type="file" id="camera-input-side2" accept="image/*" capture="environment" style="display: none;" onchange="handlePanelFile('side2', this.files)">
+          <input type="file" id="gallery-input-side2" accept="image/*" style="display: none;" onchange="handlePanelFile('side2', this.files)">
+          <input type="file" id="files-input-side2" accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,*/*" style="display: none;" onchange="handlePanelFile('side2', this.files)">
+
+          <!-- Side Panel 2 Drop Zone -->
+          <div id="side2-drop-container">
+            <div class="drop-zone" id="drop-zone-side2" onclick="triggerGalleryInput('side2')">
+              <div class="drop-zone-icon">📷</div>
+              <h3>Upload Side Panel 2 Photograph</h3>
+              <p>Select your photo source below (auto-advances upon upload):</p>
+              
+              <!-- 3 Direct Touch Options: Camera, Gallery, Device Files -->
+              <div class="upload-options-row">
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerCameraInput('side2')" title="Take photo directly using camera">
+                  <span class="upload-opt-icon">📸</span>
+                  <span class="upload-opt-label">Camera</span>
+                  <span class="upload-opt-desc">Take Photo</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerGalleryInput('side2')" title="Choose photo from gallery / library">
+                  <span class="upload-opt-icon">🖼️</span>
+                  <span class="upload-opt-label">Gallery</span>
+                  <span class="upload-opt-desc">Photo Library</span>
+                </button>
+                <button type="button" class="btn-upload-option" onclick="event.stopPropagation(); triggerFilesInput('side2')" title="Browse documents, iCloud or device files">
+                  <span class="upload-opt-icon">📁</span>
+                  <span class="upload-opt-label">Device Files</span>
+                  <span class="upload-opt-desc">Browse Storage</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Skip / Back Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(3)">
+                ← Back to Side Panel 1
+              </button>
+              <button type="button" class="btn btn-outline" onclick="markPanelUnavailable('side2')">
+                ⚪ Not Available (Proceed to Review) →
+              </button>
+            </div>
+          </div>
+
+          <!-- Side Panel 2 Uploaded Preview -->
+          <div id="side2-preview-container" style="display: none;">
+            <div class="panel-preview-card">
+              <img id="side2-preview-img" src="" alt="Side Panel 2 Preview">
+              <div class="panel-preview-details">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="badge badge-pass">✓ Side Panel 2 Uploaded</span>
+                  <span id="side2-filename" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;"></span>
+                </div>
+                <div id="side2-filesize" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearPanel('side2')">
+                  🔄 Retake / Change Photograph
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="goToStep(3)">
+                ← Back to Side Panel 1
+              </button>
+              <div style="display: flex; gap: 0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="markPanelUnavailable('side2')">
+                  Mark as Not Available Instead
+                </button>
+                <button type="button" class="btn btn-primary" onclick="goToStep(5)">
                   Proceed to Evidence Review →
                 </button>
               </div>
@@ -371,8 +467,8 @@
         </div>
       </div>
 
-      <!-- STEP 4: Review Evidence & Start AI Inspection -->
-      <div class="wizard-pane" id="pane-step-4">
+      <!-- STEP 5: Review Evidence & Start AI Inspection -->
+      <div class="wizard-pane" id="pane-step-5">
         <!-- Product Commodity Identity Card -->
         <div class="card" style="margin-bottom: 1.5rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -437,11 +533,11 @@
           </div>
         </div>
 
-        <!-- Packaging Evidence Summary Card -->
+        <!-- Packaging Evidence Summary Card (4 Panels) -->
         <div class="card" style="margin-bottom: 1.5rem;">
-          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--primary);">2. Packaging Evidence Review</h3>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--primary);">2. Packaging Evidence Review (4 Panels)</h3>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
-            The compliance evaluation will analyze all available photographs together in one unified inspection record. Unprovided panels will be evaluated as Not Determined without blocking your results.
+            The compliance evaluation will analyze all available packaging panels together in one unified inspection record. Unprovided panels will be evaluated as Not Determined without blocking your results.
           </p>
 
           <table class="summary-evidence-table">
@@ -464,9 +560,14 @@
                 <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(2)">Change / Add</button></td>
               </tr>
               <tr>
-                <td><strong>Side Flap / Nutrition</strong></td>
-                <td id="summary-side-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
+                <td><strong>Side Panel 1 (Nutrition & Ingredients)</strong></td>
+                <td id="summary-side1-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
                 <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(3)">Change / Add</button></td>
+              </tr>
+              <tr>
+                <td><strong>Side Panel 2 (Batch, Barcode & USP)</strong></td>
+                <td id="summary-side2-status"><span class="badge badge-unclear">⚪ Not Available</span></td>
+                <td><button type="button" class="btn btn-outline btn-sm" onclick="goToStep(4)">Change / Add</button></td>
               </tr>
             </tbody>
           </table>
@@ -477,8 +578,8 @@
 
         <!-- Submit & Navigation Controls -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-          <button type="button" class="btn btn-ghost" onclick="goToStep(3)">
-            ← Back to Side Flap
+          <button type="button" class="btn btn-ghost" onclick="goToStep(4)">
+            ← Back to Side Panel 2
           </button>
           <button type="button" id="submit-inspection-btn" class="btn btn-primary btn-lg" onclick="startUnifiedAiInspection()" style="padding: 0.85rem 2.5rem; font-size: 1.05rem;" disabled>
             🚀 Start AI Inspection
@@ -495,48 +596,6 @@
       <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
     </div>
   </footer>
-
-  <!-- Upload Source Selection Sheet / Modal (Smartphone Action Sheet) -->
-  <div id="uploadSourceModal" class="modal-backdrop" style="display: none;" onclick="closeSourceModal()">
-    <div class="source-modal-sheet" onclick="event.stopPropagation()">
-      <div class="source-sheet-pill"></div>
-      <h3 id="sourceModalTitle" style="font-size: 1.15rem; margin: 0.5rem 0 0.25rem 0; font-weight: 700;">Select Packaging Photo Source</h3>
-      <p id="sourceModalSub" style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">Choose how you want to provide this packaging photograph:</p>
-      
-      <div class="source-options-list">
-        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('camera')">
-          <div class="source-btn-icon bg-blue-subtle">📸</div>
-          <div class="source-btn-text">
-            <strong>Take Photo with Camera</strong>
-            <span>Directly launch phone camera to snap packaging</span>
-          </div>
-          <span class="source-arrow">&rarr;</span>
-        </button>
-
-        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('gallery')">
-          <div class="source-btn-icon bg-purple-subtle">🖼️</div>
-          <div class="source-btn-text">
-            <strong>Photo Gallery / Library</strong>
-            <span>Choose from saved photos and camera roll</span>
-          </div>
-          <span class="source-arrow">&rarr;</span>
-        </button>
-
-        <button type="button" class="source-sheet-btn" onclick="selectSourceAction('files')">
-          <div class="source-btn-icon bg-amber-subtle">📁</div>
-          <div class="source-btn-text">
-            <strong>Device Files & Documents</strong>
-            <span>Browse iCloud, Downloads, or Internal Storage</span>
-          </div>
-          <span class="source-arrow">&rarr;</span>
-        </button>
-      </div>
-
-      <button type="button" class="btn btn-outline" style="width: 100%; margin-top: 1.25rem; padding: 0.75rem;" onclick="closeSourceModal()">
-        ✕ Cancel
-      </button>
-    </div>
-  </div>
 
   <!-- Firebase Compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

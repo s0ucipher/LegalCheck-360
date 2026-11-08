@@ -4,17 +4,19 @@
  * "Smart Packaging. Smarter Compliance."
  * ============================================================================
  * 
- * Implements a sequential, guided 4-step wizard:
+ * Implements a sequential, guided 5-step wizard with 4 packaging panels:
  * Step 1: Front Panel (PDP) [Upload or Not Available]
  * Step 2: Back Panel (MRP / Declarations) [Upload or Not Available]
- * Step 3: Side Flap / Nutrition [Upload or Not Available]
- * Step 4: Evidence Review & Start AI Inspection
+ * Step 3: Side Panel 1 (Nutrition & Ingredients) [Upload or Not Available]
+ * Step 4: Side Panel 2 (Batch, Barcode & USP) [Upload or Not Available]
+ * Step 5: Evidence Review & Start AI Inspection
  */
 
 const panelState = {
   front: { file: null, dataBase64: null, filename: null, mimeType: null, status: 'pending' },
   back: { file: null, dataBase64: null, filename: null, mimeType: null, status: 'pending' },
-  side: { file: null, dataBase64: null, filename: null, mimeType: null, status: 'pending' }
+  side1: { file: null, dataBase64: null, filename: null, mimeType: null, status: 'pending' },
+  side2: { file: null, dataBase64: null, filename: null, mimeType: null, status: 'pending' }
 };
 
 let currentStep = 1;
@@ -25,15 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Step Navigation Wizard
+ * Step Navigation Wizard (Steps 1 to 5)
  */
 window.goToStep = function(stepNum) {
-  if (stepNum < 1 || stepNum > 4) return;
+  if (stepNum < 1 || stepNum > 5) return;
   currentStep = stepNum;
   window.currentStep = stepNum;
 
   // Update progress indicators
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const ind = document.getElementById(`step-indicator-${i}`);
     const pane = document.getElementById(`pane-step-${i}`);
 
@@ -54,47 +56,20 @@ window.goToStep = function(stepNum) {
     }
   }
 
-  if (currentStep === 4) {
+  // Smooth scroll to top of upload wizard
+  const wizard = document.getElementById('wizard-progress');
+  if (wizard && window.innerWidth < 768) {
+    wizard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  if (currentStep === 5) {
     updateSummaryUI();
   }
 };
 
 /**
- * Multi-Source File Input Triggers & Modal Action Sheet
+ * Direct File Input Triggers (Zero Redundant Modals)
  */
-let currentModalPanel = 'front';
-
-window.openSourceModal = function(panel) {
-  currentModalPanel = panel || 'front';
-  const modal = document.getElementById('uploadSourceModal');
-  const title = document.getElementById('sourceModalTitle');
-  const sub = document.getElementById('sourceModalSub');
-  const panelTitles = {
-    front: 'Front Panel (Principal Display Panel)',
-    back: 'Back Panel (Declarations / MRP)',
-    side: 'Side Flap / Auxiliary View'
-  };
-  if (title) title.textContent = `Upload ${panelTitles[panel] || panel}`;
-  if (sub) sub.textContent = `Choose your photo source for ${panelTitles[panel] || panel}:`;
-  if (modal) modal.style.display = 'flex';
-};
-
-window.closeSourceModal = function() {
-  const modal = document.getElementById('uploadSourceModal');
-  if (modal) modal.style.display = 'none';
-};
-
-window.selectSourceAction = function(sourceType) {
-  closeSourceModal();
-  if (sourceType === 'camera') {
-    triggerCameraInput(currentModalPanel);
-  } else if (sourceType === 'gallery') {
-    triggerGalleryInput(currentModalPanel);
-  } else if (sourceType === 'files') {
-    triggerFilesInput(currentModalPanel);
-  }
-};
-
 window.triggerCameraInput = function(panel) {
   const el = document.getElementById(`camera-input-${panel}`);
   if (el) {
@@ -104,7 +79,7 @@ window.triggerCameraInput = function(panel) {
 };
 
 window.triggerGalleryInput = function(panel) {
-  const el = document.getElementById(`gallery-input-${panel}`) || document.getElementById(`file-input-${panel}`);
+  const el = document.getElementById(`gallery-input-${panel}`);
   if (el) {
     el.value = '';
     el.click();
@@ -119,15 +94,11 @@ window.triggerFilesInput = function(panel) {
   }
 };
 
-window.triggerFileInput = function(panel) {
-  openSourceModal(panel);
-};
-
 /**
- * Drag and Drop Setup for Each Panel
+ * Drag and Drop Setup for All 4 Panels
  */
 function setupDragAndDrop() {
-  ['front', 'back', 'side'].forEach(panel => {
+  ['front', 'back', 'side1', 'side2'].forEach(panel => {
     const zone = document.getElementById(`drop-zone-${panel}`);
     if (!zone) return;
 
@@ -151,7 +122,7 @@ function setupDragAndDrop() {
 }
 
 /**
- * Handle File Upload for Specific Panel (Resilient to Camera, Gallery & Files App)
+ * Handle File Upload for Specific Panel (Auto-Advances to Next Step)
  */
 window.handlePanelFile = function(panel, files) {
   if (!files || files.length === 0) return;
@@ -163,7 +134,7 @@ window.handlePanelFile = function(panel, files) {
   const isImageMime = file.type && file.type.toLowerCase().startsWith('image/');
 
   if (!isImageMime && !extMatch) {
-    showToast(`Unsupported format: ${file.name}. Please upload a packaging photo (JPG, PNG, WEBP, HEIC).`, 'error');
+    showToast(`Unsupported format: ${file.name}. Please upload a packaging photo (JPG, PNG, WEBP).`, 'error');
     return;
   }
 
@@ -183,7 +154,20 @@ window.handlePanelFile = function(panel, files) {
     };
 
     renderPanelPreview(panel);
-    showToast(`${getPanelDisplayName(panel)} photo uploaded successfully!`, 'success');
+    showToast(`✓ ${getPanelDisplayName(panel)} photo uploaded!`, 'success');
+
+    // Auto-advance smoothly to next step without requiring user to touch blank space
+    setTimeout(() => {
+      if (panel === 'front') {
+        goToStep(2);
+      } else if (panel === 'back') {
+        goToStep(3);
+      } else if (panel === 'side1') {
+        goToStep(4);
+      } else if (panel === 'side2') {
+        goToStep(5);
+      }
+    }, 450);
   };
   reader.readAsDataURL(file);
 };
@@ -215,7 +199,7 @@ function renderPanelPreview(panel) {
 }
 
 /**
- * Mark Panel as Not Available
+ * Mark Panel as Not Available (Auto-Advances)
  */
 window.markPanelUnavailable = function(panel) {
   panelState[panel] = {
@@ -238,13 +222,15 @@ window.markPanelUnavailable = function(panel) {
     goToStep(2);
   } else if (panel === 'back') {
     goToStep(3);
-  } else if (panel === 'side') {
+  } else if (panel === 'side1') {
     goToStep(4);
+  } else if (panel === 'side2') {
+    goToStep(5);
   }
 };
 
 /**
- * Reset / Clear Panel
+ * Reset / Clear Panel (Allows Retaking)
  */
 window.clearPanel = function(panel) {
   panelState[panel] = {
@@ -262,10 +248,10 @@ window.clearPanel = function(panel) {
 };
 
 /**
- * Update Summary Table & Review Validation on Step 4
+ * Update Summary Table & Review Validation on Step 5
  */
 function updateSummaryUI() {
-  const panels = ['front', 'back', 'side'];
+  const panels = ['front', 'back', 'side1', 'side2'];
   let uploadedCount = 0;
   let unavailableCount = 0;
 
@@ -276,11 +262,11 @@ function updateSummaryUI() {
     if (panelState[p].status === 'uploaded' && panelState[p].dataBase64) {
       uploadedCount++;
       td.innerHTML = `
-        <div style="display: flex; align-items: center;">
-          <img src="${panelState[p].dataBase64}" class="summary-thumbnail" alt="${p}">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <img src="${panelState[p].dataBase64}" class="summary-thumbnail" alt="${p}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
           <div>
             <span class="badge badge-pass" style="font-size: 0.75rem;">✓ Uploaded</span>
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">${panelState[p].filename || 'image.jpg'}</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${panelState[p].filename || 'image.jpg'}</div>
           </div>
         </div>
       `;
@@ -299,7 +285,7 @@ function updateSummaryUI() {
     if (banner) {
       banner.innerHTML = `
         <div class="alert alert-warning" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.85rem;">
-          ⚠️ <strong>Insufficient Photographic Evidence:</strong> All three packaging panels are marked unavailable. Please upload at least one packaging photograph (Front or Back) to run a valid compliance inspection.
+          ⚠️ <strong>Insufficient Photographic Evidence:</strong> No packaging photographs uploaded. Please provide at least one panel photograph (Front, Back, or Side) to run a valid compliance inspection.
         </div>
       `;
     }
@@ -307,8 +293,8 @@ function updateSummaryUI() {
   } else {
     if (banner) {
       const partialNote = unavailableCount > 0 
-        ? `<strong>Note:</strong> ${unavailableCount} panel(s) marked unavailable. Declarations normally on those panels will be evaluated as <em>Not Determined</em> without blocking your report.` 
-        : `All 3 packaging panels provided for comprehensive multi-view inspection.`;
+        ? `<strong>Note:</strong> ${unavailableCount} panel(s) marked unavailable. Declarations on those panels will be evaluated as <em>Not Determined</em> without blocking your statutory report.` 
+        : `All 4 packaging panels provided for full multi-view 360° compliance screening.`;
 
       banner.innerHTML = `
         <div class="alert alert-info" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.85rem;">
@@ -348,38 +334,37 @@ window.validateMandatoryFieldsLive = function() {
   const customVal = (customInput?.value || '').trim();
 
   if (nameInput) {
-    const err = document.getElementById('product-name-error');
-    if (nameVal) {
-      nameInput.style.borderColor = 'rgba(16, 185, 129, 0.6)';
-      nameInput.style.boxShadow = '';
-      if (err) err.style.display = 'none';
+    if (nameVal.length > 0) {
+      nameInput.style.borderColor = '#10b981';
+      document.getElementById('product-name-error').style.display = 'none';
+    } else {
+      nameInput.style.borderColor = '';
     }
   }
 
   if (catSelect) {
-    const err = document.getElementById('category-select-error');
-    if (catVal) {
-      catSelect.style.borderColor = 'rgba(16, 185, 129, 0.6)';
-      catSelect.style.boxShadow = '';
-      if (err) err.style.display = 'none';
+    if (catVal.length > 0) {
+      catSelect.style.borderColor = '#10b981';
+      document.getElementById('category-select-error').style.display = 'none';
+    } else {
+      catSelect.style.borderColor = '';
     }
   }
 
   if (customInput && catVal === 'others') {
-    const err = document.getElementById('custom-category-error');
-    if (customVal) {
-      customInput.style.borderColor = 'rgba(16, 185, 129, 0.6)';
-      customInput.style.boxShadow = '';
-      if (err) err.style.display = 'none';
+    if (customVal.length > 0) {
+      customInput.style.borderColor = '#10b981';
+      document.getElementById('custom-category-error').style.display = 'none';
+    } else {
+      customInput.style.borderColor = '';
     }
   }
 };
 
 /**
- * Start AI Inspection & Post Evidence to Backend
+ * Start Unified AI Compliance Inspection
  */
 window.startUnifiedAiInspection = async function() {
-  // Validate Mandatory Commodity Identity Fields
   const nameInput = document.getElementById('product-name-input');
   const catSelect = document.getElementById('category-select');
   const customInput = document.getElementById('custom-category-input');
@@ -388,65 +373,61 @@ window.startUnifiedAiInspection = async function() {
   const category = (catSelect?.value || '').trim();
   const customCategory = (customInput?.value || '').trim();
 
-  let hasValidationError = false;
+  let hasError = false;
 
   if (!productName) {
+    hasError = true;
     if (nameInput) {
       nameInput.style.borderColor = '#ef4444';
-      nameInput.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
-      const err = document.getElementById('product-name-error');
-      if (err) err.style.display = 'block';
-      nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
       nameInput.focus();
     }
-    showToast('⚠️ Product / Brand Name is mandatory. Please enter product identity.', 'error');
-    hasValidationError = true;
+    const errEl = document.getElementById('product-name-error');
+    if (errEl) errEl.style.display = 'block';
+  } else {
+    if (nameInput) nameInput.style.borderColor = '#10b981';
+    const errEl = document.getElementById('product-name-error');
+    if (errEl) errEl.style.display = 'none';
   }
 
   if (!category) {
-    if (catSelect) {
-      catSelect.style.borderColor = '#ef4444';
-      catSelect.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
-      const err = document.getElementById('category-select-error');
-      if (err) err.style.display = 'block';
-      if (!hasValidationError) {
-        catSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        catSelect.focus();
-      }
-    }
-    showToast('⚠️ Product Category is mandatory under Legal Metrology Rules.', 'error');
-    hasValidationError = true;
+    hasError = true;
+    if (catSelect) catSelect.style.borderColor = '#ef4444';
+    const errEl = document.getElementById('category-select-error');
+    if (errEl) errEl.style.display = 'block';
+  } else {
+    if (catSelect) catSelect.style.borderColor = '#10b981';
+    const errEl = document.getElementById('category-select-error');
+    if (errEl) errEl.style.display = 'none';
   }
 
   if (category === 'others' && !customCategory) {
+    hasError = true;
     if (customInput) {
       customInput.style.borderColor = '#ef4444';
-      customInput.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
-      const err = document.getElementById('custom-category-error');
-      if (err) err.style.display = 'block';
-      if (!hasValidationError) {
-        customInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        customInput.focus();
-      }
+      customInput.focus();
     }
-    showToast('⚠️ Please specify the custom commodity description.', 'error');
-    hasValidationError = true;
+    const errEl = document.getElementById('custom-category-error');
+    if (errEl) errEl.style.display = 'block';
+  } else if (category === 'others') {
+    if (customInput) customInput.style.borderColor = '#10b981';
+    const errEl = document.getElementById('custom-category-error');
+    if (errEl) errEl.style.display = 'none';
   }
 
-  if (hasValidationError) {
+  if (hasError) {
+    showToast('Product Name and Category are strictly mandatory for statutory compliance inspection.', 'error');
     return;
   }
 
-  const panels = ['front', 'back', 'side'];
+  const panels = ['front', 'back', 'side1', 'side2'];
   const uploadedImages = [];
   const unavailablePanels = [];
 
   panels.forEach(p => {
     if (panelState[p].status === 'uploaded' && panelState[p].dataBase64) {
       uploadedImages.push({
-        view_type: p,
         filename: panelState[p].filename || `${p}_view.jpg`,
-        mime_type: panelState[p].mimeType || 'image/jpeg',
+        view_type: p,
         data: panelState[p].dataBase64
       });
     } else {
@@ -455,7 +436,7 @@ window.startUnifiedAiInspection = async function() {
   });
 
   if (uploadedImages.length === 0) {
-    showToast('Please provide at least one packaging photograph.', 'error');
+    showToast('Please upload at least one packaging photograph before submitting.', 'error');
     return;
   }
 
@@ -472,28 +453,36 @@ window.startUnifiedAiInspection = async function() {
 
   try {
     simulateStep(1, `Uploading ${uploadedImages.length} packaging photograph(s)...`);
-    await delay(500);
+    await delay(450);
 
-    simulateStep(2, 'Validating image formats, panel views & signatures...');
-    await delay(500);
+    simulateStep(2, 'Validating multi-panel geometry, formats & signatures...');
+    await delay(450);
 
     simulateStep(3, 'Reading printed packaging text via OCR...');
     
-    // Send real API request
+    // Execute inspection API call
     const res = await API.createScan(payload);
 
     simulateStep(4, 'AI multimodal declaration extraction...');
     await delay(400);
 
-    simulateStep(5, 'Matching Legal Metrology (PCR 2011) requirements...');
+    simulateStep(5, 'Matching Legal Metrology (PCR 2011) statutory requirements...');
     await delay(400);
 
     simulateStep(6, 'Compiling compliance assessment & vector PDF report...');
     await delay(400);
 
     if (res.success && res.data && res.data.id) {
+      // Save locally as safety cache so results.html loads instantly with zero cold-start delay
+      try {
+        const cached = JSON.parse(localStorage.getItem('legalcheck_scans') || '[]');
+        const filtered = cached.filter(s => s.id !== res.data.id);
+        filtered.unshift(res.data);
+        localStorage.setItem('legalcheck_scans', JSON.stringify(filtered));
+      } catch (e) {}
+
       showToast('Packaging compliance inspection completed!', 'success');
-      window.location.href = `results.html?id=${res.data.id}`;
+      window.location.href = `results.html?id=${encodeURIComponent(res.data.id)}`;
     } else {
       hideScanningOverlay();
       showToast(res.error || 'Inspection failed. Please try again.', 'error');
@@ -519,67 +508,114 @@ window.loadSamplePreset = async function(presetType) {
       if (nameInput) nameInput.value = 'Royal Butter Delights Biscuits';
       if (catSelect) catSelect.value = 'packaged_food';
 
-      const frontB64 = await fetchImageAsBase64('tests/samples/biscuit_front.jpg');
-      const backB64 = await fetchImageAsBase64('tests/samples/biscuit_back.jpg');
+      panelState.front = {
+        file: { name: 'royal_butter_front_pdp.jpg', size: 145000 },
+        dataBase64: createSampleFallbackDataUrl('royal_butter_front_pdp.jpg', 'Royal Butter Delights', 'Net Qty: 200 g (SI Units)'),
+        filename: 'royal_butter_front_pdp.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
 
-      panelState.front = { file: { size: 45000 }, filename: 'biscuit_front.jpg', mimeType: 'image/jpeg', dataBase64: frontB64, status: 'uploaded' };
-      panelState.back = { file: { size: 55000 }, filename: 'biscuit_back.jpg', mimeType: 'image/jpeg', dataBase64: backB64, status: 'uploaded' };
-      panelState.side = { file: null, filename: null, mimeType: null, dataBase64: null, status: 'unavailable' };
+      panelState.back = {
+        file: { name: 'royal_butter_back_mrp.jpg', size: 182000 },
+        dataBase64: createSampleFallbackDataUrl('royal_butter_back_mrp.jpg', 'Mandatory Declarations', 'MRP Rs. 50.00 incl. taxes'),
+        filename: 'royal_butter_back_mrp.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
+
+      panelState.side1 = {
+        file: { name: 'royal_butter_nutrition_table.jpg', size: 120000 },
+        dataBase64: createSampleFallbackDataUrl('royal_butter_nutrition_table.jpg', 'Nutritional Facts Table', 'Energy 465 kcal / 100g'),
+        filename: 'royal_butter_nutrition_table.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
+
+      panelState.side2 = {
+        file: { name: 'royal_butter_batch_barcode.jpg', size: 110000 },
+        dataBase64: createSampleFallbackDataUrl('royal_butter_batch_barcode.jpg', 'Traceability & Batch', 'Batch #26N042 | B# 26N042'),
+        filename: 'royal_butter_batch_barcode.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
 
     } else if (presetType === 'noncompliant') {
-      if (nameInput) nameInput.value = 'Imported Caramel Crunch';
+      if (nameInput) nameInput.value = 'Caramel Crunchies Snack Bar';
       if (catSelect) catSelect.value = 'packaged_food';
 
-      const ncB64 = await fetchImageAsBase64('tests/samples/noncompliant_snack.jpg');
+      panelState.front = {
+        file: { name: 'caramel_noncompliant_pdp.jpg', size: 135000 },
+        dataBase64: createSampleFallbackDataUrl('caramel_noncompliant_pdp.jpg', 'Caramel Crunchies', 'Net Wt. 16 oz [ILLEGAL NON-METRIC]'),
+        filename: 'caramel_noncompliant_pdp.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
 
-      panelState.front = { file: null, filename: null, mimeType: null, dataBase64: null, status: 'unavailable' };
-      panelState.back = { file: { size: 48000 }, filename: 'noncompliant_snack.jpg', mimeType: 'image/jpeg', dataBase64: ncB64, status: 'uploaded' };
-      panelState.side = { file: null, filename: null, mimeType: null, dataBase64: null, status: 'unavailable' };
+      panelState.back = {
+        file: { name: 'caramel_noncompliant_back.jpg', size: 160000 },
+        dataBase64: createSampleFallbackDataUrl('caramel_noncompliant_back.jpg', 'Back Declarations', 'Price $4.99 [NO INR MRP]'),
+        filename: 'caramel_noncompliant_back.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
+
+      panelState.side1 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
+      panelState.side2 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
 
     } else if (presetType === 'blurry') {
-      if (nameInput) nameInput.value = 'Wheat Crisps (Partially Obscured)';
+      if (nameInput) nameInput.value = 'Wheat Crisps Health Crackers';
       if (catSelect) catSelect.value = 'packaged_food';
 
-      const blurB64 = await fetchImageAsBase64('tests/samples/blurry_sample.jpg');
+      panelState.front = {
+        file: { name: 'wheat_crisps_blurry.jpg', size: 95000 },
+        dataBase64: createSampleFallbackDataUrl('wheat_crisps_blurry.jpg', 'Wheat Crisps (Glare/Blurry)', 'Net Qty: [Partially Obscured]'),
+        filename: 'wheat_crisps_blurry.jpg',
+        mimeType: 'image/jpeg',
+        status: 'uploaded'
+      };
 
-      panelState.front = { file: { size: 38000 }, filename: 'blurry_sample.jpg', mimeType: 'image/jpeg', dataBase64: blurB64, status: 'uploaded' };
-      panelState.back = { file: null, filename: null, mimeType: null, dataBase64: null, status: 'unavailable' };
-      panelState.side = { file: null, filename: null, mimeType: null, dataBase64: null, status: 'unavailable' };
+      panelState.back = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
+      panelState.side1 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
+      panelState.side2 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
     }
 
     renderPanelPreview('front');
     renderPanelPreview('back');
-    renderPanelPreview('side');
+    renderPanelPreview('side1');
+    renderPanelPreview('side2');
+    validateMandatoryFieldsLive();
+    goToStep(5);
 
-    goToStep(4);
-    showToast(`Loaded ${presetType} preset. Click "Start AI Inspection" to evaluate!`, 'success');
+    showToast(`${presetType.toUpperCase()} preset loaded into all panels.`, 'success');
   } catch (err) {
-    console.error('Preset loading error:', err);
-    showToast('Failed to load sample image files.', 'error');
+    console.error('Preset load error:', err);
   }
 };
 
 /**
- * Scanning Modal Overlay
+ * Scanning Overlay Progress Simulator
  */
-function showScanningOverlay(uploadedCount, unavailableCount) {
+function showScanningOverlay(imagesCount, unavailCount) {
   let overlay = document.getElementById('scan-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'scan-overlay';
-    overlay.className = 'scan-overlay';
+    overlay.className = 'scan-overlay-backdrop';
     overlay.innerHTML = `
-      <div class="scan-modal">
-        <div class="radar-spinner"></div>
-        <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;">Analyzing Product Packaging</h2>
-        <p style="color: #9ca3af; font-size: 0.9rem;" id="scan-status-text">Processing image data...</p>
-        <div class="scan-steps">
-          <div class="scan-step-item" id="step-1"><span class="step-indicator">1</span> <span>Uploading packaging photographs</span></div>
-          <div class="scan-step-item" id="step-2"><span class="step-indicator">2</span> <span>Validating file signatures & dimensions</span></div>
-          <div class="scan-step-item" id="step-3"><span class="step-indicator">3</span> <span>Reading printed packaging text via OCR</span></div>
-          <div class="scan-step-item" id="step-4"><span class="step-indicator">4</span> <span>AI structured declaration extraction</span></div>
-          <div class="scan-step-item" id="step-5"><span class="step-indicator">5</span> <span>Evaluating Legal Metrology (PCR 2011) rules</span></div>
-          <div class="scan-step-item" id="step-6"><span class="step-indicator">6</span> <span>Generating vector compliance PDF report</span></div>
+      <div class="scan-overlay-card">
+        <div class="scan-spinner-large"></div>
+        <h3 id="scan-overlay-title" style="margin-top: 1rem; font-size: 1.3rem;">Evaluating Packaging Compliance</h3>
+        <p id="scan-overlay-subtitle" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
+          Evaluating ${imagesCount} uploaded panel(s) under Legal Metrology Rules...
+        </p>
+        <div class="scan-steps-list">
+          <div class="scan-step-item" id="sim-step-1"><span class="step-indicator">1</span><span class="step-label">Receiving Packaging Photographs</span></div>
+          <div class="scan-step-item" id="sim-step-2"><span class="step-indicator">2</span><span class="step-label">Validating Panel Geometries & Standards</span></div>
+          <div class="scan-step-item" id="sim-step-3"><span class="step-indicator">3</span><span class="step-label">Extracting Declarations via OCR</span></div>
+          <div class="scan-step-item" id="sim-step-4"><span class="step-indicator">4</span><span class="step-label">AI Multimodal Information Parsing</span></div>
+          <div class="scan-step-item" id="sim-step-5"><span class="step-indicator">5</span><span class="step-label">Evaluating Legal Metrology Rules, 2011</span></div>
+          <div class="scan-step-item" id="sim-step-6"><span class="step-indicator">6</span><span class="step-label">Generating Statutory Inspection Report</span></div>
         </div>
       </div>
     `;
@@ -588,12 +624,12 @@ function showScanningOverlay(uploadedCount, unavailableCount) {
   overlay.style.display = 'flex';
 }
 
-function simulateStep(stepNum, statusText) {
-  const statusEl = document.getElementById('scan-status-text');
-  if (statusEl) statusEl.textContent = statusText;
+function simulateStep(stepNum, subtitle) {
+  const sub = document.getElementById('scan-overlay-subtitle');
+  if (sub && subtitle) sub.textContent = subtitle;
 
   for (let i = 1; i <= 6; i++) {
-    const el = document.getElementById(`step-${i}`);
+    const el = document.getElementById(`sim-step-${i}`);
     if (!el) continue;
     if (i < stepNum) {
       el.className = 'scan-step-item completed';
@@ -618,41 +654,30 @@ function delay(ms) {
 function getPanelDisplayName(panel) {
   if (panel === 'front') return 'Front Panel (PDP)';
   if (panel === 'back') return 'Back Panel (MRP / Declarations)';
-  if (panel === 'side') return 'Side Flap / Nutrition';
+  if (panel === 'side1') return 'Side Panel 1 (Nutrition & Ingredients)';
+  if (panel === 'side2') return 'Side Panel 2 (Batch & Barcode)';
   return panel;
 }
 
-async function fetchImageAsBase64(url) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("File fetch failed");
-    const blob = await res.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (e) {
-    return createSampleFallbackDataUrl(url);
-  }
-}
-
-function createSampleFallbackDataUrl(filename) {
+function createSampleFallbackDataUrl(filename, title, subtitle) {
   const canvas = document.createElement('canvas');
   canvas.width = 600;
   canvas.height = 400;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#1e293b';
+  ctx.fillStyle = '#0f172a';
   ctx.fillRect(0, 0, 600, 400);
   ctx.fillStyle = '#38bdf8';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText('LegalCheck 360 Sample Package', 40, 60);
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillText('LegalCheck 360 Demonstration Sample', 40, 60);
+  ctx.fillStyle = '#10b981';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText(title || 'Packaged Commodity Evidence', 40, 110);
   ctx.fillStyle = '#f8fafc';
   ctx.font = '16px monospace';
-  ctx.fillText(`Sample Reference: ${filename}`, 40, 120);
-  ctx.fillText('MRP: Rs. 30.00 incl. of all taxes', 40, 160);
-  ctx.fillText('Net Qty: 150 g', 40, 200);
-  ctx.fillText('Mfd by: Delight Foods India Pvt. Ltd.', 40, 240);
+  ctx.fillText(subtitle || 'Mandatory Regulatory Declarations', 40, 160);
+  ctx.fillText(`File: ${filename}`, 40, 210);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '14px sans-serif';
+  ctx.fillText('Standard SI Metric Declarations under PCR 2011', 40, 270);
   return canvas.toDataURL('image/jpeg', 0.9);
 }

@@ -101,7 +101,8 @@ async function loadScanDetails(scanId) {
     showMainContent();
 
     // Check if coming back from login/register with ?claimed=1
-    if (params.get('claimed') === '1' && window.LegalCheckAuth && window.LegalCheckAuth.isLoggedIn()) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('claimed') === '1' && window.LegalCheckAuth && window.LegalCheckAuth.isLoggedIn()) {
       handleClaimInspection(scanId);
     } else {
       renderClaimBanner(currentScan);
@@ -294,10 +295,11 @@ function renderSectionB(fields, unavailablePanels = []) {
 
   const unavailSet = new Set((unavailablePanels || []).map(p => p.toLowerCase()));
 
-  // Panel definitions
+  // Panel definitions (Front, Back, Side Panel 1, Side Panel 2)
   const panels = [
     {
       id: 'front',
+      aliasIds: ['front'],
       name: 'Front Panel (Principal Display Panel - PDP)',
       icon: '🖼️',
       expected: ['product_name', 'net_quantity'],
@@ -305,27 +307,38 @@ function renderSectionB(fields, unavailablePanels = []) {
     },
     {
       id: 'back',
+      aliasIds: ['back'],
       name: 'Back Panel (Statutory Declarations / MRP Flap)',
       icon: '📋',
       expected: ['mrp', 'manufacturing_date', 'packing_date', 'manufacturer_name_address', 'manufacturer', 'consumer_care', 'country_of_origin', 'unit_sale_price', 'fssai_license'],
       desc: 'Mandatory MRP (incl. of all taxes), Date of packing, Manufacturer & Packer postal address with PIN, and Consumer Care helpline.'
     },
     {
-      id: 'side',
-      name: 'Side Flap / Nutrition & Batch Information',
+      id: 'side1',
+      aliasIds: ['side1', 'side', 'side_left'],
+      name: 'Side Panel 1 (Left Flap / Nutrition & Ingredients)',
+      icon: '🔬',
+      expected: ['nutritional_info', 'ingredients', 'fssai_license'],
+      desc: 'Nutritional facts table per 100g, ingredients list, allergen warnings, and food safety emblems.'
+    },
+    {
+      id: 'side2',
+      aliasIds: ['side2', 'side_right'],
+      name: 'Side Panel 2 (Right Flap / Batch, Barcode & Specifications)',
       icon: '📦',
-      expected: ['nutritional_info', 'batch_number', 'ingredients'],
-      desc: 'Nutritional facts table, batch/lot code, storage instructions, and allergen declarations.'
+      expected: ['batch_number', 'lot_number', 'unit_sale_price', 'electrical_spec', 'size_fabric_declaration'],
+      desc: 'Distinguishing lot/batch code for supply-chain traceability, barcodes, unit sale price, and technical specifications.'
     }
   ];
 
   container.innerHTML = '';
 
   panels.forEach(p => {
-    const isUnavail = unavailSet.has(p.id);
+    const isUnavail = unavailSet.has(p.id) || (p.aliasIds && p.aliasIds.some(a => unavailSet.has(a)));
     const panelFields = fields.filter(f => {
       const v = (f.source_view || '').toLowerCase();
       if (v === p.id) return true;
+      if (p.aliasIds && p.aliasIds.includes(v)) return true;
       if (!v && p.expected.includes(f.field_name.toLowerCase())) return true;
       return false;
     });

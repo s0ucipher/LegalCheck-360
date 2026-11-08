@@ -230,8 +230,9 @@
     p1.text('F2', 8.5, 48, 648, 'Packaging Evidence:', [0.42, 0.46, 0.52]);
     const frontSt = unavailPanels.includes('front') ? '[--] Front Unavailable' : '[OK] Front (PDP)';
     const backSt = unavailPanels.includes('back') ? '[--] Back Unavailable' : '[OK] Back (MRP)';
-    const sideSt = unavailPanels.includes('side') ? '[--] Side Flap Unavailable' : '[OK] Side Flap';
-    p1.text('F1', 8, 142, 648, `${frontSt}   |   ${backSt}   |   ${sideSt}`, [0.15, 0.35, 0.65]);
+    const side1St = (unavailPanels.includes('side1') || unavailPanels.includes('side')) ? '[--] Side 1 Unavailable' : '[OK] Side 1 (Nutrition)';
+    const side2St = (unavailPanels.includes('side2') || unavailPanels.includes('side')) ? '[--] Side 2 Unavailable' : '[OK] Side 2 (Batch)';
+    p1.text('F1', 7.5, 142, 648, `${frontSt}  |  ${backSt}  |  ${side1St}  |  ${side2St}`, [0.15, 0.35, 0.65]);
 
     // Row 5: Auditor & Human Verification
     p1.text('F2', 8.5, 48, 628, 'Auditor Verification:', [0.42, 0.46, 0.52]);
