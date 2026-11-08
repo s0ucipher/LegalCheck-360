@@ -1402,6 +1402,18 @@ body.theme-light .source-btn-text strong {
   color: #0f172a;
 }
 
+@media (max-width: 680px) {
+  .commodity-identity-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+}
+
+body.theme-smartphone .commodity-identity-grid {
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+}
+
 
 
 

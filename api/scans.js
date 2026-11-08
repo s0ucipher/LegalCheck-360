@@ -41,6 +41,13 @@ module.exports = (req, res) => {
     const images = Array.isArray(body.images) ? body.images : [];
     let rawText = body.raw_ocr_text || "";
 
+    if (!productName && (!body.fields || body.fields.length === 0)) {
+      return res.status(400).json({
+        success: false,
+        error: "Product / Brand Name is mandatory under Legal Metrology inspection guidelines."
+      });
+    }
+
     // Fields passed directly or extracted dynamically based on category/preset
     let fields = [];
     if (Array.isArray(body.fields) && body.fields.length > 0) {

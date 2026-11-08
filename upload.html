@@ -375,16 +375,36 @@
       <div class="wizard-pane" id="pane-step-4">
         <!-- Product Commodity Identity Card -->
         <div class="card" style="margin-bottom: 1.5rem;">
-          <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">1. Commodity Identity & Statutory Category</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h3 style="font-size: 1.15rem; margin: 0; color: var(--primary);">1. Commodity Identity & Statutory Category</h3>
+            <span class="badge badge-warning" style="font-size: 0.72rem; padding: 4px 10px; font-weight: 700; border-radius: 6px; letter-spacing: 0.03em;">
+              🔒 BOTH FIELDS MANDATORY
+            </span>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.45;">
+            Accurate product identification and statutory categorization are required to establish product actuality, ensure legal traceability, and apply the correct Legal Metrology (Packaged Commodities) Rules, 2011.
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;" class="commodity-identity-grid">
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="product-name-input">Product / Brand Name (Optional)</label>
-              <input type="text" id="product-name-input" class="form-control" placeholder="e.g. Britannia Good Day Cookies">
+              <label for="product-name-input" style="font-weight: 600; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
+                <span>Product / Brand Name <span style="color: #ef4444; font-weight: 700;">*</span></span>
+                <span style="font-size: 0.7rem; color: #ef4444; font-weight: 700; background: rgba(239, 68, 68, 0.1); padding: 1px 6px; border-radius: 4px;">MANDATORY</span>
+              </label>
+              <input type="text" id="product-name-input" class="form-control" placeholder="e.g. Britannia Good Day Butter Cookies (Required)" required oninput="validateMandatoryFieldsLive()">
+              <div id="product-name-error" style="display: none; color: #ef4444; font-size: 0.78rem; margin-top: 4px; font-weight: 500;">
+                ⚠️ Product / Brand Name is required for statutory traceability.
+              </div>
             </div>
+
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="category-select">Product Category (Legal Metrology)</label>
-              <select id="category-select" class="form-control" onchange="onCategoryChanged(this.value)">
-                <option value="packaged_food">Packaged Food & Confectionery (Biscuits, Snacks, Sweets)</option>
+              <label for="category-select" style="font-weight: 600; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
+                <span>Product Category (Legal Metrology) <span style="color: #ef4444; font-weight: 700;">*</span></span>
+                <span style="font-size: 0.7rem; color: #ef4444; font-weight: 700; background: rgba(239, 68, 68, 0.1); padding: 1px 6px; border-radius: 4px;">MANDATORY</span>
+              </label>
+              <select id="category-select" class="form-control" required onchange="onCategoryChanged(this.value); validateMandatoryFieldsLive();">
+                <option value="" disabled>-- Select Statutory Commodity Category (Mandatory) --</option>
+                <option value="packaged_food" selected>Packaged Food & Confectionery (Biscuits, Snacks, Sweets)</option>
                 <option value="beverages">Beverages, Water & Juices (Soft Drinks, Packaged Drinking Water)</option>
                 <option value="dairy">Dairy & Milk Products (Milk, Ghee, Butter, Paneer, Cheese)</option>
                 <option value="edible_oils">Edible Oils & Vanaspati (Mustard, Sunflower, Cooking Oils)</option>
@@ -399,11 +419,21 @@
                 <option value="general_packaged_goods">General Consumer Packaged Goods (CPG / Hardware)</option>
                 <option value="others">Others / Custom Commodity (Not Listed Above)</option>
               </select>
+              <div id="category-select-error" style="display: none; color: #ef4444; font-size: 0.78rem; margin-top: 4px; font-weight: 500;">
+                ⚠️ Product Category is required to evaluate applicable legal metrology rules.
+              </div>
             </div>
           </div>
+
           <div id="custom-category-container" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
-            <label for="custom-category-input" style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Specify Custom Commodity Type / Description:</label>
-            <input type="text" id="custom-category-input" class="form-control" placeholder="e.g. Pet Food, Industrial Adhesive, Automotive Lubes, Toy Packaging">
+            <label for="custom-category-input" style="font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
+              <span>Specify Custom Commodity Type / Description <span style="color: #ef4444; font-weight: 700;">*</span></span>
+              <span style="font-size: 0.7rem; color: #ef4444; font-weight: 700; background: rgba(239, 68, 68, 0.1); padding: 1px 6px; border-radius: 4px;">MANDATORY</span>
+            </label>
+            <input type="text" id="custom-category-input" class="form-control" placeholder="e.g. Pet Food, Industrial Adhesive, Automotive Lubes, Toy Packaging (Required)" oninput="validateMandatoryFieldsLive()">
+            <div id="custom-category-error" style="display: none; color: #ef4444; font-size: 0.78rem; margin-top: 4px; font-weight: 500;">
+              ⚠️ Please specify the commodity type for custom statutory evaluation.
+            </div>
           </div>
         </div>
 

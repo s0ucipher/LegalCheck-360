@@ -336,9 +336,107 @@ window.onCategoryChanged = function(val) {
 };
 
 /**
+ * Live Mandatory Fields Validator
+ */
+window.validateMandatoryFieldsLive = function() {
+  const nameInput = document.getElementById('product-name-input');
+  const catSelect = document.getElementById('category-select');
+  const customInput = document.getElementById('custom-category-input');
+
+  const nameVal = (nameInput?.value || '').trim();
+  const catVal = (catSelect?.value || '').trim();
+  const customVal = (customInput?.value || '').trim();
+
+  if (nameInput) {
+    const err = document.getElementById('product-name-error');
+    if (nameVal) {
+      nameInput.style.borderColor = 'rgba(16, 185, 129, 0.6)';
+      nameInput.style.boxShadow = '';
+      if (err) err.style.display = 'none';
+    }
+  }
+
+  if (catSelect) {
+    const err = document.getElementById('category-select-error');
+    if (catVal) {
+      catSelect.style.borderColor = 'rgba(16, 185, 129, 0.6)';
+      catSelect.style.boxShadow = '';
+      if (err) err.style.display = 'none';
+    }
+  }
+
+  if (customInput && catVal === 'others') {
+    const err = document.getElementById('custom-category-error');
+    if (customVal) {
+      customInput.style.borderColor = 'rgba(16, 185, 129, 0.6)';
+      customInput.style.boxShadow = '';
+      if (err) err.style.display = 'none';
+    }
+  }
+};
+
+/**
  * Start AI Inspection & Post Evidence to Backend
  */
 window.startUnifiedAiInspection = async function() {
+  // Validate Mandatory Commodity Identity Fields
+  const nameInput = document.getElementById('product-name-input');
+  const catSelect = document.getElementById('category-select');
+  const customInput = document.getElementById('custom-category-input');
+
+  const productName = (nameInput?.value || '').trim();
+  const category = (catSelect?.value || '').trim();
+  const customCategory = (customInput?.value || '').trim();
+
+  let hasValidationError = false;
+
+  if (!productName) {
+    if (nameInput) {
+      nameInput.style.borderColor = '#ef4444';
+      nameInput.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+      const err = document.getElementById('product-name-error');
+      if (err) err.style.display = 'block';
+      nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nameInput.focus();
+    }
+    showToast('⚠️ Product / Brand Name is mandatory. Please enter product identity.', 'error');
+    hasValidationError = true;
+  }
+
+  if (!category) {
+    if (catSelect) {
+      catSelect.style.borderColor = '#ef4444';
+      catSelect.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+      const err = document.getElementById('category-select-error');
+      if (err) err.style.display = 'block';
+      if (!hasValidationError) {
+        catSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        catSelect.focus();
+      }
+    }
+    showToast('⚠️ Product Category is mandatory under Legal Metrology Rules.', 'error');
+    hasValidationError = true;
+  }
+
+  if (category === 'others' && !customCategory) {
+    if (customInput) {
+      customInput.style.borderColor = '#ef4444';
+      customInput.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+      const err = document.getElementById('custom-category-error');
+      if (err) err.style.display = 'block';
+      if (!hasValidationError) {
+        customInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        customInput.focus();
+      }
+    }
+    showToast('⚠️ Please specify the custom commodity description.', 'error');
+    hasValidationError = true;
+  }
+
+  if (hasValidationError) {
+    return;
+  }
+
   const panels = ['front', 'back', 'side'];
   const uploadedImages = [];
   const unavailablePanels = [];
