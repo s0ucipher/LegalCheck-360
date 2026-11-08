@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile & Inspection History | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <!-- Firebase Compat SDK for Universal Web Compatibility -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Compact Single Button Device Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Toggle Desktop / Mobile view">
+          <span class="toggle-icon" id="deviceToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
+
+        <!-- Compact Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Toggle Dark / Light mode">
+          <span class="toggle-icon" id="themeToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="nav-left-group">
+        <button type="button" class="nav-back-btn" id="globalNavBackBtn" onclick="handleGlobalBack()" title="Go Back">
+          <svg class="back-arrow-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+        <a href="index.html" class="brand">
+          <div class="brand-icon">⚖️</div>
+          <div class="brand-text">LegalCheck <span>360</span></div>
+        </a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">Upload & Inspect</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <!-- Logged In Profile Content -->
+    <div id="authenticatedProfileView" style="display: none;">
+      <div class="app-header">
+        <div class="app-title-group">
+          <h1>Auditor Account Profile</h1>
+          <p>Manage your account credentials, compliance inspection registry, and security settings</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a href="history.html" class="btn btn-outline">📜 My Inspection History</a>
+          <a href="upload.html" class="btn btn-primary">📸 New Inspection</a>
+        </div>
+      </div>
+
+      <!-- User Identity Card -->
+      <div class="profile-overview-card">
+        <div class="profile-avatar-large" id="profileAvatarInitials">AU</div>
+        <div>
+          <div class="profile-meta-title" id="profileDisplayName">Auditor User</div>
+          <div class="profile-meta-email" id="profileEmail">auditor@legalcheck360.gov.in</div>
+          <div class="profile-badge-row">
+            <span class="badge-account-type">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Permanent Inspection Account
+            </span>
+            <span class="badge-account-type" id="profileProviderBadge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-color: rgba(59, 130, 246, 0.3);">
+              Firebase Authenticated
+            </span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);" id="profileUidDisplay">UID: usr_...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Inspection Statistics Grid -->
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Personal Compliance Record</h2>
+      <div class="metrics-grid" style="margin-bottom: 2.5rem;">
+        <div class="metric-card">
+          <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">📦</div>
+          <div class="metric-content">
+            <div class="metric-value" id="userTotalScans">0</div>
+            <div class="metric-label">Total Inspections Saved</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✅</div>
+          <div class="metric-content">
+            <div class="metric-value" id="userCompliantScans">0</div>
+            <div class="metric-label">Compliant Packages</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚠️</div>
+          <div class="metric-content">
+            <div class="metric-value" id="userNonCompliantScans">0</div>
+            <div class="metric-label">Violations Detected</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">🔍</div>
+          <div class="metric-content">
+            <div class="metric-value" id="userReviewScans">0</div>
+            <div class="metric-label">Human Review Required</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">🎯</div>
+          <div class="metric-content">
+            <div class="metric-value" id="userComplianceRate">0%</div>
+            <div class="metric-label">Compliance Success Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security & Account Management -->
+      <div class="card" style="padding: 1.75rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Security & Session Controls</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          Your inspection data is linked to your Firebase UID. All inspections performed while signed in are permanently retained.
+        </p>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline" onclick="triggerPasswordReset()">
+            🔑 Request Password Reset Link
+          </button>
+          <button type="button" class="btn btn-danger" onclick="handleAccountLogout()">
+            🚪 Sign Out of LegalCheck 360
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest / Not Logged In View -->
+    <div id="guestProfileView" style="display: none; max-width: 580px; margin: 3rem auto; text-align: center;">
+      <div class="card" style="padding: 2.5rem 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
+        <h2 style="font-size: 1.45rem; font-weight: 800; margin-bottom: 0.5rem;">You are using Guest Mode</h2>
+        <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.75rem;">
+          You can freely inspect packaged commodities without an account. However, creating an account permanently saves your inspection history, allows multi-device access, and tracks compliance metrics.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="login.html" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Sign In</a>
+          <a href="register.html" class="btn btn-outline" style="padding: 0.75rem 1.5rem;">Create Free Account</a>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          <a href="upload.html" class="btn-guest-inspect">🚀 Start Packaging Inspection as Guest</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      setTimeout(async () => {
+        const user = LegalCheckAuth.getCurrentUser();
+        if (!user) {
+          document.getElementById('guestProfileView').style.display = 'block';
+          document.getElementById('authenticatedProfileView').style.display = 'none';
+          return;
+        }
+
+        document.getElementById('authenticatedProfileView').style.display = 'block';
+        document.getElementById('guestProfileView').style.display = 'none';
+
+        // Render profile information
+        const displayName = user.displayName || user.email.split('@')[0];
+        document.getElementById('profileDisplayName').textContent = displayName;
+        document.getElementById('profileEmail').textContent = user.email || 'Email not declared';
+        document.getElementById('profileAvatarInitials').textContent = (displayName || 'AU').substring(0, 2).toUpperCase();
+        document.getElementById('profileUidDisplay').textContent = `UID: ${user.uid}`;
+        if (user.provider) {
+          document.getElementById('profileProviderBadge').textContent = user.provider.includes('google') ? 'Google Account' : 'Password Authenticated';
+        }
+
+        // Fetch User Statistics
+        try {
+          const statsRes = await LegalCheckAPI.getUserStats();
+          if (statsRes && statsRes.data) {
+            const data = statsRes.data;
+            document.getElementById('userTotalScans').textContent = data.total_inspections || 0;
+            document.getElementById('userCompliantScans').textContent = data.compliant_inspections || 0;
+            document.getElementById('userNonCompliantScans').textContent = data.non_compliant_inspections || 0;
+            document.getElementById('userReviewScans').textContent = data.inspections_requiring_review || 0;
+            document.getElementById('userComplianceRate').textContent = (data.compliance_rate || 0).toFixed(1) + '%';
+          }
+        } catch (e) {
+          console.warn('Could not load user stats:', e);
+        }
+      }, 150);
+    });
+
+    async function triggerPasswordReset() {
+      const user = LegalCheckAuth.getCurrentUser();
+      if (!user || !user.email) return;
+      if (confirm(`Send password reset email to ${user.email}?`)) {
+        try {
+          const res = await LegalCheckAuth.resetPassword(user.email);
+          if (typeof showToast === 'function') {
+            showToast(res.message || 'Password reset email sent!', 'success');
+          } else {
+            alert(res.message || 'Password reset email sent!');
+          }
+        } catch (err) {
+          alert(err.message || 'Error sending reset email.');
+        }
+      }
+    }
+
+    async function handleAccountLogout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        await LegalCheckAuth.logout();
+      }
+    }
+  </script>
+</body>
+</html>
+

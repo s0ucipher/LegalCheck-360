@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Rules Management | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Compact Single Button Device Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Toggle Desktop / Mobile view">
+          <span class="toggle-icon" id="deviceToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
+
+        <!-- Compact Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Toggle Dark / Light mode">
+          <span class="toggle-icon" id="themeToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="nav-left-group">
+        <button type="button" class="nav-back-btn" id="globalNavBackBtn" onclick="handleGlobalBack()" title="Go Back">
+          <svg class="back-arrow-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+        <a href="index.html" class="brand">
+          <div class="brand-icon">⚖️</div>
+          <div class="brand-text">LegalCheck <span>360</span></div>
+        </a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">New Scan</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link active">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <div class="app-header">
+      <div class="app-title-group">
+        <h1>Regulatory Rules Engine Administration</h1>
+        <p>Manage versioned statutory provisions, amendments, and category checklists</p>
+      </div>
+      <div>
+        <button type="button" id="open-add-rule-btn" class="btn btn-primary">
+          + Add Statutory Rule
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Rules Table -->
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title">Indian Legal Metrology (Packaged Commodities) Rules, 2011</h3>
+        <span class="badge badge-pass">OFFICIAL GOVERNMENT CITATIONS</span>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Rule ID</th>
+            <th>Statutory Requirement</th>
+            <th>Legal Reference Citation</th>
+            <th>Category</th>
+            <th>Verified Date</th>
+            <th>Active Status</th>
+          </tr>
+        </thead>
+        <tbody id="admin-rules-tbody">
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">Loading statutory rules...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Add Rule Modal -->
+    <div id="add-rule-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Add Statutory Compliance Rule</h2>
+        <form id="add-rule-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="modal-rule-id">Rule ID (e.g. LMR-RULE-NEW)</label>
+              <input type="text" id="modal-rule-id" class="form-control" required placeholder="LMR-RULE-...">
+            </div>
+            <div class="form-group">
+              <label for="modal-category">Applicable Category</label>
+              <select id="modal-category" class="form-control">
+                <option value="all">All Packaged Commodities</option>
+                <option value="packaged_food">Packaged Food</option>
+                <option value="beverages">Beverages</option>
+                <option value="cosmetics">Cosmetics</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-rule-name">Rule Title</label>
+            <input type="text" id="modal-rule-name" class="form-control" required placeholder="e.g. Nutritional Information Declaration">
+          </div>
+
+          <div class="form-group">
+            <label for="modal-reference">Legal Citation Reference</label>
+            <input type="text" id="modal-reference" class="form-control" required placeholder="e.g. Rule 6(1)(d), PCR 2011 read with FSSAI Reg.">
+          </div>
+
+          <div class="form-group">
+            <label for="modal-requirement">Requirement Description</label>
+            <textarea id="modal-requirement" class="form-control" rows="3" required placeholder="Detail the exact legal obligation..."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="button" id="close-rule-modal-btn" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Rule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
+

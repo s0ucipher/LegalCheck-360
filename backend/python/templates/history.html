@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit History | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <!-- Firebase Compat SDK for Universal Web Compatibility -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Compact Single Button Device Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Toggle Desktop / Mobile view">
+          <span class="toggle-icon" id="deviceToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
+
+        <!-- Compact Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Toggle Dark / Light mode">
+          <span class="toggle-icon" id="themeToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="nav-left-group">
+        <button type="button" class="nav-back-btn" id="globalNavBackBtn" onclick="handleGlobalBack()" title="Go Back">
+          <svg class="back-arrow-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+        <a href="index.html" class="brand">
+          <div class="brand-icon">⚖️</div>
+          <div class="brand-text">LegalCheck <span>360</span></div>
+        </a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">Upload & Inspect</a></li>
+          <li><a href="history.html" class="nav-link active">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+    <!-- Guest Notification Banner (Option A) -->
+    <div id="guestHistoryNotice" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 260px;">
+        <span style="font-size: 1.5rem;">⏱️</span>
+        <div>
+          <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main);">Temporary Guest Session</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Inspections done without an account are stored in temporary session cache. Create an account to permanently retain records, access audits from any device, and track historical compliance trends.
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Create Free Account</a>
+      </div>
+    </div>
+
+    <div class="app-header">
+      <div class="app-title-group">
+        <h1 id="historyPageHeading">Packaging Inspection Audit Trail</h1>
+        <p id="historyPageSubheading">Complete historical registry of inspected consumer goods and regulatory outcomes</p>
+      </div>
+      <div>
+        <a href="upload.html" class="btn btn-primary">📸 New Inspection</a>
+      </div>
+    </div>
+
+    <!-- Metrics Summary Bar -->
+    <div class="metrics-grid" style="margin-bottom: 1.75rem;">
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">📋</div>
+        <div class="metric-content">
+          <div class="metric-value" id="historyTotalCount">0</div>
+          <div class="metric-label">Total Records</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✅</div>
+        <div class="metric-content">
+          <div class="metric-value" id="historyPassCount">0</div>
+          <div class="metric-label">Compliant (PASS)</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">❌</div>
+        <div class="metric-content">
+          <div class="metric-value" id="historyFailCount">0</div>
+          <div class="metric-label">Non-Compliant (FAIL)</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">🔍</div>
+        <div class="metric-content">
+          <div class="metric-value" id="historyReviewCount">0</div>
+          <div class="metric-label">Needs Review</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">📈</div>
+        <div class="metric-content">
+          <div class="metric-value" id="historyRateVal">0%</div>
+          <div class="metric-label">Compliance Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.25rem;">
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 220px;">
+          <input type="text" id="search-input" class="form-control" placeholder="🔍 Search by Scan ID or Product Name...">
+        </div>
+        <div style="width: 170px;">
+          <select id="status-filter" class="form-control">
+            <option value="ALL">All Outcomes</option>
+            <option value="PASS">Compliant (PASS)</option>
+            <option value="FAIL">Non-Compliant (FAIL)</option>
+            <option value="REVIEW_REQUIRED">Needs Review</option>
+          </select>
+        </div>
+        <div style="width: 170px;">
+          <select id="sort-filter" class="form-control">
+            <option value="date-desc">Newest First</option>
+            <option value="date-asc">Oldest First</option>
+            <option value="score-desc">Highest Score</option>
+            <option value="score-asc">Lowest Score</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Scan ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Inspection Date</th>
+            <th>Overall Status</th>
+            <th>Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">Loading inspection records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>

@@ -40,6 +40,11 @@ all: dirs sync-static $(BIN)
 sync-static:
 	@cp -f frontend/*.html . 2>/dev/null || true
 	@cp -rf frontend/css frontend/js frontend/assets . 2>/dev/null || true
+	@mkdir -p backend/python/static backend/python/templates 2>/dev/null || true
+	@cp -f frontend/*.html backend/python/ 2>/dev/null || true
+	@cp -f frontend/*.html backend/python/templates/ 2>/dev/null || true
+	@cp -rf frontend/css frontend/js frontend/assets backend/python/ 2>/dev/null || true
+	@cp -rf frontend/css frontend/js frontend/assets backend/python/static/ 2>/dev/null || true
 
 dirs:
 	@mkdir -p $(BUILD_DIR)/$(LIB_DIR)

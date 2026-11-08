@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Inspection Results | LegalCheck 360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+  <!-- Top Utility Bar: Smartphone Mode & Theme Switcher -->
+  <div class="top-utility-bar">
+    <div class="container top-utility-container">
+      <div class="utility-left">
+        <span class="utility-badge">🇮🇳 Legal Metrology Act 2009 & PCR 2011</span>
+        <span class="utility-hint">Official Regulatory Screening Engine</span>
+      </div>
+      <div class="utility-right">
+        <!-- Compact Single Button Device Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()"
+          title="Toggle Desktop / Mobile view">
+          <span class="toggle-icon" id="deviceToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </span>
+          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
+        </button>
+
+        <!-- Compact Single Button Theme Switcher -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()"
+          title="Toggle Dark / Light mode">
+          <span class="toggle-icon" id="themeToggleIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </span>
+          <span class="toggle-label" id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="nav-left-group">
+        <button type="button" class="nav-back-btn" id="globalNavBackBtn" onclick="handleGlobalBack()" title="Go Back">
+          <svg class="back-arrow-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+        <a href="index.html" class="brand">
+          <div class="brand-icon">⚖️</div>
+          <div class="brand-text">LegalCheck <span>360</span></div>
+        </a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="upload.html" class="nav-link">New Scan</a></li>
+          <li><a href="history.html" class="nav-link">Audit History</a></li>
+          <li><a href="admin.html" class="nav-link">Legal Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding: 2rem 1.5rem 4rem;">
+
+    <!-- LOADING STATE -->
+    <div id="results-loading-state" class="results-loading-state">
+      <div class="loading-spinner"></div>
+      <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+        Analysing Packaging Compliance...
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 520px; line-height: 1.5;">
+        Evaluating extracted packaging declarations against statutory standards under the <strong>Legal Metrology (Packaged Commodities) Rules, 2011</strong>.
+      </p>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="results-error-state" class="results-error-state">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: #ef4444; margin-bottom: 0.5rem;">
+        Inspection Record Not Found
+      </h2>
+      <p id="error-message-text" style="color: var(--text-muted); max-width: 540px; margin: 0 auto 1.5rem; line-height: 1.5;">
+        The requested inspection scan ID could not be retrieved from the server or local session. Please check the scan ID or start a new product inspection.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="upload.html" class="btn btn-primary">🚀 Start New Inspection</a>
+        <a href="dashboard.html" class="btn btn-secondary">📊 View Inspector Dashboard</a>
+      </div>
+    </div>
+
+    <!-- MAIN REPORT CONTENT (Shown once loaded) -->
+    <div id="results-main-content" style="display: none;">
+
+      <!-- Guest-to-Account Persistent Transition Banner -->
+      <div id="guestClaimBanner" class="guest-claim-card" style="display: none;">
+        <div class="guest-claim-info">
+          <div class="guest-claim-title">
+            <span>💾</span> Save this inspection report permanently
+          </div>
+          <div class="guest-claim-desc" id="guestClaimDesc">
+            This inspection was run in a temporary session. Save it to your LegalCheck 360 account to retain this compliance certificate permanently.
+          </div>
+        </div>
+        <div class="guest-claim-actions" id="guestClaimActions">
+          <button type="button" class="btn btn-primary btn-sm" id="btnClaimInspection" onclick="handleClaimInspection()">
+            💾 Save to My Account
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION A: INSPECTION SUMMARY (Executive Header Card) -->
+      <section class="results-header-card" style="margin-bottom: 2rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 6px; flex-wrap: wrap;">
+            <span style="font-size: 0.8rem; color: #9ca3af; font-weight: 700; text-transform: uppercase;">
+              SECTION A: INSPECTION SUMMARY
+            </span>
+            <span class="badge badge-neutral" id="header-scan-id" style="font-family: monospace;">Loading ID...</span>
+          </div>
+          
+          <h1 id="header-product-name" style="font-size: 2rem; font-weight: 800; margin-bottom: 0.65rem; color: var(--text-main);">
+            Product Inspection
+          </h1>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            <div>Category: <strong id="header-category" style="color: var(--text-main); text-transform: capitalize;">-</strong></div>
+            <div>•</div>
+            <div>Date: <strong id="header-date" style="color: var(--text-main);">-</strong></div>
+          </div>
+
+          <!-- Evidence Panels Badges -->
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+            <span class="badge badge-info" id="header-uploaded-count">📸 Uploaded: - Panels</span>
+            <span class="badge badge-neutral" id="header-unavail-count">⚪ Unavailable: - Panels</span>
+            <span class="badge badge-pass" id="header-verified-chip" style="display: none;">✓ Verified by Inspector</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; min-width: 260px;">
+          <div id="header-status-badge" class="badge badge-unclear score-badge-large">
+            EVALUATING...
+          </div>
+          
+          <div style="width: 100%; text-align: right;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span style="color: var(--text-muted);">Compliance Score:</span>
+              <strong id="header-score-text" style="color: var(--primary); font-size: 1rem;">--%</strong>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(100, 116, 139, 0.2); border-radius: 4px; overflow: hidden;">
+              <div id="header-score-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.6s ease;"></div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 4px;" id="header-score-subtitle">
+              Calculated over applicable statutory rules
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
+            <button type="button" id="download-pdf-btn" onclick="downloadPdfReport(event)" class="btn btn-primary btn-sm">
+              📄 Download PDF Report
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToAuditorSection()">
+              👨‍⚖️ Auditor Controls
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav">
+        <button type="button" class="tab-btn active" data-tab="tab-statutory-audit">
+          📋 Statutory Compliance Assessment (Sections C, D, E)
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-declarations">
+          🔍 Extracted Declarations by Panel (Section B)
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-auditor-review">
+          👨‍⚖️ Auditor Final Determination (Section F)
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-evidence-pdf">
+          📸 Packaging Evidence & PDF Report (Section G)
+        </button>
+      </div>
+
+      <!-- TAB 1: STATUTORY COMPLIANCE ASSESSMENT (SECTIONS C, D, E) -->
+      <div id="tab-statutory-audit" class="tab-content active">
+
+        <!-- SECTION C: STATUTORY COMPLIANCE ASSESSMENT -->
+        <section style="margin-bottom: 2.5rem;">
+          <div class="report-section-header">
+            <div>
+              <h2 class="report-section-title">
+                <span class="report-section-letter">C</span>
+                Statutory Compliance Assessment
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">
+                Rule-by-rule statutory analysis under the <strong>Legal Metrology (Packaged Commodities) Rules, 2011</strong>. Review evidence, presence status, compliance status, and override AI determinations if necessary.
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="badge badge-pass" id="stat-pass-count">0 Compliant</span>
+              <span class="badge badge-fail" id="stat-fail-count">0 Non-Compliant</span>
+              <span class="badge badge-warning" id="stat-unclear-count">0 Review</span>
+              <span class="badge badge-info" id="stat-notdet-count">0 Not Determined</span>
+            </div>
+          </div>
+
+          <div id="rules-matrix-container">
+            <!-- Dynamic detailed cards rendered by results.js -->
+          </div>
+        </section>
+
+        <!-- SECTION D: MISSING OR UNVERIFIABLE INFORMATION -->
+        <section style="margin-bottom: 2.5rem;">
+          <div class="report-section-header">
+            <div>
+              <h2 class="report-section-title">
+                <span class="report-section-letter" style="background: #f59e0b;">D</span>
+                Missing or Unverifiable Information
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">
+                Specific declarations that were omitted by the packager, unreadable due to photo quality, or pending inspection because a packaging panel was unavailable.
+              </p>
+            </div>
+          </div>
+
+          <div id="gaps-summary-container">
+            <!-- Dynamic gaps rendered by results.js -->
+          </div>
+        </section>
+
+        <!-- SECTION E: RECOMMENDED CORRECTIVE ACTIONS -->
+        <section style="margin-bottom: 2.5rem;">
+          <div class="report-section-header">
+            <div>
+              <h2 class="report-section-title">
+                <span class="report-section-letter" style="background: #10b981;">E</span>
+                Recommended Corrective Actions
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">
+                Consolidated statutory guidance and remedial measures required for the packaging to achieve full legal compliance.
+              </p>
+            </div>
+          </div>
+
+          <div id="corrective-actions-container">
+            <!-- Dynamic corrective actions rendered by results.js -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- TAB 2: EXTRACTED DECLARATIONS BY PANEL (SECTION B) -->
+      <div id="tab-declarations" class="tab-content">
+        <section style="margin-bottom: 2rem;">
+          <div class="report-section-header">
+            <div>
+              <h2 class="report-section-title">
+                <span class="report-section-letter" style="background: #3b82f6;">B</span>
+                Extracted Packaging Information (By Packaging Panel)
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">
+                Mandatory declarations extracted by high-precision OCR and multimodal AI, organized by packaging panel. You can edit or verify extracted values directly in the inputs below.
+              </p>
+            </div>
+          </div>
+
+          <div id="panel-declarations-container">
+            <!-- Rendered by results.js into Front, Back, and Side panel cards -->
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 3: AUDITOR FINAL DETERMINATION (SECTION F) -->
+      <div id="tab-auditor-review" class="tab-content">
+        <section id="section-auditor-review" class="auditor-determination-card">
+          <div class="report-section-header" style="border-bottom-color: rgba(59, 130, 246, 0.3);">
+            <div>
+              <h2 class="report-section-title">
+                <span class="report-section-letter" style="background: #8b5cf6;">F</span>
+                Human Auditor Review & Final Determination
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">
+                Under Indian Legal Metrology enforcement, automated AI and OCR screening is advisory. <strong>The authorized human auditor exercises final statutory authority.</strong>
+              </p>
+            </div>
+            <div>
+              <span class="badge badge-pass" id="auditor-verified-pill" style="display: none;">✓ Determination Confirmed</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="auditor-name-input" style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
+                Auditor Name & Inspector ID:
+              </label>
+              <input type="text" id="auditor-name-input" class="form-control" value="Legal Metrology Inspector / Senior Officer" placeholder="e.g. S. Sharma (Inspector LM-WB-042)">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="auditor-decision-select" style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
+                Official Statutory Determination:
+              </label>
+              <select id="auditor-decision-select" class="form-control" style="font-weight: 700;">
+                <option value="APPROVED">✓ APPROVED (Complies with PCR 2011)</option>
+                <option value="REJECTED">✗ REJECTED (Statutory Violations Confirmed)</option>
+                <option value="PASS_WITH_REMARKS">⚠️ CONDITIONAL PASS (Pass with Rectification Remarks)</option>
+                <option value="PARTIAL_INSPECTION">⚪ PARTIAL AUDIT (Pending Additional Photographs)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="auditor-notes-input" style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
+              Auditor Inspection Observations & Endorsement:
+            </label>
+            <textarea id="auditor-notes-input" class="form-control" rows="3" placeholder="Enter official statutory observations, notice issuance references, or packaging rectification requirements..."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 0.8rem; color: var(--text-sub);">
+              * Confirming final determination saves auditor overrides and reflects directly on the downloadable official PDF report.
+            </div>
+            <button type="button" class="btn btn-success" id="btn-finalize-determination" onclick="finalizeUserDecision()">
+              ✓ Confirm & Finalize Determination
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 4: EVIDENCE & PDF REPORT (SECTION G) -->
+      <div id="tab-evidence-pdf" class="tab-content">
+
+        <!-- SECTION G: OFFICIAL PDF REPORT -->
+        <section class="pdf-download-card">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 4px;">
+              <span class="report-section-letter" style="background: #ef4444;">G</span>
+              <strong style="font-size: 1.15rem; color: var(--text-main);">Official Statutory Inspection Report (PDF)</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0; max-width: 600px;">
+              Generated pure vector compliance report conforming to the <strong>Legal Metrology (Packaged Commodities) Rules, 2011</strong>. Includes complete rule citations, extracted packaging evidence, auditor notes, and statutory determinations.
+            </p>
+          </div>
+          <button type="button" id="download-pdf-btn-large" onclick="downloadPdfReport(event)" class="btn btn-primary">
+            📄 Download Official PDF Report
+          </button>
+        </section>
+
+        <!-- PACKAGING PHOTOGRAPHS -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h3 class="card-title" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+            <span>📸</span> Uploaded Packaging Photographs
+          </h3>
+          <div class="preview-grid" id="results-images-grid">
+            <!-- Rendered by results.js -->
+          </div>
+        </div>
+
+        <!-- RAW OCR STREAM -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+            <span>🔤</span> Raw Packaging OCR Typography Stream
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            Unprocessed text stream captured from packaging typography by optical character recognition.
+          </p>
+          <pre id="raw-ocr-text-view" style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 1.25rem; border-radius: 8px; color: #38bdf8; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; max-height: 280px; overflow-y: auto;"></pre>
+        </div>
+
+      </div>
+
+      <!-- Statutory Disclaimer -->
+      <div class="disclaimer-banner" style="margin-top: 3rem;">
+        <strong>⚠️ OFFICIAL STATUTORY DISCLAIMER:</strong>
+        This report represents an automated, preliminary compliance audit conducted under the provisions of the Legal Metrology (Packaged Commodities) Rules, 2011. This assessment does NOT constitute an official government certificate, legal license, or binding governmental determination. Any disputed, partial, or unreadable packaging markings require physical verification by an authorized Legal Metrology Inspector.
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+      <div>Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011</div>
+    </div>
+  </footer>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pdf-generator.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/results.js"></script>
+</body>
+
+</html>

@@ -24,10 +24,12 @@ CREATE TABLE IF NOT EXISTS scans (
     is_guest INTEGER DEFAULT 1,                -- 1 = Guest inspection, 0 = Authenticated permanent
     product_name TEXT DEFAULT 'Unknown Product',
     category TEXT DEFAULT 'general_packaged_goods',
+    custom_category TEXT DEFAULT '',
     brand_name TEXT DEFAULT '',
     raw_ocr_text TEXT DEFAULT '',
     overall_status TEXT CHECK(overall_status IN ('PASS', 'FAIL', 'UNCLEAR', 'PENDING', 'REVIEW_REQUIRED')) DEFAULT 'PENDING',
     compliance_score REAL DEFAULT 0.0,
+    data_json TEXT DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL

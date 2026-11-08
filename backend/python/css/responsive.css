@@ -1,0 +1,151 @@
+/**
+ * ============================================================================
+ * LegalCheck 360: Responsive Layout Breakpoints (CSS3)
+ * "Smart Packaging. Smarter Compliance."
+ * ============================================================================
+ */
+
+/* Tablets and small desktops */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .results-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none; /* Mobile menu can be toggled */
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .action-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .custom-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Wizard Steps on Mobile: 2x2 Clean Responsive Grid */
+  .wizard-progress {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+
+  .wizard-step-indicator {
+    padding: 0.5rem 0.65rem !important;
+    font-size: 0.75rem !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .step-num {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Result Header and Badges on Mobile */
+  .results-header-card {
+    padding: 1.25rem !important;
+  }
+
+  .results-header-card h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .score-badge-large {
+    font-size: 0.95rem !important;
+    padding: 0.6rem 1rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Tabs Navigation: Horizontal swipeable tabs on Mobile */
+  .tabs-nav {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    padding-bottom: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .tab-btn {
+    font-size: 0.85rem !important;
+    padding: 0.6rem 0.85rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Rule Cards on Mobile */
+  .rule-card-detailed {
+    padding: 1rem 1.15rem !important;
+  }
+
+  .rule-card-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .rule-decision-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .rule-status-selector {
+    width: 100% !important;
+  }
+}
+
+
