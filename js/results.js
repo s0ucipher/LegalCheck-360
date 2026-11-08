@@ -151,9 +151,12 @@ function renderSectionA(scan) {
 
   const pdfBtn = document.getElementById('download-pdf-btn');
   const pdfBtnLarge = document.getElementById('download-pdf-btn-large');
-  const pdfUrl = API.getPdfUrl(scan.id);
-  if (pdfBtn) pdfBtn.href = pdfUrl;
-  if (pdfBtnLarge) pdfBtnLarge.href = pdfUrl;
+  if (pdfBtn) {
+    pdfBtn.onclick = (e) => downloadPdfReport(e);
+  }
+  if (pdfBtnLarge) {
+    pdfBtnLarge.onclick = (e) => downloadPdfReport(e);
+  }
 }
 
 function updateHeaderStatusBadge(status, score) {
@@ -816,3 +819,119 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+/**
+ * Automated High-Precision PDF Report Generation & Direct Device Download
+ * Generates pure vector 3-page standards-compliant PDF containing:
+ * - Executive identity & metadata
+ * - Packaging panel evidence manifest
+ * - Complete 13 statutory extracted declarations
+ * - Complete 13 statutory compliance rules evaluation matrix
+ * - Section D unavailable / unreadable gap analysis
+ * - Section E prioritized corrective action plan
+ * - Section F human auditor review, comments & digital verification stamp
+ * - Official Legal Metrology Act, 2009 statutory disclaimer
+ */
+window.downloadPdfReport = async function(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  const pdfBtn = document.getElementById('download-pdf-btn');
+  const pdfBtnLarge = document.getElementById('download-pdf-btn-large');
+  const origBtnText = pdfBtn ? pdfBtn.innerHTML : '';
+  const origLargeText = pdfBtnLarge ? pdfBtnLarge.innerHTML : '';
+
+  if (pdfBtn) {
+    pdfBtn.disabled = true;
+    pdfBtn.innerHTML = '⏳ Generating PDF...';
+  }
+  if (pdfBtnLarge) {
+    pdfBtnLarge.disabled = true;
+    pdfBtnLarge.innerHTML = '⏳ Generating Official Inspection PDF...';
+  }
+
+  showToast('⏳ Generating official inspection PDF report with full product declarations...', 'info');
+
+  try {
+    let scanData = currentScan;
+
+    // Fallback: If currentScan is not set in global state, retrieve from URL or cache
+    if (!scanData) {
+      const params = new URLSearchParams(window.location.search);
+      const scanId = params.get('id');
+      if (scanId) {
+        try {
+          const res = await API.getScan(scanId);
+          if (res && res.data) scanData = res.data;
+        } catch (e) {}
+      }
+    }
+
+    if (!scanData) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('legalcheck_scans') || '[]');
+        if (cached.length > 0) scanData = cached[0];
+      } catch (e) {}
+    }
+
+    if (!scanData) {
+      throw new Error('Inspection details not yet loaded. Please wait for the scan to finish loading.');
+    }
+
+    let pdfBlob = null;
+
+    // 1. Client-Side Generation (Instant, offline-capable, includes live auditor edits)
+    if (typeof generateInspectionPdfBlob === 'function') {
+      try {
+        pdfBlob = generateInspectionPdfBlob(scanData);
+      } catch (clientErr) {
+        console.warn('Client-side PDF generation error, trying fallback:', clientErr);
+      }
+    }
+
+    // 2. Server-Side Fallback if client-side blob generation was not available
+    if (!pdfBlob) {
+      const pdfUrl = API.getPdfUrl(scanData.id);
+      const resp = await fetch(pdfUrl);
+      if (!resp.ok) {
+        throw new Error(`Server returned HTTP status ${resp.status}`);
+      }
+      pdfBlob = await resp.blob();
+    }
+
+    if (!pdfBlob || pdfBlob.size === 0) {
+      throw new Error('Generated PDF file is empty or corrupted.');
+    }
+
+    // Trigger instant native device download & save to device storage
+    const filename = `LegalCheck360_Inspection_Report_${scanData.id || 'scan'}.pdf`;
+    const objectUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+    }, 20000);
+
+    showToast(`✅ PDF Report successfully downloaded and saved: ${filename}`, 'success');
+  } catch (err) {
+    console.error('PDF download error:', err);
+    showToast(`Failed to download PDF: ${err.message}`, 'error');
+  } finally {
+    if (pdfBtn) {
+      pdfBtn.disabled = false;
+      pdfBtn.innerHTML = origBtnText;
+    }
+    if (pdfBtnLarge) {
+      pdfBtnLarge.disabled = false;
+      pdfBtnLarge.innerHTML = origLargeText;
+    }
+  }
+};

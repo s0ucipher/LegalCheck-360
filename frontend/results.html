@@ -154,9 +154,9 @@
           </div>
 
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-            <a id="download-pdf-btn" href="#" target="_blank" class="btn btn-primary btn-sm">
+            <button type="button" id="download-pdf-btn" onclick="downloadPdfReport(event)" class="btn btn-primary btn-sm">
               📄 Download PDF Report
-            </a>
+            </button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToAuditorSection()">
               👨‍⚖️ Auditor Controls
             </button>
@@ -340,9 +340,9 @@
               Generated pure vector compliance report conforming to the <strong>Legal Metrology (Packaged Commodities) Rules, 2011</strong>. Includes complete rule citations, extracted packaging evidence, auditor notes, and statutory determinations.
             </p>
           </div>
-          <a id="download-pdf-btn-large" href="#" target="_blank" class="btn btn-primary">
+          <button type="button" id="download-pdf-btn-large" onclick="downloadPdfReport(event)" class="btn btn-primary">
             📄 Download Official PDF Report
-          </a>
+          </button>
         </section>
 
         <!-- PACKAGING PHOTOGRAPHS -->
@@ -387,6 +387,7 @@
   </footer>
 
   <script src="js/api.js"></script>
+  <script src="js/pdf-generator.js"></script>
   <script src="js/main.js"></script>
   <script src="js/results.js"></script>
 </body>
