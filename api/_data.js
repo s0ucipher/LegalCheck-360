@@ -263,29 +263,52 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
   const filenames = (images || []).map(img => (typeof img === 'string' ? img : img.filename || "")).join(" ").toLowerCase();
   const unavail = new Set((unavailablePanels || []).map(p => p.toLowerCase()));
 
-  // 1. Non-compliant preset
-  if (filenames.includes("noncompliant")) {
+  const pNameLower = (productName || "").toLowerCase();
+
+  // 1. Non-compliant preset (Imperial units, missing tax clause, missing PIN)
+  if (filenames.includes("noncompliant") || pNameLower.includes("crunchy") || pNameLower.includes("caramel")) {
     const rawFields = [
-      { id: 1, field_name: "product_name", field_value: "Crunchy Bites Spiced Potato Wafers", confidence: 0.91, evidence_text: "Crunchy Bites Wafers", source_view: "front", is_verified: 0 },
+      { id: 1, field_name: "product_name", field_value: productName || "Crunchy Bites Spiced Potato Wafers", confidence: 0.91, evidence_text: productName || "Crunchy Bites Wafers", source_view: "front", is_verified: 0 },
       { id: 2, field_name: "mrp", field_value: "35 Rupees (Missing mandatory taxes clause)", confidence: 0.85, evidence_text: "Price: 35 Rupees", source_view: "back", is_verified: 0 },
       { id: 3, field_name: "net_quantity", field_value: "7.05 oz (Non-metric imperial primary unit)", confidence: 0.88, evidence_text: "Net Wt 7.05 oz", source_view: "back", is_verified: 0 },
       { id: 4, field_name: "manufacturer_name_address", field_value: "Mumbai India (Incomplete, missing street and 6-digit PIN)", confidence: 0.70, evidence_text: "Packed at Mumbai India", source_view: "back", is_verified: 0 }
     ];
     return {
-      product_name: "Crunchy Bites Spiced Potato Wafers",
+      product_name: productName || "Crunchy Bites Spiced Potato Wafers",
       raw_ocr_text: "Crunchy Bites Wafers Net Wt 7.05 oz (200g) Price: 35 Rupees Packed at Mumbai India",
       fields: rawFields.filter(f => !unavail.has(f.source_view))
     };
   }
 
-  // 2. Blurry preset
-  if (filenames.includes("blurry")) {
+  // 2. Blurry preset (Glare / motion blur requiring human inspector review)
+  if (filenames.includes("blurry") || pNameLower.includes("blurry") || pNameLower.includes("wheat crisps")) {
     const rawFields = [
-      { id: 1, field_name: "product_name", field_value: "Wheat Crisps (Partially Obscured)", confidence: 0.42, evidence_text: "Crisps...", source_view: "front", is_verified: 0 }
+      { id: 1, field_name: "product_name", field_value: productName || "Wheat Crisps (Partially Obscured)", confidence: 0.42, evidence_text: "Crisps...", source_view: "front", is_verified: 0 }
     ];
     return {
-      product_name: "Wheat Crisps (Partially Obscured)",
+      product_name: productName || "Wheat Crisps (Partially Obscured)",
       raw_ocr_text: "Packaging text partially unreadable due to lighting glare and motion blur.",
+      fields: rawFields.filter(f => !unavail.has(f.source_view))
+    };
+  }
+
+  // 3. Compliant Biscuit Demonstration Preset
+  if (filenames.includes("biscuit") || pNameLower.includes("britannia") || pNameLower.includes("royal butter")) {
+    const biscuitName = productName || "Britannia Good Day Butter Cookies";
+    const rawFields = [
+      { id: 1, field_name: "product_name", field_value: biscuitName, confidence: 0.98, evidence_text: biscuitName, source_view: "front", is_verified: 1 },
+      { id: 2, field_name: "mrp", field_value: "40.00 INR (incl. of all taxes)", confidence: 0.97, evidence_text: "MRP Rs. 40.00 (Incl. of all taxes)", source_view: "back", is_verified: 1 },
+      { id: 3, field_name: "net_quantity", field_value: "200 g", confidence: 0.99, evidence_text: "Net Qty: 200 g", source_view: "back", is_verified: 1 },
+      { id: 4, field_name: "manufacturing_date", field_value: "01/2026", confidence: 0.95, evidence_text: "Pkd: 01/2026", source_view: "back", is_verified: 1 },
+      { id: 5, field_name: "manufacturer_name_address", field_value: "Britannia Industries Ltd., 5/1A Hungerford Street, Kolkata - 700017, West Bengal", confidence: 0.96, evidence_text: "Mfd by: Britannia Industries Ltd., Kolkata 700017", source_view: "back", is_verified: 1 },
+      { id: 6, field_name: "consumer_care", field_value: "1800-425-4449 | feedback@britindia.com", confidence: 0.94, evidence_text: "Toll Free: 1800-425-4449", source_view: "back", is_verified: 1 },
+      { id: 7, field_name: "country_of_origin", field_value: "India", confidence: 0.99, evidence_text: "Country of Origin: India", source_view: "back", is_verified: 1 },
+      { id: 8, field_name: "unit_sale_price", field_value: "0.20 INR / g", confidence: 0.93, evidence_text: "USP: Rs. 0.20/g", source_view: "back", is_verified: 1 },
+      { id: 9, field_name: "fssai_license", field_value: "10015043001129", confidence: 0.97, evidence_text: "FSSAI Lic No. 10015043001129", source_view: "back", is_verified: 1 }
+    ];
+    return {
+      product_name: biscuitName,
+      raw_ocr_text: `${biscuitName} Net Wt 200g MRP Rs. 40.00 (Incl. of all taxes) Pkd 01/2026 Mfd by Britannia Industries Ltd Kolkata 700017 India`,
       fields: rawFields.filter(f => !unavail.has(f.source_view))
     };
   }

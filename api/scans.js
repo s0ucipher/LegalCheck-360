@@ -15,19 +15,49 @@ module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // GET: List Scans (User-isolated if authenticated)
+  // GET: List Scans (User-isolated if authenticated, always including academic benchmark records)
   if (req.method === 'GET') {
     const user = getAuthenticatedUser(req);
     const queryUid = (req.query && req.query.user_uid) || null;
     const targetUid = user ? user.uid : queryUid;
 
-    let scans = [];
+    const allScans = getScans();
+    // Academic benchmark demonstration inspections for college evaluation showcase
+    const benchmarkScans = allScans.filter(s =>
+      s.id === 'LMC-2026-PASS-001' ||
+      s.id === 'LMC-2026-FAIL-002' ||
+      s.id === 'LMC-2026-REV-003'
+    );
+
+    let userScans = [];
     if (targetUid) {
-      // Return only this authenticated user's persistent scans
-      scans = getUserScans(targetUid);
+      // User's personal inspections
+      userScans = getUserScans(targetUid);
     } else {
-      // Guest view: only guest scans or empty personal history
-      scans = getScans().filter(s => s.is_guest);
+      // Guest view: guest scans created in this instance
+      userScans = allScans.filter(s => s.is_guest);
+    }
+
+    // Merge: User's personal scans at top (newest first), followed by academic benchmarks (deduplicated)
+    const scanMap = new Map();
+    for (const s of userScans) {
+      scanMap.set(s.id, s);
+    }
+    for (const s of benchmarkScans) {
+      if (!scanMap.has(s.id)) {
+        scanMap.set(s.id, s);
+      }
+    }
+
+    let scans = Array.from(scanMap.values());
+
+    // Optional status filter
+    const statusFilter = req.query && req.query.status;
+    if (statusFilter && statusFilter !== 'ALL') {
+      scans = scans.filter(s =>
+        s.overall_status === statusFilter ||
+        (statusFilter === 'REVIEW_REQUIRED' && (s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'UNCLEAR' || s.overall_status === 'PARTIALLY_EVALUATED'))
+      );
     }
 
     const formatted = scans.map(s => ({

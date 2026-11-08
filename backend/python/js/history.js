@@ -46,74 +46,48 @@ function checkAuthAndGuestBanner(userObj) {
 function setupFilters() {
   const searchInput = document.getElementById('search-input');
   const statusFilter = document.getElementById('status-filter');
-  const sortFilter = document.getElementById('sort-filter');
 
   if (searchInput) searchInput.addEventListener('input', applyFilters);
   if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-  if (sortFilter) sortFilter.addEventListener('change', applyFilters);
 }
 
 async function loadHistory() {
   try {
-    const res = await LegalCheckAPI.listScans();
-    if (res.success && res.data) {
+    const api = window.API || window.LegalCheckAPI;
+    if (!api) {
+      console.warn('API client not yet available, retrying...');
+      setTimeout(loadHistory, 300);
+      return;
+    }
+    const res = await api.listScans();
+    if (res && res.success && res.data) {
       allScans = res.data;
-      updateMetrics(allScans);
       applyFilters();
+    } else {
+      renderTable([]);
     }
   } catch (err) {
     console.error('Error loading history:', err);
     if (typeof showToast === 'function') {
       showToast('Failed to load inspection history.', 'error');
     }
+    renderTable([]);
   }
-}
-
-function updateMetrics(scans) {
-  const total = scans.length;
-  const pass = scans.filter(s => s.overall_status === 'PASS').length;
-  const fail = scans.filter(s => s.overall_status === 'FAIL').length;
-  const review = scans.filter(s => s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'PARTIALLY_EVALUATED' || s.overall_status === 'UNCLEAR').length;
-  const rate = total > 0 ? Math.round((pass / total) * 1000) / 10 : 0.0;
-
-  const totalEl = document.getElementById('historyTotalCount');
-  const passEl = document.getElementById('historyPassCount');
-  const failEl = document.getElementById('historyFailCount');
-  const reviewEl = document.getElementById('historyReviewCount');
-  const rateEl = document.getElementById('historyRateVal');
-
-  if (totalEl) totalEl.textContent = total;
-  if (passEl) passEl.textContent = pass;
-  if (failEl) failEl.textContent = fail;
-  if (reviewEl) reviewEl.textContent = review;
-  if (rateEl) rateEl.textContent = `${rate.toFixed(1)}%`;
 }
 
 function applyFilters() {
   const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
   const statusVal = document.getElementById('status-filter')?.value || 'ALL';
-  const sortVal = document.getElementById('sort-filter')?.value || 'date-desc';
 
   let filtered = allScans.filter(scan => {
-    const matchesSearch = (scan.id && scan.id.toLowerCase().includes(searchVal)) ||
+    const matchesSearch = !searchVal ||
+                          (scan.id && scan.id.toLowerCase().includes(searchVal)) ||
                           (scan.product_name && scan.product_name.toLowerCase().includes(searchVal)) ||
                           (scan.category && scan.category.toLowerCase().includes(searchVal));
-    const matchesStatus = (statusVal === 'ALL') || (scan.overall_status === statusVal);
+    const matchesStatus = (statusVal === 'ALL') ||
+                          (scan.overall_status === statusVal) ||
+                          (statusVal === 'REVIEW_REQUIRED' && (scan.overall_status === 'REVIEW_REQUIRED' || scan.overall_status === 'UNCLEAR' || scan.overall_status === 'PARTIALLY_EVALUATED'));
     return matchesSearch && matchesStatus;
-  });
-
-  // Sorting
-  filtered.sort((a, b) => {
-    if (sortVal === 'date-desc') {
-      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-    } else if (sortVal === 'date-asc') {
-      return new Date(a.created_at || 0) - new Date(b.created_at || 0);
-    } else if (sortVal === 'score-desc') {
-      return (b.compliance_score || 0) - (a.compliance_score || 0);
-    } else if (sortVal === 'score-asc') {
-      return (a.compliance_score || 0) - (b.compliance_score || 0);
-    }
-    return 0;
   });
 
   renderTable(filtered);
@@ -123,30 +97,30 @@ function renderTable(scans) {
   const tbody = document.getElementById('history-tbody');
   if (!tbody) return;
 
-  if (scans.length === 0) {
+  if (!scans || scans.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: #6b7280;">No matching inspection records found.</td></tr>`;
     return;
   }
 
+  const api = window.API || window.LegalCheckAPI;
   tbody.innerHTML = '';
   scans.forEach(scan => {
     const tr = document.createElement('tr');
     tr.id = `scan-row-${scan.id}`;
+    const pdfUrl = api ? api.getPdfUrl(scan.id) : `api/scans/${scan.id}/pdf`;
     tr.innerHTML = `
       <td><strong>${escapeHtml(scan.id)}</strong></td>
       <td>
         <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(scan.product_name || 'General Commodity')}</div>
-        ${scan.is_guest ? '<span style="font-size: 0.7rem; color: #f59e0b; background: rgba(245,158,11,0.12); padding: 0.1rem 0.35rem; border-radius: 4px;">Guest Session</span>' : '<span style="font-size: 0.7rem; color: #10b981; background: rgba(16,185,129,0.12); padding: 0.1rem 0.35rem; border-radius: 4px;">Saved to Account</span>'}
       </td>
       <td><span style="text-transform: capitalize; color: #9ca3af;">${escapeHtml((scan.category || 'all').replace(/_/g, ' '))}</span></td>
       <td>${formatDate(scan.created_at)}</td>
       <td>${formatStatusBadge(scan.overall_status)}</td>
-      <td><strong>${scan.compliance_score ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
+      <td><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
       <td>
         <div style="display: flex; gap: 0.4rem; align-items: center;">
           <a href="results.html?id=${encodeURIComponent(scan.id)}" class="btn btn-outline btn-sm">Report</a>
-          <a href="${LegalCheckAPI.getPdfUrl(scan.id)}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
-          <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteScan('${scan.id}')" title="Delete inspection" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">✕</button>
+          <a href="${pdfUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
         </div>
       </td>
     `;
@@ -160,16 +134,16 @@ async function handleDeleteScan(scanId) {
   }
 
   try {
-    const res = await LegalCheckAPI.deleteScan(scanId);
-    if (res.success) {
+    const api = window.API || window.LegalCheckAPI;
+    const res = await api.deleteScan(scanId);
+    if (res && res.success) {
       allScans = allScans.filter(s => s.id !== scanId);
-      updateMetrics(allScans);
       applyFilters();
       if (typeof showToast === 'function') {
         showToast('Inspection record removed.', 'info');
       }
     } else {
-      alert(res.error || 'Failed to delete record.');
+      alert((res && res.error) || 'Failed to delete record.');
     }
   } catch (e) {
     alert('Error deleting inspection record.');

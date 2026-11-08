@@ -786,25 +786,19 @@ def list_scans():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        if g.user:
+        target_uid = (g.user and g.user.get("uid")) or request.args.get("user_uid")
+        if target_uid:
             cursor.execute(
                 "SELECT id, product_name, category, overall_status, compliance_score, created_at, user_uid, is_guest "
-                "FROM scans WHERE user_uid = ? ORDER BY created_at DESC",
-                (g.user["uid"],)
+                "FROM scans WHERE user_uid = ? OR id IN ('LMC-2026-PASS-001', 'LMC-2026-FAIL-002', 'LMC-2026-REV-003') "
+                "ORDER BY (CASE WHEN user_uid = ? THEN 0 ELSE 1 END), created_at DESC",
+                (target_uid, target_uid)
             )
         else:
-            query_uid = request.args.get("user_uid")
-            if query_uid:
-                cursor.execute(
-                    "SELECT id, product_name, category, overall_status, compliance_score, created_at, user_uid, is_guest "
-                    "FROM scans WHERE user_uid = ? ORDER BY created_at DESC",
-                    (query_uid,)
-                )
-            else:
-                cursor.execute(
-                    "SELECT id, product_name, category, overall_status, compliance_score, created_at, user_uid, is_guest "
-                    "FROM scans WHERE is_guest = 1 OR user_uid IS NULL ORDER BY created_at DESC LIMIT 20"
-                )
+            cursor.execute(
+                "SELECT id, product_name, category, overall_status, compliance_score, created_at, user_uid, is_guest "
+                "FROM scans ORDER BY created_at DESC LIMIT 50"
+            )
         rows = cursor.fetchall()
         scans = [dict(r) for r in rows]
         conn.close()

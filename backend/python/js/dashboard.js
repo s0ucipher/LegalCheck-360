@@ -11,9 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDashboardData() {
   try {
+    const api = window.API || window.LegalCheckAPI;
+    if (!api) {
+      setTimeout(loadDashboardData, 300);
+      return;
+    }
+
     // 1. Fetch dashboard metrics
-    const statsResp = await API.getDashboardStats();
-    if (statsResp.success && statsResp.data) {
+    const statsResp = await api.getDashboardStats();
+    if (statsResp && statsResp.success && statsResp.data) {
       const s = statsResp.data;
       const completed = s.completed_inspections ?? ((s.pass_count || 0) + (s.fail_count || 0));
       const reviews = s.pending_reviews ?? (s.review_required_count || 0);
@@ -33,24 +39,25 @@ async function loadDashboardData() {
     }
 
     // 2. Fetch recent scans
-    const scansResp = await API.listScans();
+    const scansResp = await api.listScans();
     const tbody = document.getElementById('recent-scans-tbody');
     if (!tbody) return;
 
-    if (scansResp.success && scansResp.data && scansResp.data.length > 0) {
+    if (scansResp && scansResp.success && scansResp.data && scansResp.data.length > 0) {
       tbody.innerHTML = '';
       scansResp.data.slice(0, 10).forEach(scan => {
         const tr = document.createElement('tr');
+        const pdfUrl = api ? api.getPdfUrl(scan.id) : `api/scans/${scan.id}/pdf`;
         tr.innerHTML = `
           <td><strong>${scan.id}</strong></td>
           <td>${scan.product_name || 'General Commodity'}</td>
-          <td><span style="text-transform: capitalize; color: #9ca3af;">${(scan.category || 'all').replace('_', ' ')}</span></td>
+          <td><span style="text-transform: capitalize; color: #9ca3af;">${(scan.category || 'all').replace(/_/g, ' ')}</span></td>
           <td>${formatDate(scan.created_at)}</td>
           <td>${formatStatusBadge(scan.overall_status)}</td>
-          <td><strong>${scan.compliance_score ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
+          <td><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
           <td>
             <a href="results.html?id=${scan.id}" class="btn btn-outline btn-sm">View Report</a>
-            <a href="${API.getPdfUrl(scan.id)}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
+            <a href="${pdfUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
           </td>
         `;
         tbody.appendChild(tr);
@@ -62,7 +69,9 @@ async function loadDashboardData() {
     }
   } catch (err) {
     console.error('Error loading dashboard:', err);
-    showToast('Failed to connect to LegalCheck 360 backend.', 'error');
+    if (typeof showToast === 'function') {
+      showToast('Failed to connect to LegalCheck 360 backend.', 'error');
+    }
   }
 }
 

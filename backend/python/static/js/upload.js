@@ -505,57 +505,44 @@ window.loadSamplePreset = async function(presetType) {
 
   try {
     if (presetType === 'compliant') {
-      if (nameInput) nameInput.value = 'Royal Butter Delights Biscuits';
+      if (nameInput) nameInput.value = 'Britannia Good Day Butter Cookies';
       if (catSelect) catSelect.value = 'packaged_food';
 
       panelState.front = {
-        file: { name: 'royal_butter_front_pdp.jpg', size: 145000 },
-        dataBase64: createSampleFallbackDataUrl('royal_butter_front_pdp.jpg', 'Royal Butter Delights', 'Net Qty: 200 g (SI Units)'),
-        filename: 'royal_butter_front_pdp.jpg',
+        file: { name: 'biscuit_front.jpg', size: 145000 },
+        dataBase64: createSampleFallbackDataUrl('biscuit_front.jpg', 'Britannia Good Day Butter Cookies', 'Net Qty: 200 g (SI Units)'),
+        filename: 'biscuit_front.jpg',
         mimeType: 'image/jpeg',
         status: 'uploaded'
       };
 
       panelState.back = {
-        file: { name: 'royal_butter_back_mrp.jpg', size: 182000 },
-        dataBase64: createSampleFallbackDataUrl('royal_butter_back_mrp.jpg', 'Mandatory Declarations', 'MRP Rs. 50.00 incl. taxes'),
-        filename: 'royal_butter_back_mrp.jpg',
+        file: { name: 'biscuit_back.jpg', size: 182000 },
+        dataBase64: createSampleFallbackDataUrl('biscuit_back.jpg', 'Mandatory Declarations', 'MRP Rs. 40.00 incl. taxes | 01/2026'),
+        filename: 'biscuit_back.jpg',
         mimeType: 'image/jpeg',
         status: 'uploaded'
       };
 
-      panelState.side1 = {
-        file: { name: 'royal_butter_nutrition_table.jpg', size: 120000 },
-        dataBase64: createSampleFallbackDataUrl('royal_butter_nutrition_table.jpg', 'Nutritional Facts Table', 'Energy 465 kcal / 100g'),
-        filename: 'royal_butter_nutrition_table.jpg',
-        mimeType: 'image/jpeg',
-        status: 'uploaded'
-      };
-
-      panelState.side2 = {
-        file: { name: 'royal_butter_batch_barcode.jpg', size: 110000 },
-        dataBase64: createSampleFallbackDataUrl('royal_butter_batch_barcode.jpg', 'Traceability & Batch', 'Batch #26N042 | B# 26N042'),
-        filename: 'royal_butter_batch_barcode.jpg',
-        mimeType: 'image/jpeg',
-        status: 'uploaded'
-      };
+      panelState.side1 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
+      panelState.side2 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
 
     } else if (presetType === 'noncompliant') {
-      if (nameInput) nameInput.value = 'Caramel Crunchies Snack Bar';
+      if (nameInput) nameInput.value = 'Crunchy Bites Spiced Potato Wafers';
       if (catSelect) catSelect.value = 'packaged_food';
 
       panelState.front = {
-        file: { name: 'caramel_noncompliant_pdp.jpg', size: 135000 },
-        dataBase64: createSampleFallbackDataUrl('caramel_noncompliant_pdp.jpg', 'Caramel Crunchies', 'Net Wt. 16 oz [ILLEGAL NON-METRIC]'),
-        filename: 'caramel_noncompliant_pdp.jpg',
+        file: { name: 'biscuit_front.jpg', size: 135000 },
+        dataBase64: createSampleFallbackDataUrl('biscuit_front.jpg', 'Crunchy Bites Spiced Potato Wafers', 'Net Wt. 7.05 oz [ILLEGAL NON-METRIC]'),
+        filename: 'biscuit_front.jpg',
         mimeType: 'image/jpeg',
         status: 'uploaded'
       };
 
       panelState.back = {
-        file: { name: 'caramel_noncompliant_back.jpg', size: 160000 },
-        dataBase64: createSampleFallbackDataUrl('caramel_noncompliant_back.jpg', 'Back Declarations', 'Price $4.99 [NO INR MRP]'),
-        filename: 'caramel_noncompliant_back.jpg',
+        file: { name: 'noncompliant_snack.jpg', size: 160000 },
+        dataBase64: createSampleFallbackDataUrl('noncompliant_snack.jpg', 'Back Declarations (Illegal Units)', 'Price: 35 Rupees [NO INCL TAXES]'),
+        filename: 'noncompliant_snack.jpg',
         mimeType: 'image/jpeg',
         status: 'uploaded'
       };
@@ -564,13 +551,13 @@ window.loadSamplePreset = async function(presetType) {
       panelState.side2 = { file: null, dataBase64: null, filename: null, mimeType: null, status: 'unavailable' };
 
     } else if (presetType === 'blurry') {
-      if (nameInput) nameInput.value = 'Wheat Crisps Health Crackers';
-      if (catSelect) catSelect.value = 'packaged_food';
+      if (nameInput) nameInput.value = 'Darjeeling Green Tea Premium Blend';
+      if (catSelect) catSelect.value = 'beverages';
 
       panelState.front = {
-        file: { name: 'wheat_crisps_blurry.jpg', size: 95000 },
-        dataBase64: createSampleFallbackDataUrl('wheat_crisps_blurry.jpg', 'Wheat Crisps (Glare/Blurry)', 'Net Qty: [Partially Obscured]'),
-        filename: 'wheat_crisps_blurry.jpg',
+        file: { name: 'blurry_sample.jpg', size: 95000 },
+        dataBase64: createSampleFallbackDataUrl('blurry_sample.jpg', 'Darjeeling Green Tea (Glare/Blurry)', 'Net Qty: [Partially Obscured]'),
+        filename: 'blurry_sample.jpg',
         mimeType: 'image/jpeg',
         status: 'uploaded'
       };
@@ -586,8 +573,12 @@ window.loadSamplePreset = async function(presetType) {
     renderPanelPreview('side2');
     validateMandatoryFieldsLive();
     goToStep(5);
+    updateSummaryUI();
 
-    showToast(`${presetType.toUpperCase()} preset loaded into all panels.`, 'success');
+    const submitBtn = document.getElementById('submit-inspection-btn');
+    if (submitBtn) submitBtn.disabled = false;
+
+    showToast(`Loaded ${presetType.toUpperCase()} preset. Click "🚀 Start AI Inspection" to demonstrate to judges!`, 'success');
   } catch (err) {
     console.error('Preset load error:', err);
   }

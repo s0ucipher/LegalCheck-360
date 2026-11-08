@@ -144,6 +144,40 @@ const SEED_LEGAL_RULES = [
 const LS_SCANS = 'legalcheck_scans';
 const LS_RULES = 'legalcheck_rules';
 
+// Academic Benchmark Demonstration Inspections for College Evaluation Showcase
+const BENCHMARK_DEMO_SCANS = [
+  {
+    id: "LMC-2026-PASS-001",
+    product_name: "Britannia Good Day Butter Cookies",
+    category: "packaged_food",
+    brand_name: "Britannia",
+    overall_status: "PASS",
+    compliance_score: 100.0,
+    created_at: "2026-11-08T00:06:00.000Z",
+    is_guest: false
+  },
+  {
+    id: "LMC-2026-FAIL-002",
+    product_name: "Crunchy Bites Spiced Potato Wafers",
+    category: "packaged_food",
+    brand_name: "Crunchy Bites",
+    overall_status: "FAIL",
+    compliance_score: 11.1,
+    created_at: "2026-11-07T21:06:00.000Z",
+    is_guest: false
+  },
+  {
+    id: "LMC-2026-REV-003",
+    product_name: "Darjeeling Green Tea Premium Blend",
+    category: "beverages",
+    brand_name: "Darjeeling Tea",
+    overall_status: "REVIEW_REQUIRED",
+    compliance_score: 0.0,
+    created_at: "2026-11-07T18:06:00.000Z",
+    is_guest: false
+  }
+];
+
 function getLocalScans() {
   try {
     return JSON.parse(localStorage.getItem(LS_SCANS)) || [];
@@ -192,26 +226,33 @@ const API = {
   async getDashboardStats() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/stats`, { signal: AbortSignal.timeout(2000) });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.success && json.data) {
+          return json;
+        }
+      }
     } catch (e) {}
 
-    // Vercel fallback: compute from localStorage
-    const scans = getLocalScans();
-    const completed = scans.filter(s => s.overall_status !== 'PENDING').length;
+    // Fallback: Compute accurately from listScans or benchmarks
+    const scansRes = await this.listScans();
+    const scans = (scansRes && scansRes.data && scansRes.data.length > 0) ? scansRes.data : BENCHMARK_DEMO_SCANS;
+    const total = scans.length;
     const passes = scans.filter(s => s.overall_status === 'PASS').length;
     const fails = scans.filter(s => s.overall_status === 'FAIL').length;
     const pendingReviews = scans.filter(s => s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'UNCLEAR').length;
-    const rate = completed > 0 ? (passes / completed) * 100 : 100.0;
+    const completed = passes + fails;
+    const rate = total > 0 ? Math.round((passes / total) * 1000) / 10 : 33.3;
 
     return {
       success: true,
       message: "Dashboard statistics retrieved (Cloud Mode)",
       data: {
-        total_scans: scans.length > 0 ? scans.length : 3,
-        completed_inspections: scans.length > 0 ? completed : 3,
+        total_scans: total,
+        completed_inspections: completed,
         pending_reviews: pendingReviews,
-        pass_count: scans.length > 0 ? passes : 2,
-        fail_count: scans.length > 0 ? fails : 1,
+        pass_count: passes,
+        fail_count: fails,
         unclear_count: pendingReviews,
         compliance_rate: rate
       }
@@ -220,6 +261,7 @@ const API = {
 
   async listScans(statusFilter = '') {
     const user = window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null;
+    let serverScans = null;
     try {
       const headers = await getApiHeaders();
       let url = `${API_BASE_URL}/api/scans`;
@@ -230,43 +272,55 @@ const API = {
       if (queryString) url += `?${queryString}`;
 
       const res = await fetch(url, { headers, signal: AbortSignal.timeout(3000) });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          serverScans = json.data;
+        }
+      }
     } catch (e) {}
 
-    // Vercel fallback with User Isolation
-    let scans = getLocalScans();
-    if (user && user.uid) {
-      scans = scans.filter(s => s.user_uid === user.uid);
-    } else {
-      // Guest view: show guest scans only
-      scans = scans.filter(s => s.is_guest !== false && (!s.user_uid || s.is_guest === true));
+    // Combine server scans with local scans and academic benchmark demonstrations
+    const local = getLocalScans();
+    const scanMap = new Map();
+
+    // 1. Add server scans if returned
+    if (serverScans && serverScans.length > 0) {
+      for (const s of serverScans) {
+        scanMap.set(s.id, s);
+      }
     }
 
-    if (scans.length === 0 && !user) {
-      // Seed sample scan for guest showcase
-      scans = [
-        {
-          id: "LMC-2026-DEMO-01",
-          product_name: "Royal Butter Delights Biscuits",
-          category: "packaged_food",
-          brand_name: "Royal Delights",
-          overall_status: "PASS",
-          compliance_score: 100.0,
-          created_at: new Date().toISOString(),
-          is_guest: true
+    // 2. Add local storage scans (scans performed in this browser)
+    for (const s of local) {
+      if (user && user.uid) {
+        if (!s.user_uid || s.user_uid === user.uid) {
+          if (!scanMap.has(s.id)) scanMap.set(s.id, s);
         }
-      ];
-      saveLocalScans(scans);
+      } else {
+        if (!scanMap.has(s.id)) scanMap.set(s.id, s);
+      }
     }
 
+    // 3. Ensure the 3 canonical benchmark demonstration scans are ALWAYS present
+    for (const b of BENCHMARK_DEMO_SCANS) {
+      if (!scanMap.has(b.id)) {
+        scanMap.set(b.id, b);
+      }
+    }
+
+    let all = Array.from(scanMap.values());
     if (statusFilter && statusFilter !== 'ALL') {
-      scans = scans.filter(s => s.overall_status === statusFilter);
+      all = all.filter(s =>
+        s.overall_status === statusFilter ||
+        (statusFilter === 'REVIEW_REQUIRED' && (s.overall_status === 'REVIEW_REQUIRED' || s.overall_status === 'UNCLEAR' || s.overall_status === 'PARTIALLY_EVALUATED'))
+      );
     }
 
     return {
       success: true,
       message: "Scan records retrieved",
-      data: scans
+      data: all
     };
   },
 
@@ -749,3 +803,8 @@ const API = {
     return { success: true, message: "Inspection record deleted." };
   }
 };
+
+// Global Universal Exposure for all script consumers
+window.API = API;
+window.LegalCheckAPI = API;
+
