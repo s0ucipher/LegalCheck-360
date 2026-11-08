@@ -459,10 +459,6 @@ window.startUnifiedAiInspection = async function() {
     return;
   }
 
-  const productName = (document.getElementById('product-name-input')?.value || '').trim();
-  const category = document.getElementById('category-select')?.value || 'packaged_food';
-  const customCategory = (document.getElementById('custom-category-input')?.value || '').trim();
-
   // Show Scanning Overlay & Interactive Stage Tracker
   showScanningOverlay(uploadedImages.length, unavailablePanels.length);
 
