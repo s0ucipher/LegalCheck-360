@@ -452,23 +452,26 @@ window.startUnifiedAiInspection = async function() {
   };
 
   try {
-    simulateStep(1, `Analyzing ${uploadedImages.length} packaging photograph(s)... Please wait patiently.`, 20);
-    await delay(500);
+    simulateStep(1, `Uploading packaging photographs (${uploadedImages.length} panel${uploadedImages.length > 1 ? 's' : ''})... Please wait patiently.`, 16);
+    await delay(450);
 
-    simulateStep(2, 'Extracting printed declarations via high-accuracy OCR...', 40);
+    simulateStep(2, 'Validating file signatures & dimensions...', 33);
     
     // Execute inspection API call concurrently with visual progress simulation
     const resPromise = API.createScan(payload);
 
-    await delay(600);
-    simulateStep(3, 'Auditing MRP, taxes clause, unit sale price & metric units...', 65);
+    await delay(500);
+    simulateStep(3, 'Reading printed packaging text via OCR...', 50);
 
-    await delay(600);
-    simulateStep(4, 'Evaluating manufacturer address, PIN code & consumer care...', 85);
+    await delay(550);
+    simulateStep(4, 'AI structured declaration extraction...', 68);
+
+    await delay(550);
+    simulateStep(5, 'Evaluating Legal Metrology (PCR 2011) rules...', 85);
 
     const res = await resPromise;
 
-    simulateStep(5, 'Compiling official inspection report & statutory certificate...', 100);
+    simulateStep(6, 'Generating vector compliance PDF report...', 100);
     await delay(450);
 
     if (res.success && res.data && res.data.id) {
@@ -593,7 +596,7 @@ function showScanningOverlay(imagesCount, unavailCount) {
   }
   const title = document.getElementById('scan-overlay-title');
   if (title) {
-    title.textContent = 'Evaluating Packaging Compliance';
+    title.textContent = 'Analyzing Product Packaging';
   }
   const sub = document.getElementById('scan-overlay-subtitle');
   if (sub) {
@@ -603,8 +606,8 @@ function showScanningOverlay(imagesCount, unavailCount) {
   if (prog) {
     prog.style.width = '15%';
   }
-  // Reset all step indicators
-  for (let i = 1; i <= 5; i++) {
+  // Reset all 6 step indicators
+  for (let i = 1; i <= 6; i++) {
     const el = document.getElementById(`sim-step-${i}`);
     if (el) {
       el.className = 'scan-step-item';
@@ -621,7 +624,7 @@ function simulateStep(stepNum, subtitle, percent) {
   const bar = document.getElementById('scan-progress-bar');
   if (bar && percent !== undefined) bar.style.width = `${percent}%`;
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     const el = document.getElementById(`sim-step-${i}`);
     if (!el) continue;
     const indicator = el.querySelector('.step-indicator');

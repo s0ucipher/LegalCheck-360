@@ -601,7 +601,7 @@
 
       <!-- Satisfactory Reassuring Heading -->
       <h3 id="scan-overlay-title" style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.4rem;">
-        Evaluating Packaging Compliance
+        Analyzing Product Packaging
       </h3>
 
       <!-- Patient Waiting Messages -->
@@ -617,27 +617,31 @@
         <div id="scan-progress-bar" style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: 18%; transition: width 0.45s ease; border-radius: 999px;"></div>
       </div>
 
-      <!-- Live Stage Tracker -->
+      <!-- Live Stage Tracker (6 Sequential Regulatory Inspection Steps) -->
       <div class="scan-steps">
         <div class="scan-step-item" id="sim-step-1">
           <span class="step-indicator">1</span>
-          <span class="step-label">Uploading & validating packaging evidence</span>
+          <span class="step-label">Uploading packaging photographs</span>
         </div>
         <div class="scan-step-item" id="sim-step-2">
           <span class="step-indicator">2</span>
-          <span class="step-label">Extracting printed declarations via high-accuracy OCR</span>
+          <span class="step-label">Validating file signatures & dimensions</span>
         </div>
         <div class="scan-step-item" id="sim-step-3">
           <span class="step-indicator">3</span>
-          <span class="step-label">Auditing MRP, taxes clause, unit sale price & metric units</span>
+          <span class="step-label">Reading printed packaging text via OCR</span>
         </div>
         <div class="scan-step-item" id="sim-step-4">
           <span class="step-indicator">4</span>
-          <span class="step-label">Evaluating manufacturer address, PIN code & consumer care</span>
+          <span class="step-label">AI structured declaration extraction</span>
         </div>
         <div class="scan-step-item" id="sim-step-5">
           <span class="step-indicator">5</span>
-          <span class="step-label">Compiling official inspection report & statutory certificate</span>
+          <span class="step-label">Evaluating Legal Metrology (PCR 2011) rules</span>
+        </div>
+        <div class="scan-step-item" id="sim-step-6">
+          <span class="step-indicator">6</span>
+          <span class="step-label">Generating vector compliance PDF report</span>
         </div>
       </div>
 
