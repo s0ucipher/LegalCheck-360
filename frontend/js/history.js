@@ -10,11 +10,21 @@ let allScans = [];
 document.addEventListener('DOMContentLoaded', async () => {
   setupFilters();
   checkAuthAndGuestBanner();
+  
+  // Reactively track authentication state changes
+  if (window.LegalCheckAuth && typeof window.LegalCheckAuth.onAuthStateChanged === 'function') {
+    window.LegalCheckAuth.onAuthStateChanged((user) => {
+      checkAuthAndGuestBanner(user);
+      loadHistory();
+    });
+  }
+
   await loadHistory();
 });
 
-function checkAuthAndGuestBanner() {
-  const isLogged = window.LegalCheckAuth && window.LegalCheckAuth.isLoggedIn();
+function checkAuthAndGuestBanner(userObj) {
+  const user = userObj || (window.LegalCheckAuth ? window.LegalCheckAuth.getCurrentUser() : null);
+  const isLogged = !!(user && !user.isGuest && user.uid);
   const notice = document.getElementById('guestHistoryNotice');
   const heading = document.getElementById('historyPageHeading');
   const subheading = document.getElementById('historyPageSubheading');
@@ -24,10 +34,12 @@ function checkAuthAndGuestBanner() {
   }
 
   if (isLogged) {
-    const user = window.LegalCheckAuth.getCurrentUser();
-    const name = user.displayName || user.email.split('@')[0];
-    if (heading) heading.textContent = `Audit Trail — ${name}`;
-    if (subheading) subheading.textContent = `Permanent inspection records and legal compliance certificates registered to your account`;
+    const name = user.displayName || (user.email ? user.email.split('@')[0] : 'Auditor');
+    if (heading) heading.textContent = `Packaging Inspection Audit Trail — ${name}`;
+    if (subheading) subheading.textContent = `Permanent inspection records and legal compliance certificates registered to your account (${user.email || ''})`;
+  } else {
+    if (heading) heading.textContent = `Packaging Inspection Audit Trail`;
+    if (subheading) subheading.textContent = `Complete historical registry of inspected consumer goods and regulatory outcomes`;
   }
 }
 

@@ -29,6 +29,27 @@
   let authListeners = [];
   let isFirebaseReady = false;
 
+  // Auto-claim any guest scans present in local storage for the logged-in user
+  function autoClaimGuestScans(user) {
+    if (!user || !user.uid) return;
+    try {
+      const key = 'legalcheck_scans';
+      let cached = JSON.parse(localStorage.getItem(key) || '[]');
+      let updated = false;
+      cached.forEach(s => {
+        if (!s.user_uid || s.is_guest) {
+          s.user_uid = user.uid;
+          s.user_email = user.email;
+          s.is_guest = false;
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem(key, JSON.stringify(cached));
+      }
+    } catch (e) {}
+  }
+
   // Initialize Firebase SDK if present and configured
   function initFirebase() {
     try {
@@ -55,6 +76,7 @@
               };
               localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
               localStorage.setItem(TOKEN_KEY, token);
+              autoClaimGuestScans(currentUser);
             } else {
               currentUser = null;
               localStorage.removeItem(SESSION_KEY);
@@ -127,7 +149,12 @@
     },
 
     isAuthenticated() {
-      return !!this.getCurrentUser();
+      const u = this.getCurrentUser();
+      return !!(u && !u.isGuest && u.uid);
+    },
+
+    isLoggedIn() {
+      return this.isAuthenticated();
     },
 
     async getIdToken() {
@@ -164,6 +191,7 @@
             };
             localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
             localStorage.setItem(TOKEN_KEY, token);
+            autoClaimGuestScans(currentUser);
             notifyListeners();
             updateNavigationUI();
             return { success: true, user: currentUser };
@@ -205,6 +233,7 @@
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       localStorage.setItem(TOKEN_KEY, devToken);
+      autoClaimGuestScans(currentUser);
       notifyListeners();
       updateNavigationUI();
       return { success: true, user: currentUser };
@@ -231,6 +260,7 @@
             };
             localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
             localStorage.setItem(TOKEN_KEY, token);
+            autoClaimGuestScans(currentUser);
             notifyListeners();
             updateNavigationUI();
             return { success: true, user: currentUser };
@@ -291,6 +321,7 @@
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       localStorage.setItem(TOKEN_KEY, devToken);
+      autoClaimGuestScans(currentUser);
       notifyListeners();
       updateNavigationUI();
       return { success: true, user: currentUser };
@@ -314,6 +345,7 @@
             };
             localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
             localStorage.setItem(TOKEN_KEY, token);
+            autoClaimGuestScans(currentUser);
             notifyListeners();
             updateNavigationUI();
             return { success: true, user: currentUser };
