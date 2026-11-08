@@ -6,8 +6,9 @@
  */
 
 function extractBearerToken(req) {
+  if (!req || !req.headers) return null;
   const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
-  if (authHeader.startsWith('Bearer ')) {
+  if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7).trim();
   }
   return null;
