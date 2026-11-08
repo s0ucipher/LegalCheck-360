@@ -930,6 +930,105 @@ function escapeHtml(str) {
  * - Section F human auditor review, comments & digital verification stamp
  * - Official Legal Metrology Act, 2009 statutory disclaimer
  */
+/**
+ * Collect Live Inspection Data from DOM
+ * Synchronizes 100% of website state (edited fields, live product name, category,
+ * scores, auditor sign-off) into the canonical scan data structure for PDF generation.
+ */
+window.collectLiveInspectionData = function() {
+  const scanData = JSON.parse(JSON.stringify(currentScan || {}));
+
+  // 1. Harvest Executive Metadata from Section A DOM
+  const prodNameEl = document.getElementById('header-product-name');
+  if (prodNameEl && prodNameEl.textContent.trim() && prodNameEl.textContent.trim() !== 'Product Inspection') {
+    scanData.product_name = prodNameEl.textContent.trim();
+  }
+
+  const catEl = document.getElementById('header-category');
+  if (catEl && catEl.textContent.trim() && catEl.textContent.trim() !== '-') {
+    scanData.category = catEl.textContent.trim().toLowerCase().replace(/\s+/g, '_');
+  }
+
+  const scanIdEl = document.getElementById('header-scan-id');
+  if (scanIdEl && scanIdEl.textContent.trim() && !scanIdEl.textContent.includes('Loading')) {
+    scanData.id = scanIdEl.textContent.trim();
+  }
+
+  const dateEl = document.getElementById('header-date');
+  if (dateEl && dateEl.textContent.trim() && dateEl.textContent.trim() !== '-') {
+    scanData.audit_date_display = dateEl.textContent.trim();
+  }
+
+  const scoreEl = document.getElementById('header-score-text');
+  if (scoreEl && scoreEl.textContent.trim() && !scoreEl.textContent.includes('--')) {
+    const parsedScore = parseFloat(scoreEl.textContent.replace('%', ''));
+    if (!isNaN(parsedScore)) scanData.compliance_score = parsedScore;
+  }
+
+  const statusBadge = document.getElementById('header-status-badge');
+  if (statusBadge && statusBadge.textContent.trim() && !statusBadge.textContent.includes('EVALUATING')) {
+    const rawStatus = statusBadge.textContent.replace(/[✓✗⚪⚠️]/g, '').trim().toUpperCase();
+    if (rawStatus.includes('COMPLIANT') || rawStatus.includes('PASS')) scanData.overall_status = 'PASS';
+    else if (rawStatus.includes('NON-COMPLIANT') || rawStatus.includes('FAIL')) scanData.overall_status = 'FAIL';
+    else if (rawStatus.includes('PARTIALLY')) scanData.overall_status = 'PARTIALLY_EVALUATED';
+    else if (rawStatus.includes('REVIEW')) scanData.overall_status = 'NEEDS_HUMAN_REVIEW';
+  }
+
+  // 2. Harvest Section B Live / User-Edited Declarations
+  if (!Array.isArray(scanData.fields)) scanData.fields = [];
+  const fieldInputs = document.querySelectorAll('.field-override-input');
+  fieldInputs.forEach(input => {
+    const fieldName = input.getAttribute('data-field');
+    const val = (input.value || '').trim();
+    if (fieldName && val) {
+      const existing = scanData.fields.find(f => f.field_name && f.field_name.toLowerCase() === fieldName.toLowerCase());
+      if (existing) {
+        existing.field_value = val;
+        existing.is_verified = 1;
+      } else {
+        scanData.fields.push({
+          id: scanData.fields.length + 1,
+          field_name: fieldName,
+          field_value: val,
+          confidence: 1.0,
+          evidence_text: val,
+          source_view: 'user_edit',
+          is_verified: 1
+        });
+      }
+    }
+  });
+
+  // 3. Harvest Section F Auditor Determination & Notes
+  const auditorNameInput = document.getElementById('auditor-name-input');
+  if (auditorNameInput && auditorNameInput.value.trim()) {
+    scanData.reviewed_by = auditorNameInput.value.trim();
+  }
+
+  const auditorNotesInput = document.getElementById('auditor-notes-input');
+  if (auditorNotesInput && auditorNotesInput.value.trim()) {
+    scanData.review_comments = auditorNotesInput.value.trim();
+  }
+
+  const auditorDecisionSelect = document.getElementById('auditor-decision-select');
+  if (auditorDecisionSelect && auditorDecisionSelect.value) {
+    scanData.reviewer_decision = auditorDecisionSelect.value;
+    if (auditorDecisionSelect.value === 'APPROVED') {
+      scanData.is_human_reviewed = true;
+      scanData.overall_status = 'PASS';
+    } else if (auditorDecisionSelect.value === 'REJECTED') {
+      scanData.is_human_reviewed = true;
+      scanData.overall_status = 'FAIL';
+    }
+  }
+
+  return scanData;
+};
+
+/**
+ * Universal PDF Report Downloader
+ * Generates official pure-vector PDF 1.4 report directly synchronized with live website details.
+ */
 window.downloadPdfReport = async function(event) {
   if (event) {
     event.preventDefault();
@@ -950,13 +1049,13 @@ window.downloadPdfReport = async function(event) {
     pdfBtnLarge.innerHTML = '⏳ Generating Official Inspection PDF...';
   }
 
-  showToast('⏳ Generating official inspection PDF report with full product declarations...', 'info');
+  showToast('⏳ Generating official inspection PDF report synchronized with live product declarations...', 'info');
 
   try {
-    let scanData = currentScan;
+    let scanData = (typeof window.collectLiveInspectionData === 'function') ? window.collectLiveInspectionData() : currentScan;
 
     // Fallback: If currentScan is not set in global state, retrieve from URL or cache
-    if (!scanData) {
+    if (!scanData || !scanData.id) {
       const params = new URLSearchParams(window.location.search);
       const scanId = params.get('id');
       if (scanId) {
@@ -967,14 +1066,14 @@ window.downloadPdfReport = async function(event) {
       }
     }
 
-    if (!scanData) {
+    if (!scanData || !scanData.id) {
       try {
         const cached = JSON.parse(localStorage.getItem('legalcheck_scans') || '[]');
         if (cached.length > 0) scanData = cached[0];
       } catch (e) {}
     }
 
-    if (!scanData) {
+    if (!scanData || !scanData.id) {
       throw new Error('Inspection details not yet loaded. Please wait for the scan to finish loading.');
     }
 
@@ -1004,7 +1103,8 @@ window.downloadPdfReport = async function(event) {
     }
 
     // Trigger instant native device download & save to device storage
-    const filename = `LegalCheck360_Inspection_Report_${scanData.id || 'scan'}.pdf`;
+    const safeProdName = (scanData.product_name || 'Commodity').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 24);
+    const filename = `LegalCheck360_Report_${safeProdName}_${scanData.id || 'scan'}.pdf`;
     const objectUrl = URL.createObjectURL(pdfBlob);
     const link = document.createElement('a');
     link.href = objectUrl;

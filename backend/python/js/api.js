@@ -271,7 +271,16 @@ const API = {
   },
 
   async getScan(scanId) {
-    // 1. Query network with resilient 8-second timeout for serverless cold-starts
+    if (!scanId) return { success: false, error: "Missing scan ID" };
+
+    // 1. Immediate local session retrieval (Zero cold-start delay, 100% preservation of client scan)
+    const localScans = getLocalScans();
+    const localFound = localScans.find(s => s.id === scanId);
+    if (localFound && localFound.fields && localFound.fields.length > 0 && localFound.product_name) {
+      return { success: true, data: localFound };
+    }
+
+    // 2. Query network if not found in local cache
     try {
       const res = await fetch(`${API_BASE_URL}/api/scans/${encodeURIComponent(scanId)}`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) {
@@ -288,11 +297,9 @@ const API = {
       console.warn('Network getScan timed out or unreachable, checking local session:', e);
     }
 
-    // 2. Immediate local storage retrieval
-    const scans = getLocalScans();
-    const found = scans.find(s => s.id === scanId);
-    if (found) {
-      return { success: true, data: found };
+    // Return local scan even if fields are minimal
+    if (localFound) {
+      return { success: true, data: localFound };
     }
 
     // 3. Resilient emergency fallback generator if ID is valid
@@ -448,7 +455,7 @@ const API = {
         cat === "apparel_textiles" ? "100% Combed Cotton Casual T-Shirt" :
         cat === "baby_care" ? "Ultra Comfort Diaper Pants (Medium)" :
         cat === "others" ? (customCat || "Consumer Packaged Product") :
-        "Royal Butter Delights Biscuits"
+        "Packaged Food & Confectionery Product"
       );
 
       overallStatus = "PASS";
@@ -546,9 +553,9 @@ const API = {
       user_uid: user ? user.uid : null,
       user_email: user ? (user.email || '') : '',
       is_guest: !user,
-      product_name: payload.product_name || "Packaged Commodity",
+      product_name: payload.product_name || displayName || "Packaged Commodity",
       category: payload.category || "packaged_food",
-      brand_name: payload.product_name || "",
+      brand_name: payload.product_name || displayName || "",
       overall_status: overallStatus,
       compliance_score: complianceScore,
       raw_ocr_text: "Packaging Declarations Extracted Successfully.",

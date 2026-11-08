@@ -304,7 +304,7 @@ function extractDeclarationsForCategory(productName, category, customCategory, i
                       category === "apparel_textiles" ? "100% Combed Cotton Casual T-Shirt" :
                         category === "baby_care" ? "Ultra Comfort Diaper Pants (Medium)" :
                           category === "others" ? (customCategory || "Consumer Packaged Product") :
-                            "Royal Butter Delights Biscuits"
+                            "Packaged Food & Confectionery Product"
   );
 
   let rawFields = [

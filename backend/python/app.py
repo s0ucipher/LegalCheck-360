@@ -901,29 +901,7 @@ def get_scan(scan_id):
     except Exception:
         pass
 
-    # Dynamic fallback reconstruction if scan was in-memory or query by ID
-    eval_out = evaluate_compliance(
-        product_name="Royal Butter Delights Biscuits",
-        category="packaged_food",
-        custom_category="",
-        images=[],
-        unavailable_panels=[]
-    )
-    fallback_record = {
-        "id": scan_id,
-        "product_name": eval_out["display_name"],
-        "category": "packaged_food",
-        "overall_status": eval_out["overall_status"],
-        "compliance_score": eval_out["compliance_score"],
-        "raw_ocr_text": eval_out["raw_ocr_text"],
-        "created_at": datetime.datetime.utcnow().isoformat() + "Z",
-        "is_guest": True,
-        "images": [],
-        "unavailable_panels": [],
-        "fields": eval_out["fields"],
-        "results": eval_out["results"]
-    }
-    return jsonify({"success": True, "data": fallback_record})
+    return jsonify({"success": False, "error": f"Inspection record '{scan_id}' not found"}), 404
 
 @app.route("/api/reviews/<scan_id>", methods=["POST"])
 def review_scan(scan_id):
