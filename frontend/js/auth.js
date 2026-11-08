@@ -531,3 +531,4 @@ document.addEventListener('DOMContentLoaded', () => {
     LegalCheckAuth.init();
   }
 });
+

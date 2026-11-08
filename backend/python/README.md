@@ -54,3 +54,4 @@ The API will listen at `http://127.0.0.1:5001`.
 3. Under Environment Variables in the Render dashboard, set:
    - `FIREBASE_SERVICE_ACCOUNT_JSON`: Paste the contents of your Firebase service account private key JSON.
 4. Deploy!
+

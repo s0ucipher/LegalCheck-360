@@ -32,3 +32,4 @@ module.exports = (req, res) => {
     data: stats
   });
 };
+

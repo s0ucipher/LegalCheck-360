@@ -57,3 +57,4 @@ module.exports = (req, res) => {
     message: success ? 'Inspection record removed successfully.' : 'Unable to remove record.'
   });
 };
+
