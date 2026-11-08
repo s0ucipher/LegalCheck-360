@@ -140,6 +140,17 @@ def get_db():
             conn.execute("ALTER TABLE scans ADD COLUMN user_email TEXT")
         if "is_guest" not in existing_cols:
             conn.execute("ALTER TABLE scans ADD COLUMN is_guest INTEGER DEFAULT 1")
+
+        # Pre-seed canonical academic demonstration benchmark inspections
+        cursor.execute("SELECT COUNT(*) FROM scans WHERE id = 'LMC-2026-PASS-001'")
+        if cursor.fetchone()[0] == 0:
+            conn.execute("""
+                INSERT OR IGNORE INTO scans (id, user_uid, user_email, is_guest, product_name, category, overall_status, compliance_score, data_json, created_at)
+                VALUES 
+                ('LMC-2026-PASS-001', NULL, NULL, 0, 'Britannia Good Day Butter Cookies', 'packaged_food', 'PASS', 100.0, '{}', '2026-11-08 05:36:00'),
+                ('LMC-2026-FAIL-002', NULL, NULL, 0, 'Crunchy Bites Spiced Potato Wafers', 'packaged_food', 'FAIL', 11.1, '{}', '2026-11-08 02:36:00'),
+                ('LMC-2026-REV-003', NULL, NULL, 0, 'Darjeeling Green Tea Premium Blend', 'beverages', 'REVIEW_REQUIRED', 0.0, '{}', '2026-11-07 23:36:00')
+            """)
     return conn
 
 # --------------------------------------------------------------------------
