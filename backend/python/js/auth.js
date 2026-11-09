@@ -522,6 +522,11 @@
         </div>
       `;
     }
+
+    // Synchronize Mobile Navigation Drawer if initialized
+    if (typeof window.updateDrawerAuthUI === 'function') {
+      window.updateDrawerAuthUI(user);
+    }
   }
 
   function escapeText(str) {

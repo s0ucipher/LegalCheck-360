@@ -94,6 +94,14 @@ function setThemeMode(mode) {
     }
   }
 
+  // Update Mobile App Drawer Theme Switcher
+  const drawerThemeIcon = document.getElementById('drawerThemeIcon');
+  const drawerThemeLabel = document.getElementById('drawerThemeLabel');
+  if (drawerThemeIcon && drawerThemeLabel) {
+    drawerThemeIcon.textContent = isLight ? '🌙' : '☀️';
+    drawerThemeLabel.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  }
+
   // Backwards compatibility for segmented buttons
   const btnDark = document.getElementById('btnThemeDark');
   const btnLight = document.getElementById('btnThemeLight');
@@ -133,6 +141,14 @@ function setDeviceMode(mode) {
     if (singleDevBtn) {
       singleDevBtn.title = isMobile ? 'Mobile View (Click for Desktop)' : 'Desktop View (Click for Mobile)';
     }
+  }
+
+  // Update Mobile App Drawer Device Switcher
+  const drawerDevIcon = document.getElementById('drawerDeviceIcon');
+  const drawerDevLabel = document.getElementById('drawerDeviceLabel');
+  if (drawerDevIcon && drawerDevLabel) {
+    drawerDevIcon.textContent = isMobile ? '🖥️' : '📱';
+    drawerDevLabel.textContent = isMobile ? 'Desktop View' : 'Mobile View';
   }
 
   // Backwards compatibility for segmented buttons
@@ -241,6 +257,318 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     setDeviceMode('desktop');
   }
+
+  // Initialize Mobile App Navigation (Hamburger, Drawer, Bottom Tab Bar)
+  initMobileNavigation();
+});
+
+// ============================================================================
+// Dedicated Mobile App Navigation Controller (Drawer + Bottom App Bar)
+// ============================================================================
+function escapeNavText(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[m]);
+}
+
+function initMobileNavigation() {
+  // 1. Inject Hamburger button into .nav-container if missing
+  const navContainer = document.querySelector('.nav-container');
+  if (navContainer && !document.getElementById('mobileMenuToggleBtn')) {
+    const hamburgerBtn = document.createElement('button');
+    hamburgerBtn.type = 'button';
+    hamburgerBtn.id = 'mobileMenuToggleBtn';
+    hamburgerBtn.className = 'mobile-menu-toggle';
+    hamburgerBtn.setAttribute('aria-label', 'Open mobile navigation menu');
+    hamburgerBtn.setAttribute('title', 'Navigation Menu');
+    hamburgerBtn.innerHTML = `
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    `;
+    hamburgerBtn.onclick = toggleMobileDrawer;
+    navContainer.appendChild(hamburgerBtn);
+  }
+
+  // 2. Inject Mobile Drawer & Backdrop to body if missing
+  if (!document.getElementById('mobileAppDrawer')) {
+    const backdrop = document.createElement('div');
+    backdrop.id = 'mobileDrawerBackdrop';
+    backdrop.className = 'mobile-drawer-backdrop';
+    backdrop.onclick = closeMobileDrawer;
+    document.body.appendChild(backdrop);
+
+    const drawer = document.createElement('aside');
+    drawer.id = 'mobileAppDrawer';
+    drawer.className = 'mobile-app-drawer';
+    drawer.setAttribute('aria-label', 'Mobile Navigation Drawer');
+    
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light' || document.body.classList.contains('theme-light');
+    const isMobileMode = document.body.classList.contains('device-mobile-mode');
+
+    drawer.innerHTML = `
+      <div class="mobile-drawer-header">
+        <div class="drawer-brand">
+          <div class="drawer-brand-icon">⚖️</div>
+          <div class="drawer-brand-text">LegalCheck <span>360</span></div>
+        </div>
+        <button type="button" class="drawer-close-btn" onclick="closeMobileDrawer()" aria-label="Close menu">✕</button>
+      </div>
+
+      <!-- User / Guest Identity Card -->
+      <div class="drawer-user-card" id="drawerUserProfileCard">
+        <div class="drawer-user-placeholder">
+          <div class="drawer-guest-avatar">👤</div>
+          <div>
+            <div class="drawer-user-title">Guest Inspector</div>
+            <div class="drawer-user-subtitle">Temporary inspection session</div>
+          </div>
+        </div>
+        <div class="drawer-guest-actions">
+          <a href="login.html" class="btn btn-outline btn-sm" onclick="closeMobileDrawer()">Sign In</a>
+          <a href="register.html" class="btn btn-primary btn-sm" onclick="closeMobileDrawer()">Register</a>
+        </div>
+      </div>
+
+      <!-- Quick Layout & Theme Switchers -->
+      <div class="drawer-quick-controls">
+        <button type="button" class="drawer-quick-btn" onclick="toggleDeviceMode()" title="Switch layout mode">
+          <span class="drawer-quick-icon" id="drawerDeviceIcon">${isMobileMode ? '🖥️' : '📱'}</span>
+          <span class="drawer-quick-label" id="drawerDeviceLabel">${isMobileMode ? 'Desktop View' : 'Mobile View'}</span>
+        </button>
+        <button type="button" class="drawer-quick-btn" onclick="toggleThemeMode()" title="Switch dark/light mode">
+          <span class="drawer-quick-icon" id="drawerThemeIcon">${isLight ? '🌙' : '☀️'}</span>
+          <span class="drawer-quick-label" id="drawerThemeLabel">${isLight ? 'Dark Mode' : 'Light Mode'}</span>
+        </button>
+      </div>
+
+      <!-- Primary Application Navigation -->
+      <nav class="drawer-nav">
+        <div class="drawer-section-heading">APPLICATION SECTIONS</div>
+        <a href="index.html" class="drawer-nav-item" data-page="index" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">🏠</span>
+          <span class="drawer-nav-label">Home</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="dashboard.html" class="drawer-nav-item" data-page="dashboard" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">📊</span>
+          <span class="drawer-nav-label">Dashboard</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="upload.html" class="drawer-nav-item drawer-highlight-item" data-page="upload" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">📸</span>
+          <span class="drawer-nav-label">Upload & Inspect</span>
+          <span class="drawer-nav-pill">New</span>
+        </a>
+        <a href="history.html" class="drawer-nav-item" data-page="history" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">📋</span>
+          <span class="drawer-nav-label">Audit History</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="admin.html" class="drawer-nav-item" data-page="admin" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">⚖️</span>
+          <span class="drawer-nav-label">Legal Rules (PCR 2011)</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="review.html" class="drawer-nav-item" data-page="review" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">👨‍⚖️</span>
+          <span class="drawer-nav-label">Auditor Review Queue</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+
+        <div class="drawer-section-heading" style="margin-top: 1.25rem;">ACCOUNT & SETTINGS</div>
+        <div id="drawerAuthLinks">
+          <a href="login.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+            <span class="drawer-nav-icon">🔑</span>
+            <span class="drawer-nav-label">Sign In</span>
+            <span class="drawer-nav-chevron">›</span>
+          </a>
+          <a href="register.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+            <span class="drawer-nav-icon">✨</span>
+            <span class="drawer-nav-label">Create Free Account</span>
+            <span class="drawer-nav-chevron">›</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="drawer-footer">
+        <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
+        <div>Legal Metrology (Packaged Commodities) Rules, 2011</div>
+      </div>
+    `;
+    document.body.appendChild(drawer);
+  }
+
+  // 3. Inject Fixed Mobile Bottom App Tab Bar if missing
+  if (!document.getElementById('mobileBottomNav')) {
+    const bottomNav = document.createElement('nav');
+    bottomNav.id = 'mobileBottomNav';
+    bottomNav.className = 'mobile-bottom-nav';
+    bottomNav.setAttribute('aria-label', 'Mobile Bottom Tab Bar');
+    bottomNav.innerHTML = `
+      <a href="index.html" class="bottom-nav-item" data-page="index">
+        <span class="bottom-nav-icon">🏠</span>
+        <span class="bottom-nav-text">Home</span>
+      </a>
+      <a href="dashboard.html" class="bottom-nav-item" data-page="dashboard">
+        <span class="bottom-nav-icon">📊</span>
+        <span class="bottom-nav-text">Dashboard</span>
+      </a>
+      <a href="upload.html" class="bottom-nav-item bottom-nav-scan-cta" data-page="upload">
+        <div class="bottom-nav-scan-bubble">
+          <span class="bottom-nav-scan-icon">📸</span>
+        </div>
+        <span class="bottom-nav-text">Inspect</span>
+      </a>
+      <a href="history.html" class="bottom-nav-item" data-page="history">
+        <span class="bottom-nav-icon">📋</span>
+        <span class="bottom-nav-text">History</span>
+      </a>
+      <button type="button" class="bottom-nav-item bottom-nav-menu-btn" onclick="toggleMobileDrawer()" aria-label="Open menu">
+        <span class="bottom-nav-icon">☰</span>
+        <span class="bottom-nav-text">Menu</span>
+      </button>
+    `;
+    document.body.appendChild(bottomNav);
+  }
+
+  // 4. Highlight active navigation page
+  highlightActiveMobileNav();
+
+  // 5. Connect with current user if LegalCheckAuth is already ready
+  if (typeof LegalCheckAuth !== 'undefined' && typeof LegalCheckAuth.getUser === 'function') {
+    const u = LegalCheckAuth.getUser();
+    if (u) updateDrawerAuthUI(u);
+  }
+}
+
+function highlightActiveMobileNav() {
+  const path = window.location.pathname.toLowerCase();
+  let currentPage = 'index';
+  if (path.includes('dashboard')) currentPage = 'dashboard';
+  else if (path.includes('upload')) currentPage = 'upload';
+  else if (path.includes('history')) currentPage = 'history';
+  else if (path.includes('admin')) currentPage = 'admin';
+  else if (path.includes('review')) currentPage = 'review';
+  else if (path.includes('results')) currentPage = 'upload';
+  else if (path.includes('login') || path.includes('register') || path.includes('profile')) currentPage = 'account';
+
+  document.querySelectorAll('.drawer-nav-item[data-page]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-page') === currentPage);
+  });
+
+  document.querySelectorAll('.bottom-nav-item[data-page]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-page') === currentPage);
+  });
+}
+
+window.toggleMobileDrawer = function() {
+  const drawer = document.getElementById('mobileAppDrawer');
+  if (!drawer) return;
+  if (drawer.classList.contains('open')) {
+    closeMobileDrawer();
+  } else {
+    openMobileDrawer();
+  }
+};
+
+window.openMobileDrawer = function() {
+  const drawer = document.getElementById('mobileAppDrawer');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  const hamburger = document.getElementById('mobileMenuToggleBtn');
+  if (drawer && backdrop) {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    if (hamburger) hamburger.classList.add('open');
+    document.body.classList.add('drawer-open-lock');
+  }
+};
+
+window.closeMobileDrawer = function() {
+  const drawer = document.getElementById('mobileAppDrawer');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  const hamburger = document.getElementById('mobileMenuToggleBtn');
+  if (drawer && backdrop) {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    if (hamburger) hamburger.classList.remove('open');
+    document.body.classList.remove('drawer-open-lock');
+  }
+};
+
+window.updateDrawerAuthUI = function(user) {
+  const card = document.getElementById('drawerUserProfileCard');
+  const links = document.getElementById('drawerAuthLinks');
+  if (!card) return;
+
+  if (user) {
+    const initial = (user.displayName || user.email || 'U').substring(0, 2).toUpperCase();
+    const displayName = user.displayName || user.email.split('@')[0];
+    card.innerHTML = `
+      <div class="drawer-user-info-active">
+        <div class="drawer-user-avatar-badge">${initial}</div>
+        <div class="drawer-user-text">
+          <strong class="drawer-user-name">${escapeNavText(displayName)}</strong>
+          <span class="drawer-user-email">${escapeNavText(user.email)}</span>
+          <span class="drawer-user-status-pill">✓ Registered Inspector</span>
+        </div>
+      </div>
+    `;
+
+    if (links) {
+      links.innerHTML = `
+        <a href="profile.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">👤</span>
+          <span class="drawer-nav-label">My Profile</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="history.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">📋</span>
+          <span class="drawer-nav-label">My Saved Inspections</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <button type="button" class="drawer-nav-item drawer-nav-logout" onclick="closeMobileDrawer(); if(window.LegalCheckAuth) LegalCheckAuth.logout();">
+          <span class="drawer-nav-icon">🚪</span>
+          <span class="drawer-nav-label">Sign Out</span>
+        </button>
+      `;
+    }
+  } else {
+    card.innerHTML = `
+      <div class="drawer-user-placeholder">
+        <div class="drawer-guest-avatar">👤</div>
+        <div>
+          <div class="drawer-user-title">Guest Inspector</div>
+          <div class="drawer-user-subtitle">Temporary inspection session</div>
+        </div>
+      </div>
+      <div class="drawer-guest-actions">
+        <a href="login.html" class="btn btn-outline btn-sm" onclick="closeMobileDrawer()">Sign In</a>
+        <a href="register.html" class="btn btn-primary btn-sm" onclick="closeMobileDrawer()">Register</a>
+      </div>
+    `;
+
+    if (links) {
+      links.innerHTML = `
+        <a href="login.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">🔑</span>
+          <span class="drawer-nav-label">Sign In to Account</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+        <a href="register.html" class="drawer-nav-item" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">✨</span>
+          <span class="drawer-nav-label">Create Free Account</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
+      `;
+    }
+  }
+};
+
+// Close drawer on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMobileDrawer();
 });
 
 

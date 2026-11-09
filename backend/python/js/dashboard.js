@@ -49,13 +49,13 @@ async function loadDashboardData() {
         const tr = document.createElement('tr');
         const pdfUrl = api ? api.getPdfUrl(scan.id) : `api/scans/${scan.id}/pdf`;
         tr.innerHTML = `
-          <td><strong>${scan.id}</strong></td>
-          <td>${scan.product_name || 'General Commodity'}</td>
-          <td><span style="text-transform: capitalize; color: #9ca3af;">${(scan.category || 'all').replace(/_/g, ' ')}</span></td>
-          <td>${formatDate(scan.created_at)}</td>
-          <td>${formatStatusBadge(scan.overall_status)}</td>
-          <td><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
-          <td>
+          <td data-label="Scan ID"><strong>${scan.id}</strong></td>
+          <td data-label="Product">${scan.product_name || 'General Commodity'}</td>
+          <td data-label="Category"><span style="text-transform: capitalize; color: #9ca3af;">${(scan.category || 'all').replace(/_/g, ' ')}</span></td>
+          <td data-label="Inspection Date">${formatDate(scan.created_at)}</td>
+          <td data-label="Overall Status">${formatStatusBadge(scan.overall_status)}</td>
+          <td data-label="Compliance Score"><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
+          <td data-label="Actions">
             <a href="results.html?id=${scan.id}" class="btn btn-outline btn-sm">View Report</a>
             <a href="${pdfUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
           </td>

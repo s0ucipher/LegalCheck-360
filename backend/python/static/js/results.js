@@ -387,20 +387,20 @@ function renderSectionB(fields, unavailablePanels = []) {
                   const confPercent = Math.round((f.confidence || 0.95) * 100);
                   return `
                     <tr>
-                      <td style="font-weight: 600; color: var(--text-main); white-space: nowrap;">
+                      <td data-label="Declaration" style="font-weight: 600; color: var(--text-main); white-space: nowrap;">
                         ${formatFieldName(f.field_name)}
                       </td>
-                      <td>
+                      <td data-label="Extracted Value">
                         <input type="text" class="field-input-inline field-override-input"
                                data-field="${f.field_name}"
                                value="${escapeHtml(f.field_value || '')}"
                                title="Click to edit or correct OCR extraction"
                                onchange="onFieldEdited('${f.field_name}', this.value)">
                       </td>
-                      <td style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                      <td data-label="Evidence Snippet" style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
                         "${escapeHtml(f.evidence_text || f.field_value || 'Detected on packaging')}"
                       </td>
-                      <td>
+                      <td data-label="Confidence">
                         <div style="display: flex; align-items: center; gap: 8px;">
                           <div style="width: 50px; height: 6px; background: rgba(100, 116, 139, 0.25); border-radius: 3px; overflow: hidden;">
                             <div style="width: ${confPercent}%; height: 100%; background: ${confPercent >= 80 ? '#10b981' : (confPercent >= 60 ? '#f59e0b' : '#ef4444')};"></div>

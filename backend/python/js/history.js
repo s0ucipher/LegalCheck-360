@@ -109,16 +109,16 @@ function renderTable(scans) {
     tr.id = `scan-row-${scan.id}`;
     const pdfUrl = api ? api.getPdfUrl(scan.id) : `api/scans/${scan.id}/pdf`;
     tr.innerHTML = `
-      <td><strong>${escapeHtml(scan.id)}</strong></td>
-      <td>
+      <td data-label="Scan ID"><strong>${escapeHtml(scan.id)}</strong></td>
+      <td data-label="Product">
         <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(scan.product_name || 'General Commodity')}</div>
       </td>
-      <td><span style="text-transform: capitalize; color: #9ca3af;">${escapeHtml((scan.category || 'all').replace(/_/g, ' '))}</span></td>
-      <td>${formatDate(scan.created_at)}</td>
-      <td>${formatStatusBadge(scan.overall_status)}</td>
-      <td><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
-      <td>
-        <div style="display: flex; gap: 0.4rem; align-items: center;">
+      <td data-label="Category"><span style="text-transform: capitalize; color: #9ca3af;">${escapeHtml((scan.category || 'all').replace(/_/g, ' '))}</span></td>
+      <td data-label="Inspection Date">${formatDate(scan.created_at)}</td>
+      <td data-label="Overall Status">${formatStatusBadge(scan.overall_status)}</td>
+      <td data-label="Compliance Score"><strong>${scan.compliance_score !== undefined && scan.compliance_score !== null ? scan.compliance_score.toFixed(1) + '%' : '0%'}</strong></td>
+      <td data-label="Actions">
+        <div style="display: flex; gap: 0.4rem; align-items: center; justify-content: flex-end; flex-wrap: wrap;">
           <a href="results.html?id=${encodeURIComponent(scan.id)}" class="btn btn-outline btn-sm">Report</a>
           <a href="${pdfUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF">PDF</a>
         </div>

@@ -286,10 +286,14 @@ body.device-mobile-mode .hero-actions {
 }
 
 body.device-mobile-mode .grid-3,
-body.device-mobile-mode .stats-grid,
 body.device-mobile-mode .footer-grid {
   grid-template-columns: 1fr !important;
   gap: 1rem !important;
+}
+
+body.device-mobile-mode .stats-grid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 0.75rem !important;
 }
 
 body.device-mobile-mode .results-header-card {

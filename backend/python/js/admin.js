@@ -21,15 +21,15 @@ async function loadAdminRules() {
       res.data.forEach(rule => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${rule.rule_id}</strong></td>
-          <td>
+          <td data-label="Rule ID"><strong>${rule.rule_id}</strong></td>
+          <td data-label="Requirement">
             <div style="font-weight: 600; color: #f9fafb;">${rule.rule_name}</div>
             <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 2px;">${rule.requirement}</div>
           </td>
-          <td><span style="font-size: 0.8rem; color: #60a5fa;">${rule.legal_reference}</span></td>
-          <td><span class="badge badge-neutral">${rule.category}</span></td>
-          <td><span style="font-size: 0.8rem; color: #9ca3af;">${rule.verified_at}</span></td>
-          <td>
+          <td data-label="Citation"><span style="font-size: 0.8rem; color: #60a5fa;">${rule.legal_reference}</span></td>
+          <td data-label="Category"><span class="badge badge-neutral">${rule.category}</span></td>
+          <td data-label="Verified"><span style="font-size: 0.8rem; color: #9ca3af;">${rule.verified_at}</span></td>
+          <td data-label="Status">
             <label class="switch">
               <input type="checkbox" ${rule.active_status === 1 ? 'checked' : ''} onchange="toggleRuleStatus('${rule.rule_id}')">
               <span class="slider"></span>
