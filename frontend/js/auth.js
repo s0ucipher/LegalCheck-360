@@ -148,6 +148,10 @@
       return currentUser;
     },
 
+    getUser() {
+      return this.getCurrentUser();
+    },
+
     isAuthenticated() {
       const u = this.getCurrentUser();
       return !!(u && !u.isGuest && u.uid);

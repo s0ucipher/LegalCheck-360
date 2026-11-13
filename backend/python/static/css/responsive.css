@@ -55,8 +55,8 @@
     margin: 0 !important;
     padding: 0 !important;
     -webkit-text-size-adjust: 100%;
-    /* Reserve space for the fixed Mobile Bottom App Tab Bar + iOS safe area */
-    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    /* Clean smartphone padding without intrusive bottom bar offset */
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
 
   /* Lock scrolling when mobile drawer is open */
@@ -140,40 +140,23 @@
     font-size: 1.1rem !important;
   }
 
-  /* Hide traditional horizontal desktop navigation links on mobile */
-  .nav-links > li:not(.nav-auth-item) {
+  /* Completely hide desktop horizontal navigation links in Smartphone Mode */
+  .navbar nav,
+  .nav-links {
     display: none !important;
   }
 
-  .nav-links {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-  }
-
-  .nav-auth-item .user-nav-name {
-    display: none !important; /* Show compact avatar badge only */
-  }
-
-  .nav-auth-item .user-nav-btn {
-    padding: 0.25rem !important;
-  }
-
-  .auth-pill-login,
-  .auth-pill-register {
-    padding: 0.3rem 0.65rem !important;
-    font-size: 0.76rem !important;
-  }
-
-  /* --- Hamburger Menu Toggle Button --- */
+  /* --- Hamburger Menu Toggle Button (Upper-Right Corner) --- */
   .mobile-menu-toggle {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 4px !important;
-    width: 40px !important;
-    height: 40px !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    margin-left: auto !important;
     border-radius: var(--radius-sm) !important;
     border: 1px solid var(--border-color) !important;
     background: var(--bg-card) !important;
@@ -536,104 +519,9 @@
     line-height: 1.4 !important;
   }
 
-  /* --- Fixed Mobile Bottom App Tab Bar (Modern Native Pattern) --- */
+  /* Bottom bar is removed: Smartphone Mode uses the dedicated top-right hamburger drawer */
   .mobile-bottom-nav {
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
-    align-items: center !important;
-    justify-items: center !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-    background: var(--navbar-bg) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-    border-top: 1px solid var(--border-color) !important;
-    z-index: 9990 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12) !important;
-    box-sizing: border-box !important;
-  }
-
-  [data-theme="light"] .mobile-bottom-nav,
-  body.theme-light .mobile-bottom-nav {
-    background: rgba(255, 255, 255, 0.96) !important;
-    border-top-color: #cbd5e1 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
-  }
-
-  .bottom-nav-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 2px !important;
-    color: var(--text-muted) !important;
-    text-decoration: none !important;
-    font-size: 0.68rem !important;
-    font-weight: 600 !important;
-    width: 100% !important;
-    height: 100% !important;
-    border: none !important;
-    background: transparent !important;
-    cursor: pointer !important;
-    transition: all var(--transition-fast) !important;
-    -webkit-tap-highlight-color: transparent !important;
-    user-select: none !important;
-  }
-
-  .bottom-nav-item:active {
-    transform: scale(0.92) !important;
-  }
-
-  .bottom-nav-item.active {
-    color: #3b82f6 !important;
-    font-weight: 700 !important;
-  }
-
-  .bottom-nav-icon {
-    font-size: 1.25rem !important;
-    line-height: 1 !important;
-  }
-
-  .bottom-nav-text {
-    line-height: 1.1 !important;
-  }
-
-  /* Elevated Circular Scan Bubble in Center */
-  .bottom-nav-scan-cta {
-    position: relative !important;
-  }
-
-  .bottom-nav-scan-bubble {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, #2563eb, #6366f1) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
-    transform: translateY(-10px) !important;
-    border: 2.5px solid var(--bg-primary) !important;
-    transition: transform 0.2s ease !important;
-  }
-
-  .bottom-nav-scan-cta:active .bottom-nav-scan-bubble {
-    transform: translateY(-8px) scale(0.94) !important;
-  }
-
-  .bottom-nav-scan-icon {
-    font-size: 1.25rem !important;
-    line-height: 1 !important;
-  }
-
-  .bottom-nav-scan-cta .bottom-nav-text {
-    margin-top: -6px !important;
-    font-weight: 700 !important;
-    color: #3b82f6 !important;
+    display: none !important;
   }
 
   /* --- Page Headers & Hero Section on Mobile --- */
@@ -1251,31 +1139,23 @@
 /* ============================================================================
    6. DESKTOP SMARTPHONE SIMULATION MODE (body.device-mobile-mode)
    ============================================================================ */
-body.device-mobile-mode .mobile-menu-toggle {
-  display: flex !important;
+body.device-mobile-mode html,
+body.device-mobile-mode body {
+  padding-bottom: 0 !important;
 }
 
-body.device-mobile-mode .mobile-bottom-nav {
-  display: grid !important;
-  max-width: 420px !important;
-  margin: 0 auto !important;
-  border-left: 3px solid #1e293b !important;
-  border-right: 3px solid #1e293b !important;
-}
-
-body.theme-light.device-mobile-mode .mobile-bottom-nav {
-  border-left: 3px solid #64748b !important;
-  border-right: 3px solid #64748b !important;
-}
-
-body.device-mobile-mode .nav-links > li:not(.nav-auth-item) {
+body.device-mobile-mode .navbar nav,
+body.device-mobile-mode .nav-links {
   display: none !important;
 }
 
-body.device-mobile-mode .nav-links {
+body.device-mobile-mode .mobile-menu-toggle {
   display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
+  margin-left: auto !important;
+}
+
+body.device-mobile-mode .mobile-bottom-nav {
+  display: none !important;
 }
 
 body.device-mobile-mode .stats-grid {
