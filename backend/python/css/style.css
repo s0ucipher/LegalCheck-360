@@ -160,110 +160,58 @@
   }
 }
 
-/* 2. Desktop Simulation Mode (> 768px): Sleek, Realistic Smartphone Chassis */
+/* 2. Desktop Smartphone Simulation View (> 768px in device-mobile-mode) */
 @media (min-width: 769px) {
   body.device-mobile-mode {
-    background: #060913 radial-gradient(circle at 50% 15%, rgba(37, 99, 235, 0.18) 0%, rgba(2, 6, 23, 0.95) 75%) !important;
+    background: #060913 radial-gradient(circle at 50% 15%, rgba(37, 99, 235, 0.15) 0%, rgba(2, 6, 23, 0.98) 75%) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 2.5rem 1rem !important;
+    padding: 1.5rem 1rem !important;
     min-height: 100vh !important;
     box-sizing: border-box !important;
-    transition: all var(--transition-normal);
   }
 
   body.theme-light.device-mobile-mode,
   [data-theme="light"] body.device-mobile-mode {
-    background: #cbd5e1 radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.15) 0%, #cbd5e1 75%) !important;
+    background: #e2e8f0 radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.12) 0%, #cbd5e1 75%) !important;
   }
 
-  /* Unified smartphone chassis for all content blocks */
-  body.device-mobile-mode .top-utility-bar,
+  /* Sleek, genuine mobile viewport frame without artificial fake notches */
   body.device-mobile-mode .navbar,
   body.device-mobile-mode main,
   body.device-mobile-mode .footer {
     width: 100% !important;
-    max-width: 420px !important;
+    max-width: 440px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
-    border-left: 3px solid #1e293b !important;
-    border-right: 3px solid #1e293b !important;
+    background: var(--bg-primary) !important;
+    border-left: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
   }
 
-  body.theme-light.device-mobile-mode .top-utility-bar,
-  body.theme-light.device-mobile-mode .navbar,
-  body.theme-light.device-mobile-mode main,
-  body.theme-light.device-mobile-mode .footer {
-    border-left: 3px solid #64748b !important;
-    border-right: 3px solid #64748b !important;
+  body.device-mobile-mode .navbar {
+    border-top: 1px solid var(--border-color) !important;
+    border-radius: 16px 16px 0 0 !important;
   }
 
-  /* Top chassis with realistic Dynamic Island / speaker */
-  body.device-mobile-mode .top-utility-bar {
-    border-top: 14px solid #0f172a !important;
-    border-radius: 44px 44px 0 0 !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
-    position: relative;
-    padding-top: 0.25rem !important;
-  }
-
-  body.theme-light.device-mobile-mode .top-utility-bar {
-    border-top: 14px solid #475569 !important;
-    border-radius: 44px 44px 0 0 !important;
-    background: #ffffff !important;
-  }
-
-  body.device-mobile-mode .top-utility-bar::before {
-    content: "";
-    display: block;
-    width: 100px;
-    height: 18px;
-    background: #020617;
-    border-radius: 20px;
-    margin: -10px auto 6px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-
-  /* Bottom chassis with home indicator bar */
   body.device-mobile-mode .footer {
-    border-bottom: 18px solid #0f172a !important;
-    border-radius: 0 0 44px 44px !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
-    position: relative;
-    padding-bottom: 1.25rem !important;
-  }
-
-  body.theme-light.device-mobile-mode .footer {
-    border-bottom: 18px solid #475569 !important;
-    border-radius: 0 0 44px 44px !important;
-    background: #f8fafc !important;
-  }
-
-  body.device-mobile-mode .footer::after {
-    content: "";
-    display: block;
-    width: 120px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.45);
-    border-radius: 2px;
-    margin: 14px auto -8px;
-  }
-
-  body.theme-light.device-mobile-mode .footer::after {
-    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--border-color) !important;
+    border-radius: 0 0 16px 16px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
   }
 }
 
-/* Smartphone Mode Element Layout Rules */
-body.device-mobile-mode .nav-links > li:not(.nav-auth-item) {
+/* Smartphone Mode Navigation & Utility Rules */
+body.device-mobile-mode .top-utility-bar {
   display: none !important;
 }
 
+body.device-mobile-mode .navbar nav,
 body.device-mobile-mode .nav-links {
-  display: flex !important;
+  display: none !important;
 }
 
 body.device-mobile-mode .container {
@@ -561,6 +509,68 @@ a:hover {
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
 }
+
+/* Academic Demonstration Presets Pill Buttons */
+.hero-demo-presets {
+  margin-top: 2rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-theme="light"] .hero-demo-presets,
+body.theme-light .hero-demo-presets {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.demo-presets-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.demo-presets-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.demo-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-main);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.demo-pill-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+.demo-pill-btn.pass { border-color: rgba(16, 185, 129, 0.4); }
+.demo-pill-btn.fail { border-color: rgba(239, 68, 68, 0.4); }
+.demo-pill-btn.review { border-color: rgba(245, 158, 11, 0.4); }
+
+.demo-pill-dot { font-size: 0.65rem; }
+.demo-pill-btn.pass .demo-pill-dot { color: #10b981; }
+.demo-pill-btn.fail .demo-pill-dot { color: #ef4444; }
+.demo-pill-btn.review .demo-pill-dot { color: #f59e0b; }
 
 /* Upper Left Navigation Group & Back Button */
 .nav-left-group {

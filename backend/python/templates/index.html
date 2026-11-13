@@ -46,7 +46,7 @@
           <div class="brand-text">LegalCheck <span>360</span></div>
         </a>
       </div>
-      <nav>
+      <nav class="desktop-nav">
         <ul class="nav-links">
           <li><a href="index.html" class="nav-link active">Home</a></li>
           <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
@@ -56,6 +56,12 @@
           <li><a href="upload.html" class="nav-cta">Start Inspection →</a></li>
         </ul>
       </nav>
+      <!-- Dedicated Mobile Hamburger Menu Button (Upper-Right Corner) -->
+      <button type="button" class="mobile-menu-toggle" id="mobileMenuToggleBtn" onclick="toggleMobileDrawer()" aria-label="Open navigation menu" title="Navigation Menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
     </div>
   </header>
 
@@ -74,12 +80,28 @@
           Automate the verification of mandatory packaging declarations across biscuits, foods, beverages, cosmetics, and consumer goods. Powered by high-precision OCR, multimodal AI, and a deterministic C-powered rules engine.
         </p>
         <div class="hero-actions">
-          <a href="upload.html" class="btn btn-primary" style="padding: 0.85rem 1.75rem; font-size: 1.05rem;">
+          <a href="upload.html" class="btn btn-primary hero-btn-primary" style="padding: 0.85rem 1.75rem; font-size: 1.05rem;">
             📸 Start Product Inspection
           </a>
-          <a href="dashboard.html" class="btn btn-secondary" style="padding: 0.85rem 1.75rem; font-size: 1.05rem;">
+          <a href="dashboard.html" class="btn btn-secondary hero-btn-secondary" style="padding: 0.85rem 1.75rem; font-size: 1.05rem;">
             📊 View Inspector Dashboard
           </a>
+        </div>
+
+        <!-- Academic Demonstration Presets for Instant Evaluation -->
+        <div class="hero-demo-presets">
+          <div class="demo-presets-label">⚡ Instant Academic Demonstration Presets:</div>
+          <div class="demo-presets-row">
+            <a href="upload.html?sample=1" class="demo-pill-btn pass" title="Compliant Biscuit Package (Rule 6 Complete)">
+              <span class="demo-pill-dot">●</span> 🍪 Sample 1: Good Day (100% PASS)
+            </a>
+            <a href="upload.html?sample=2" class="demo-pill-btn fail" title="Non-Compliant Potato Wafers (Missing MRP & USP)">
+              <span class="demo-pill-dot">●</span> 🥔 Sample 2: Crunchy Bites (FAIL)
+            </a>
+            <a href="upload.html?sample=3" class="demo-pill-btn review" title="Unclear Label / Needs Auditor Review">
+              <span class="demo-pill-dot">●</span> 🍵 Sample 3: Green Tea (Review)
+            </a>
+          </div>
         </div>
       </div>
     </section>

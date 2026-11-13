@@ -287,22 +287,27 @@ function initMobileNavigation() {
   const oldBottomNav = document.getElementById('mobileBottomNav');
   if (oldBottomNav) oldBottomNav.remove();
 
-  // 1. Inject Hamburger button into .nav-container if missing (Upper-Right Corner)
-  const navContainer = document.querySelector('.nav-container');
-  if (navContainer && !document.getElementById('mobileMenuToggleBtn')) {
-    const hamburgerBtn = document.createElement('button');
-    hamburgerBtn.type = 'button';
-    hamburgerBtn.id = 'mobileMenuToggleBtn';
-    hamburgerBtn.className = 'mobile-menu-toggle';
-    hamburgerBtn.setAttribute('aria-label', 'Open navigation menu');
-    hamburgerBtn.setAttribute('title', 'Navigation Menu');
-    hamburgerBtn.innerHTML = `
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-    `;
-    hamburgerBtn.onclick = toggleMobileDrawer;
-    navContainer.appendChild(hamburgerBtn);
+  // 1. Ensure Hamburger button is bound in .nav-container (Upper-Right Corner)
+  const existingBtn = document.getElementById('mobileMenuToggleBtn');
+  if (existingBtn) {
+    existingBtn.onclick = toggleMobileDrawer;
+  } else {
+    const navContainer = document.querySelector('.nav-container');
+    if (navContainer) {
+      const hamburgerBtn = document.createElement('button');
+      hamburgerBtn.type = 'button';
+      hamburgerBtn.id = 'mobileMenuToggleBtn';
+      hamburgerBtn.className = 'mobile-menu-toggle';
+      hamburgerBtn.setAttribute('aria-label', 'Open navigation menu');
+      hamburgerBtn.setAttribute('title', 'Navigation Menu');
+      hamburgerBtn.innerHTML = `
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      `;
+      hamburgerBtn.onclick = toggleMobileDrawer;
+      navContainer.appendChild(hamburgerBtn);
+    }
   }
 
   // 2. Inject Mobile Side Navigation Drawer & Backdrop to body if missing
@@ -325,7 +330,10 @@ function initMobileNavigation() {
       <div class="mobile-drawer-header">
         <div class="drawer-brand">
           <div class="drawer-brand-icon">⚖️</div>
-          <div class="drawer-brand-text">LegalCheck <span>360</span></div>
+          <div class="drawer-brand-text-wrap">
+            <div class="drawer-brand-text">LegalCheck <span>360</span></div>
+            <div class="drawer-brand-tagline">Smart Packaging Compliance</div>
+          </div>
         </div>
         <button type="button" class="drawer-close-btn" onclick="closeMobileDrawer()" aria-label="Close menu" title="Close menu">✕</button>
       </div>
@@ -375,9 +383,14 @@ function initMobileNavigation() {
           <span class="drawer-nav-label">Inspection History</span>
           <span class="drawer-nav-chevron">›</span>
         </a>
+        <a href="history.html" class="drawer-nav-item" data-page="audit-history" onclick="closeMobileDrawer()">
+          <span class="drawer-nav-icon">📜</span>
+          <span class="drawer-nav-label">Audit History</span>
+          <span class="drawer-nav-chevron">›</span>
+        </a>
         <a href="dashboard.html" class="drawer-nav-item" data-page="dashboard" onclick="closeMobileDrawer()">
           <span class="drawer-nav-icon">📊</span>
-          <span class="drawer-nav-label">Dashboard & Compliance</span>
+          <span class="drawer-nav-label">Inspector Dashboard</span>
           <span class="drawer-nav-chevron">›</span>
         </a>
         <a href="admin.html" class="drawer-nav-item" data-page="admin" onclick="closeMobileDrawer()">
@@ -405,6 +418,15 @@ function initMobileNavigation() {
           </a>
         </div>
       </nav>
+
+      <!-- Statutory Authority Regulatory Reference Card -->
+      <div class="drawer-regulatory-card">
+        <div class="drawer-reg-badge">🇮🇳 Statutory Authority</div>
+        <div class="drawer-reg-text">
+          Department of Consumer Affairs • Govt. of India<br>
+          Legal Metrology (Packaged Commodities) Rules, 2011 & Legal Metrology Act, 2009
+        </div>
+      </div>
 
       <div class="drawer-footer">
         <div>LegalCheck 360 • "Smart Packaging. Smarter Compliance."</div>
