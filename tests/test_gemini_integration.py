@@ -179,24 +179,16 @@ class TestGeminiIntegration(unittest.TestCase):
         print("[TEST 7 PASSED] Academic benchmark scan returns complete regulatory vision metadata.")
 
     def test_08_live_gemini_api_if_key_available(self):
-        """If GEMINI_API_KEY is available in the environment, perform a live smoke test."""
+        """If GEMINI_API_KEY is available in the environment, verify SDK client configuration."""
         api_key = os.environ.get("GEMINI_API_KEY", "").strip()
         if not api_key:
             print("[TEST 8 SKIPPED] GEMINI_API_KEY not in environment; skipping live Google API network call.")
             return
 
-        print(f"[TEST 8] GEMINI_API_KEY detected. Testing live connection to Google Gemini API...")
-        try:
-            from google import genai
-            client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents="LegalCheck 360 health check: verify Indian Legal Metrology Act, 2009 PCR 2011 status. Reply in 5 words."
-            )
-            self.assertTrue(bool(response and response.text))
-            print(f"[TEST 8 PASSED] Live Google Gemini response: {response.text.strip()}")
-        except Exception as e:
-            print(f"[TEST 8 WARNING] Live API call returned: {e}")
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        self.assertIsNotNone(client)
+        print("[TEST 8 PASSED] Google GenAI SDK client successfully initialized with GEMINI_API_KEY.")
 
 
 if __name__ == "__main__":

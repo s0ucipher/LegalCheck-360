@@ -1280,6 +1280,55 @@ body.device-mobile-mode body {
   padding-bottom: 0 !important;
 }
 
+@media (min-width: 769px) {
+  body.device-mobile-mode .navbar,
+  body.device-mobile-mode main,
+  body.device-mobile-mode main.container,
+  body.device-mobile-mode .auth-page-container,
+  body.device-mobile-mode .footer {
+    width: 100% !important;
+    max-width: 440px !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+    background: var(--bg-primary) !important;
+    border-left: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
+  }
+
+  body.device-mobile-mode main,
+  body.device-mobile-mode main.container,
+  body.device-mobile-mode .auth-page-container {
+    padding: 1rem 0.85rem 3.5rem !important;
+    overflow-x: hidden !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+body.device-mobile-mode .nav-back-btn .back-btn-text {
+  display: none !important;
+}
+
+body.device-mobile-mode .nav-back-btn {
+  padding: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.device-mobile-mode .brand-text {
+  white-space: nowrap !important;
+  font-size: 1.05rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
 /* In Smartphone Mode, hide top utility bar completely to eliminate clutter and save vertical space */
 body.device-mobile-mode .top-utility-bar {
   display: none !important;

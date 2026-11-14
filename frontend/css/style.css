@@ -178,18 +178,30 @@
     background: #e2e8f0 radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.12) 0%, #cbd5e1 75%) !important;
   }
 
-  /* Sleek, genuine mobile viewport frame */
+  /* Sleek, genuine mobile viewport frame across all pages */
   body.device-mobile-mode .navbar,
   body.device-mobile-mode main,
+  body.device-mobile-mode main.container,
+  body.device-mobile-mode .auth-page-container,
   body.device-mobile-mode .footer {
     width: 100% !important;
     max-width: 440px !important;
+    min-width: 0 !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
     background: var(--bg-primary) !important;
     border-left: 1px solid var(--border-color) !important;
     border-right: 1px solid var(--border-color) !important;
+  }
+
+  /* Force main inner padding for clean mobile layout */
+  body.device-mobile-mode main,
+  body.device-mobile-mode main.container,
+  body.device-mobile-mode .auth-page-container {
+    padding: 1rem 0.85rem 3.5rem !important;
+    overflow-x: hidden !important;
+    flex: 1 1 auto !important;
   }
 
   /* In Smartphone Mode, hide top utility bar completely to eliminate clutter and save vertical space */
@@ -200,26 +212,108 @@
   body.device-mobile-mode .navbar {
     border-top: 1px solid var(--border-color) !important;
     border-radius: 16px 16px 0 0 !important;
+    width: 100% !important;
+    max-width: 440px !important;
   }
 
   body.device-mobile-mode .footer {
     border-bottom: 1px solid var(--border-color) !important;
     border-radius: 0 0 16px 16px !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
+    width: 100% !important;
+    max-width: 440px !important;
   }
 }
 
-/* Smartphone Mode Navigation Rules */
+/* Smartphone Mode Navigation & Sizing Rules */
 body.device-mobile-mode .navbar nav,
 body.device-mobile-mode .nav-links {
   display: none !important;
 }
 
-body.device-mobile-mode .container {
-  max-width: 100% !important;
-  padding: 0 1rem !important;
+body.device-mobile-mode .nav-back-btn .back-btn-text {
+  display: none !important;
 }
 
+body.device-mobile-mode .nav-back-btn {
+  padding: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.device-mobile-mode .brand-text {
+  white-space: nowrap !important;
+  font-size: 1.05rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+body.device-mobile-mode .nav-left-group {
+  gap: 0.5rem !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+body.device-mobile-mode .nav-right-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  flex-wrap: nowrap !important;
+}
+
+body.device-mobile-mode .container:not(main) {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
+body.device-mobile-mode main.container {
+  max-width: 440px !important;
+}
+
+/* Page Headers on Smartphone Mode */
+body.device-mobile-mode .app-header {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.75rem !important;
+  padding: 0.5rem 0 1rem !important;
+  margin-bottom: 1rem !important;
+  width: 100% !important;
+}
+
+body.device-mobile-mode .app-header .app-title-group h1,
+body.device-mobile-mode .app-title-group h1 {
+  font-size: 1.35rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+}
+
+body.device-mobile-mode .app-header .app-title-group p,
+body.device-mobile-mode .app-title-group p {
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
+  color: var(--text-muted) !important;
+}
+
+body.device-mobile-mode .app-header div:last-child {
+  width: 100% !important;
+}
+
+body.device-mobile-mode .app-header .btn {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Hero Section (Home page) */
 body.device-mobile-mode .hero-title {
   font-size: 1.75rem !important;
   line-height: 1.25 !important;
@@ -240,21 +334,169 @@ body.device-mobile-mode .footer-grid {
   gap: 1rem !important;
 }
 
+/* Dashboard Stats Grid */
 body.device-mobile-mode .stats-grid {
   grid-template-columns: repeat(2, 1fr) !important;
-  gap: 0.75rem !important;
+  gap: 0.65rem !important;
+  margin-bottom: 1.25rem !important;
 }
 
-body.device-mobile-mode .results-header-card {
+body.device-mobile-mode .stat-card {
+  padding: 0.85rem !important;
+}
+
+body.device-mobile-mode .stat-value {
+  font-size: 1.45rem !important;
+}
+
+body.device-mobile-mode .stat-label {
+  font-size: 0.72rem !important;
+}
+
+/* Upload & Inspect Workflow (upload.html) */
+body.device-mobile-mode .upload-zone-wrapper {
+  max-width: 100% !important;
+  margin: 0 auto 1.5rem !important;
+}
+
+body.device-mobile-mode .academic-presets-bar {
+  padding: 0.85rem !important;
+  margin-bottom: 1rem !important;
+}
+
+body.device-mobile-mode .academic-presets-bar > div:first-child {
   flex-direction: column !important;
   align-items: flex-start !important;
+  gap: 4px !important;
+}
+
+body.device-mobile-mode .preset-btn-group {
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+
+body.device-mobile-mode .preset-btn {
+  width: 100% !important;
+  font-size: 0.8rem !important;
+  padding: 0.65rem 0.75rem !important;
+  justify-content: flex-start !important;
+}
+
+body.device-mobile-mode .wizard-progress {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 6px !important;
+  padding: 6px !important;
+  margin-bottom: 1.25rem !important;
+  width: 100% !important;
+}
+
+body.device-mobile-mode .wizard-step-indicator {
+  padding: 0.5rem 0.4rem !important;
+  font-size: 0.72rem !important;
+  min-height: 42px !important;
+  border-radius: var(--radius-sm, 6px) !important;
+}
+
+body.device-mobile-mode .wizard-step-indicator:last-child {
+  grid-column: span 2 !important;
+}
+
+body.device-mobile-mode .step-num {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 0.7rem !important;
+}
+
+body.device-mobile-mode .drop-zone {
+  padding: 1.25rem 0.75rem !important;
+}
+
+body.device-mobile-mode .drop-zone h3 {
+  font-size: 1.1rem !important;
+}
+
+body.device-mobile-mode .drop-zone p {
+  font-size: 0.8rem !important;
+}
+
+body.device-mobile-mode .upload-options-row {
+  flex-direction: column !important;
+  gap: 0.65rem !important;
+}
+
+body.device-mobile-mode .btn-upload-option {
+  width: 100% !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+  padding: 0.75rem 1rem !important;
+  min-height: 50px !important;
+}
+
+body.device-mobile-mode .panel-preview-card {
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+body.device-mobile-mode .panel-preview-card img {
+  max-width: 100% !important;
+  max-height: 200px !important;
+}
+
+/* History Page & Filter Controls */
+body.device-mobile-mode .card {
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+body.device-mobile-mode .card div[style*="flex"] {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.65rem !important;
+}
+
+body.device-mobile-mode #search-input,
+body.device-mobile-mode #status-filter {
+  width: 100% !important;
+  min-width: 0 !important;
+  font-size: 0.85rem !important;
+}
+
+body.device-mobile-mode .table-container {
+  overflow-x: visible !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Results Page (results.html) */
+body.device-mobile-mode .results-header-card {
+  flex-direction: column !important;
+  align-items: stretch !important;
   gap: 1.25rem !important;
-  padding: 1.25rem !important;
+  padding: 1.15rem 0.85rem !important;
+}
+
+body.device-mobile-mode .results-header-card > div:last-child {
+  align-items: stretch !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+body.device-mobile-mode #header-product-name {
+  font-size: 1.35rem !important;
+  line-height: 1.25 !important;
 }
 
 body.device-mobile-mode .score-badge-large {
   font-size: 0.95rem !important;
-  padding: 0.6rem 1rem !important;
+  padding: 0.65rem 1rem !important;
+  width: 100% !important;
+  justify-content: center !important;
 }
 
 body.device-mobile-mode .tabs-nav {
@@ -262,24 +504,74 @@ body.device-mobile-mode .tabs-nav {
   flex-wrap: nowrap !important;
   white-space: nowrap !important;
   padding-bottom: 6px !important;
+  gap: 6px !important;
   -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
 }
 
 body.device-mobile-mode .tab-btn {
-  font-size: 0.85rem !important;
-  padding: 0.6rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.45rem 0.75rem !important;
   flex-shrink: 0 !important;
+  border-radius: 999px !important;
 }
 
-body.device-mobile-mode .custom-table {
-  display: block !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
+body.device-mobile-mode .report-section-header {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.65rem !important;
 }
 
-body.device-mobile-mode .table-container {
-  overflow-x: auto !important;
-  border-radius: var(--radius-sm) !important;
+body.device-mobile-mode .report-section-title {
+  font-size: 1.25rem !important;
+}
+
+body.device-mobile-mode .rule-card {
+  padding: 1rem 0.85rem !important;
+  margin-bottom: 1rem !important;
+}
+
+body.device-mobile-mode .rule-card-top {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.65rem !important;
+}
+
+body.device-mobile-mode .rule-decision-row {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.5rem !important;
+}
+
+body.device-mobile-mode .rule-status-selector {
+  width: 100% !important;
+}
+
+body.device-mobile-mode .gemini-analysis-card {
+  padding: 1.15rem 0.85rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+body.device-mobile-mode .gemini-header {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+}
+
+/* Auth & Account Pages (login.html, register.html, profile.html) */
+body.device-mobile-mode .auth-card {
+  padding: 1.5rem 1rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  box-shadow: none !important;
+}
+
+body.device-mobile-mode .profile-overview-card {
+  grid-template-columns: 1fr !important;
+  text-align: center !important;
+  justify-items: center !important;
+  padding: 1.25rem 1rem !important;
 }
 
 

@@ -109,7 +109,10 @@ SUPPORTED_MODELS = [
     os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
     "gemini-2.5-flash",
     "gemini-2.0-flash",
-    "gemini-1.5-flash"
+    "gemini-1.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.8-flash",
+    "gemini-2.5-flash-lite"
 ]
 # Remove duplicates while preserving order
 SUPPORTED_MODELS = list(dict.fromkeys([m for m in SUPPORTED_MODELS if m]))
