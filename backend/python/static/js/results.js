@@ -191,28 +191,28 @@ function renderExecutiveVerdict(scan) {
   if (status === 'PASS' || status === 'COMPLIANT') {
     verdictCard.className = 'executive-verdict-card verdict-pass';
     if (verdictIcon) verdictIcon.textContent = '✅';
-    if (verdictHeading) verdictHeading.textContent = 'FULLY COMPLIANT & APPROVED';
+    if (verdictHeading) verdictHeading.textContent = 'Packaging Compliant — Based on Inspected Declarations';
     if (verdictChip) {
       verdictChip.className = 'verdict-status-chip chip-pass';
-      verdictChip.textContent = 'Safe for Commercial Retail';
+      verdictChip.textContent = 'Compliant (Inspected Panels)';
     }
     if (verdictExplanation) {
-      verdictExplanation.textContent = 'All mandatory statutory declarations under the Indian Legal Metrology (Packaged Commodities) Rules, 2011 and amendments are verified. MRP, Net Quantity, Manufacturer Name & Complete Address, Packing Date, Consumer Helpline, and Unit Sale Price comply fully with statutory requirements. This packaging is lawful and safe for commercial sale across India.';
+      verdictExplanation.textContent = 'All applicable mandatory statutory declarations evaluated on the inspected packaging panels satisfy the Indian Legal Metrology (Packaged Commodities) Rules, 2011. Note: This assessment applies solely to inspected packaging declarations and does not establish physical product safety or constitute official government certification.';
     }
-    if (metricDecl) { metricDecl.textContent = '100% Verified'; metricDecl.className = 'metric-val text-pass'; }
+    if (metricDecl) { metricDecl.textContent = 'All Mandatory Present'; metricDecl.className = 'metric-val text-pass'; }
     if (metricUnits) { metricUnits.textContent = 'Standard SI Metric (g/kg/ml)'; metricUnits.className = 'metric-val text-pass'; }
     if (metricUsp) { metricUsp.textContent = 'Declared (GSR 779E)'; metricUsp.className = 'metric-val text-pass'; }
     if (metricCare) { metricCare.textContent = 'Verified Helpline'; metricCare.className = 'metric-val text-pass'; }
   } else if (status === 'FAIL' || status === 'NON_COMPLIANT') {
     verdictCard.className = 'executive-verdict-card verdict-fail';
     if (verdictIcon) verdictIcon.textContent = '❌';
-    if (verdictHeading) verdictHeading.textContent = 'NON-COMPLIANT — STATUTORY VIOLATIONS DETECTED';
+    if (verdictHeading) verdictHeading.textContent = 'Packaging Non-Compliant — Statutory Violations Detected';
     if (verdictChip) {
       verdictChip.className = 'verdict-status-chip chip-fail';
-      verdictChip.textContent = 'Commercial Distribution Prohibited';
+      verdictChip.textContent = 'Statutory Violations Detected';
     }
     if (verdictExplanation) {
-      verdictExplanation.textContent = 'This product packaging violates mandatory Indian Legal Metrology regulations under the Legal Metrology Act, 2009 & PCR 2011 (such as illegal non-metric units, missing statutory MRP, missing manufacturer address, or missing consumer grievance contact). It is not legally cleared for commercial retail distribution until corrected.';
+      verdictExplanation.textContent = 'Specific statutory non-compliance or missing mandatory declarations under Legal Metrology (Packaged Commodities) Rules, 2011 were detected on the inspected packaging panels. Corrective packaging modification is required.';
     }
     if (metricDecl) { metricDecl.textContent = 'Mandatory Items Missing'; metricDecl.className = 'metric-val text-fail'; }
     if (metricUnits) { metricUnits.textContent = 'Non-Compliant Units'; metricUnits.className = 'metric-val text-fail'; }
@@ -221,18 +221,18 @@ function renderExecutiveVerdict(scan) {
   } else {
     verdictCard.className = 'executive-verdict-card verdict-review';
     if (verdictIcon) verdictIcon.textContent = '⚠️';
-    if (verdictHeading) verdictHeading.textContent = 'CONDITIONALLY ACCEPTABLE (AUDIT RECOMMENDED)';
+    if (verdictHeading) verdictHeading.textContent = 'Verification Required — Auditor Review Recommended';
     if (verdictChip) {
       verdictChip.className = 'verdict-status-chip chip-review';
-      verdictChip.textContent = 'Auditor Verification Advised';
+      verdictChip.textContent = 'Auditor Review Recommended';
     }
     if (verdictExplanation) {
-      verdictExplanation.textContent = 'Most mandatory packaging declarations are present and compliant. However, some declarations are partially obscured, unreadable, or located on packaging panels that were not uploaded. Physical verification by an authorized inspector is recommended prior to formal clearance.';
+      verdictExplanation.textContent = 'Certain mandatory packaging declarations could not be definitively verified due to obscured markings or unprovided packaging panels. Physical in-person inspection by a qualified auditor is recommended prior to clearance.';
     }
-    if (metricDecl) { metricDecl.textContent = 'Mostly Present'; metricDecl.className = 'metric-val text-warning'; }
-    if (metricUnits) { metricUnits.textContent = 'Pending Verification'; metricUnits.className = 'metric-val text-warning'; }
-    if (metricUsp) { metricUsp.textContent = 'Evidence Partial'; metricUsp.className = 'metric-val text-warning'; }
-    if (metricCare) { metricCare.textContent = 'Auditor Review'; metricCare.className = 'metric-val text-warning'; }
+    if (metricDecl) { metricDecl.textContent = 'Review Unprovided Panels'; metricDecl.className = 'metric-val text-warning'; }
+    if (metricUnits) { metricUnits.textContent = 'Inspect Physically'; metricUnits.className = 'metric-val text-pass'; }
+    if (metricUsp) { metricUsp.textContent = 'Panel Verification'; metricUsp.className = 'metric-val text-warning'; }
+    if (metricCare) { metricCare.textContent = 'Verify Panel'; metricCare.className = 'metric-val text-pass'; }
   }
 }
 

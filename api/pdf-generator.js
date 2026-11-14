@@ -232,11 +232,11 @@
     // ==========================================
     p1.rect(0, 745, 595.28, 97, [0.05, 0.08, 0.15]);
     p1.rect(0, 742, 595.28, 3, [0.85, 0.65, 0.13]); // Gold line
-    p1.text('F1', 8, 40, 818, 'GOVERNMENT OF INDIA  |  MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION', [0.85, 0.65, 0.13]);
-    p1.text('F1', 18, 40, 792, 'LEGALCHECK 360', [1, 1, 1]);
-    p1.text('F2', 11, 205, 794, '- STATUTORY PACKAGING INSPECTION REPORT', [0.85, 0.90, 1.0]);
-    p1.text('F3', 8.5, 40, 770, 'Comprehensive Compliance Audit under Legal Metrology (Packaged Commodities) Rules, 2011 & Legal Metrology Act, 2009', [0.75, 0.80, 0.90]);
-    p1.text('F1', 8, 40, 754, 'Regulatory Framework: GSR 779(E) Unit Sale Price | Rule 6(1) Declarations | Schedule II Font Height | FSSAI 2020', [0.65, 0.70, 0.82]);
+    p1.text('F1', 8, 40, 818, 'LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011  |  COMPLIANCE AUDIT', [0.85, 0.65, 0.13]);
+    p1.text('F1', 17, 40, 792, 'LEGALCHECK 360', [1, 1, 1]);
+    p1.text('F2', 10, 185, 794, '- AI-ASSISTED PACKAGING COMPLIANCE INSPECTION REPORT', [0.85, 0.90, 1.0]);
+    p1.text('F3', 8.5, 40, 770, 'Pre-market compliance verification of packaging declarations under Legal Metrology (Packaged Commodities) Rules, 2011', [0.75, 0.80, 0.90]);
+    p1.text('F1', 8, 40, 754, 'Statutory Scope: GSR 779(E) Unit Sale Price | Rule 6(1) Declarations | Schedule II Font Height Standards', [0.65, 0.70, 0.82]);
 
     // Executive Metadata Box
     p1.rect(36, 615, 523, 115, [0.96, 0.97, 0.99], [0.80, 0.84, 0.90], 1);
@@ -271,19 +271,19 @@
     const side2St = (unavailPanels.includes('side2') || unavailPanels.includes('side')) ? '[--] Side 2 Unavailable' : '[OK] Side 2 (Batch)';
     p1.text('F1', 7.5, 142, 648, `${frontSt}  |  ${backSt}  |  ${side1St}  |  ${side2St}`, [0.15, 0.35, 0.65]);
 
-    // Row 5: Official Statutory Legal Verdict & Safety Clearance Callout Box
-    let verdictStatement = 'STATUTORY VERDICT: FULLY COMPLIANT (SAFE & LAWFUL FOR COMMERCIAL RETAIL SALE ACROSS INDIA)';
+    // Row 5: Legally Cautious Statutory Verdict Callout Box
+    let verdictStatement = 'STATUTORY VERDICT: Packaging Compliant — Based on Inspected Declarations';
     let vBg = [0.92, 0.98, 0.94];
     let vBorder = [0.10, 0.65, 0.35];
     let vText = [0.04, 0.45, 0.22];
 
     if (status === 'FAIL' || status === 'NON_COMPLIANT') {
-      verdictStatement = 'STATUTORY VERDICT: NON-COMPLIANT (STATUTORY VIOLATIONS - COMMERCIAL DISTRIBUTION PROHIBITED)';
+      verdictStatement = 'STATUTORY VERDICT: Packaging Non-Compliant — Statutory Violations Detected';
       vBg = [0.99, 0.93, 0.93];
       vBorder = [0.85, 0.20, 0.20];
       vText = [0.70, 0.10, 0.10];
     } else if (status !== 'PASS' && status !== 'COMPLIANT') {
-      verdictStatement = 'STATUTORY VERDICT: CONDITIONALLY ACCEPTABLE (CORE PRESENT - AUDITOR VERIFICATION ADVISED)';
+      verdictStatement = 'STATUTORY VERDICT: Verification Required — Auditor Review Recommended';
       vBg = [0.99, 0.96, 0.90];
       vBorder = [0.88, 0.55, 0.10];
       vText = [0.65, 0.38, 0.05];
@@ -670,26 +670,26 @@
     // Official Seal Box
     p3.rect(48, 274, 499, 82, [1, 1, 1], [0.08, 0.15, 0.35], 1);
     p3.rect(51, 277, 493, 76, null, [0.85, 0.65, 0.13], 0.7);
-    p3.text('F1', 8.5, 60, 336, '[OFFICIAL GOVERNMENT REGULATORY SCREENING SEAL - LEGALCHECK 360 CERTIFIED]', [0.08, 0.15, 0.35]);
+    p3.text('F1', 8.5, 60, 336, '[LEGALCHECK 360 AUDIT VERIFICATION SEAL - DIGITAL RECORD CERTIFIED]', [0.08, 0.15, 0.35]);
 
     let hashVal = 0;
     for (let c = 0; c < id.length; c++) hashVal = ((hashVal << 5) - hashVal + id.charCodeAt(c)) | 0;
     const hexHash = Math.abs(hashVal).toString(16).padStart(8, '0').toUpperCase();
     p3.text('F2', 7.5, 60, 320, `Digital Authentication Hash: SHA256-LC360-${hexHash}B98C224F00E84A7D91`, [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.5, 60, 306, `Certified Verification Date: ${auditDate} | Legal Metrology Screening Division`, [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.5, 60, 306, `Verification Record Generated: ${auditDate} | LegalCheck 360 Compliance System`, [0.35, 0.38, 0.44]);
     p3.text('F1', 7.5, 60, 292, `Online Verification Link: https://legalcheck360.vercel.app/results?id=${id}`, [0.12, 0.45, 0.85]);
 
     // STATUTORY DISCLAIMER BOX
     p3.rect(36, 46, 523, 204, [0.97, 0.98, 0.99], [0.80, 0.84, 0.90], 0.8);
-    p3.text('F1', 8, 46, 234, 'STATUTORY NOTICE & LEGAL DISCLAIMER UNDER LEGAL METROLOGY ACT, 2009:', [0.10, 0.12, 0.18]);
-    p3.text('F2', 7.2, 46, 218, '1. Regulatory Purpose: This inspection audit is compiled by LegalCheck 360 in direct accordance with the Legal Metrology', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 206, '   Act, 2009 (Act No. 1 of 2010), the Legal Metrology (Packaged Commodities) Rules, 2011, and the Consumer Protection Act, 2019.', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 192, '2. Method of Inspection: Automated optical character recognition (OCR) typography extraction and multimodal legal intelligence', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 180, '   are used for statutory pre-screening and rapid compliance auditing across mandatory consumer packaging declarations.', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 166, '3. Auditor Authority: Human auditor overrides and final determinations recorded in Section F reflect the designated auditor review', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 154, '   pursuant to administrative screening protocols under Section 39 of the Act.', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 140, '4. Judicial Enforcement Notice: For formal court prosecution, penalty seizure or statutory tribunal proceedings under Section 36,', [0.35, 0.38, 0.44]);
-    p3.text('F2', 7.2, 46, 128, '   physical packaging specimens must be seized and verified by a gazetted Inspector of Legal Metrology.', [0.35, 0.38, 0.44]);
+    p3.text('F1', 8, 46, 234, 'REGULATORY ADVISORY & STATUTORY LIMITATION NOTICE:', [0.10, 0.12, 0.18]);
+    p3.text('F2', 7.2, 46, 218, '1. Scope of Audit: This report is compiled by LegalCheck 360 as an AI-assisted packaging compliance screening tool under the', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 206, '   Legal Metrology (Packaged Commodities) Rules, 2011 and the Legal Metrology Act, 2009.', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 192, '2. Non-Government Disclaimer: This report is an independent technical audit and does NOT constitute an official government', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 180, '   certificate, statutory endorsement, or administrative clearance issued by any government department or authority.', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 166, '3. Packaging vs Product Safety: Verification confirms only packaging declarations present on uploaded panel images; it does', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 154, '   not certify product authenticity, chemical purity, physical safety, or manufacturing quality.', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 140, '4. Incomplete Package Limitation: Absent declarations on unprovided packaging panels cannot be assumed to be missing from the', [0.35, 0.38, 0.44]);
+    p3.text('F2', 7.2, 46, 128, '   physical product container until complete 360-degree panels have been inspected.', [0.35, 0.38, 0.44]);
     p3.text('F2', 7.2, 46, 114, '5. Document Authenticity: Any tampering, unauthorized erasure, or alteration of this digital certificate invalidates this record.', [0.35, 0.38, 0.44]);
     p3.text('F1', 7.5, 46, 96, 'Official Electronic Record Repository: https://legalcheck360.vercel.app/results?id=' + id, [0.12, 0.45, 0.85]);
 
