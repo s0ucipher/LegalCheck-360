@@ -61,10 +61,10 @@ function formatStatusBadge(status) {
 }
 
 const SVG_ICONS = {
-  desktop: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
-  mobile: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`,
-  sun: `<svg class="toggle-svg sun-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>`,
-  moon: `<svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+  desktop: `<svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
+  mobile: `<svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`,
+  sun: `<svg class="toggle-svg sun-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>`,
+  moon: `<svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
 };
 
 /**
@@ -82,19 +82,30 @@ function setThemeMode(mode) {
     localStorage.setItem('legalcheck_theme', 'dark');
   }
 
-  // Update Single Theme Toggle button (Shows target action)
+  const targetIcon = isLight ? SVG_ICONS.moon : SVG_ICONS.sun;
+  const targetTitle = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+
+  // 1. Update Top Utility Bar Theme Toggle (Desktop icon-only button)
   const themeIcon = document.getElementById('themeToggleIcon');
-  const themeLabel = document.getElementById('themeToggleLabel');
   const singleThemeBtn = document.getElementById('singleThemeToggle');
-  if (themeIcon && themeLabel) {
-    themeIcon.innerHTML = isLight ? SVG_ICONS.moon : SVG_ICONS.sun;
-    themeLabel.textContent = isLight ? 'Dark' : 'Light';
-    if (singleThemeBtn) {
-      singleThemeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
-    }
+  if (themeIcon) themeIcon.innerHTML = targetIcon;
+  if (singleThemeBtn) {
+    singleThemeBtn.title = targetTitle;
+    singleThemeBtn.setAttribute('aria-label', targetTitle);
+  }
+  const themeLabel = document.getElementById('themeToggleLabel');
+  if (themeLabel) themeLabel.textContent = ''; // Remove text words
+
+  // 2. Update Navbar Mobile Right Theme Toggle (Smartphone mode icon button)
+  const navThemeIcon = document.getElementById('navThemeIcon');
+  const navThemeBtn = document.getElementById('navThemeToggle');
+  if (navThemeIcon) navThemeIcon.innerHTML = targetIcon;
+  if (navThemeBtn) {
+    navThemeBtn.title = targetTitle;
+    navThemeBtn.setAttribute('aria-label', targetTitle);
   }
 
-  // Update Mobile App Drawer Theme Switcher
+  // 3. Update Mobile App Drawer Theme Switcher
   const drawerThemeIcon = document.getElementById('drawerThemeIcon');
   const drawerThemeLabel = document.getElementById('drawerThemeLabel');
   if (drawerThemeIcon && drawerThemeLabel) {
@@ -131,19 +142,30 @@ function setDeviceMode(mode) {
     localStorage.setItem('legalcheck_device', 'desktop');
   }
 
-  // Update Single Device Toggle button (Shows target action)
+  const targetIcon = isMobile ? SVG_ICONS.desktop : SVG_ICONS.mobile;
+  const targetTitle = isMobile ? 'Switch to Desktop Mode' : 'Switch to Smartphone Mode';
+
+  // 1. Update Top Utility Bar Device Toggle (Desktop icon-only button)
   const devIcon = document.getElementById('deviceToggleIcon');
-  const devLabel = document.getElementById('deviceToggleLabel');
   const singleDevBtn = document.getElementById('singleDeviceToggle');
-  if (devIcon && devLabel) {
-    devIcon.innerHTML = isMobile ? SVG_ICONS.desktop : SVG_ICONS.mobile;
-    devLabel.textContent = isMobile ? 'Desktop' : 'Mobile';
-    if (singleDevBtn) {
-      singleDevBtn.title = isMobile ? 'Switch to Desktop Mode' : 'Switch to Smartphone Mode';
-    }
+  if (devIcon) devIcon.innerHTML = targetIcon;
+  if (singleDevBtn) {
+    singleDevBtn.title = targetTitle;
+    singleDevBtn.setAttribute('aria-label', targetTitle);
+  }
+  const devLabel = document.getElementById('deviceToggleLabel');
+  if (devLabel) devLabel.textContent = ''; // Remove text words
+
+  // 2. Update Navbar Mobile Right Device Toggle (Smartphone mode icon button)
+  const navDevIcon = document.getElementById('navDeviceIcon');
+  const navDevBtn = document.getElementById('navDeviceToggle');
+  if (navDevIcon) navDevIcon.innerHTML = targetIcon;
+  if (navDevBtn) {
+    navDevBtn.title = targetTitle;
+    navDevBtn.setAttribute('aria-label', targetTitle);
   }
 
-  // Update Mobile App Drawer Device Switcher
+  // 3. Update Mobile App Drawer Device Switcher
   const drawerDevIcon = document.getElementById('drawerDeviceIcon');
   const drawerDevLabel = document.getElementById('drawerDeviceLabel');
   if (drawerDevIcon && drawerDevLabel) {
@@ -293,14 +315,58 @@ function initMobileNavigation() {
   const oldBottomNav = document.getElementById('mobileBottomNav');
   if (oldBottomNav) oldBottomNav.remove();
 
-  // 1. Ensure Hamburger button is bound in .nav-container (Upper-Right Corner)
-  const existingBtn = document.getElementById('mobileMenuToggleBtn');
-  if (existingBtn) {
-    existingBtn.onclick = toggleMobileDrawer;
-  } else {
-    const navContainer = document.querySelector('.nav-container');
-    if (navContainer) {
-      const hamburgerBtn = document.createElement('button');
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light' || document.body.classList.contains('theme-light');
+  const isMobileMode = document.body.classList.contains('device-mobile-mode');
+
+  // 1. Ensure Nav Right Actions group exists in .nav-container (Device Switch, Theme Switch & Hamburger)
+  const navContainer = document.querySelector('.nav-container');
+  if (navContainer) {
+    let rightActions = navContainer.querySelector('.nav-right-actions');
+    if (!rightActions) {
+      rightActions = document.createElement('div');
+      rightActions.className = 'nav-right-actions';
+      rightActions.id = 'navRightActions';
+      navContainer.appendChild(rightActions);
+    }
+
+    // A. Ensure navDeviceToggle is present inside rightActions
+    let navDevBtn = document.getElementById('navDeviceToggle');
+    if (!navDevBtn) {
+      navDevBtn = document.createElement('button');
+      navDevBtn.type = 'button';
+      navDevBtn.id = 'navDeviceToggle';
+      navDevBtn.className = 'nav-icon-toggle mobile-only-control';
+      navDevBtn.setAttribute('aria-label', isMobileMode ? 'Switch to Desktop Mode' : 'Switch to Smartphone Mode');
+      navDevBtn.setAttribute('title', isMobileMode ? 'Switch to Desktop Mode' : 'Switch to Smartphone Mode');
+      navDevBtn.innerHTML = `<span class="nav-icon" id="navDeviceIcon">${isMobileMode ? SVG_ICONS.desktop : SVG_ICONS.mobile}</span>`;
+      navDevBtn.onclick = toggleDeviceMode;
+      rightActions.appendChild(navDevBtn);
+    } else {
+      navDevBtn.onclick = toggleDeviceMode;
+      if (!rightActions.contains(navDevBtn)) rightActions.appendChild(navDevBtn);
+    }
+
+    // B. Ensure navThemeToggle is present inside rightActions
+    let navThemeBtn = document.getElementById('navThemeToggle');
+    if (!navThemeBtn) {
+      navThemeBtn = document.createElement('button');
+      navThemeBtn.type = 'button';
+      navThemeBtn.id = 'navThemeToggle';
+      navThemeBtn.className = 'nav-icon-toggle mobile-only-control';
+      navThemeBtn.setAttribute('aria-label', isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+      navThemeBtn.setAttribute('title', isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+      navThemeBtn.innerHTML = `<span class="nav-icon" id="navThemeIcon">${isLight ? SVG_ICONS.moon : SVG_ICONS.sun}</span>`;
+      navThemeBtn.onclick = toggleThemeMode;
+      rightActions.appendChild(navThemeBtn);
+    } else {
+      navThemeBtn.onclick = toggleThemeMode;
+      if (!rightActions.contains(navThemeBtn)) rightActions.appendChild(navThemeBtn);
+    }
+
+    // C. Ensure mobileMenuToggleBtn is present inside rightActions
+    let hamburgerBtn = document.getElementById('mobileMenuToggleBtn');
+    if (!hamburgerBtn) {
+      hamburgerBtn = document.createElement('button');
       hamburgerBtn.type = 'button';
       hamburgerBtn.id = 'mobileMenuToggleBtn';
       hamburgerBtn.className = 'mobile-menu-toggle';
@@ -312,7 +378,10 @@ function initMobileNavigation() {
         <span class="hamburger-bar"></span>
       `;
       hamburgerBtn.onclick = toggleMobileDrawer;
-      navContainer.appendChild(hamburgerBtn);
+      rightActions.appendChild(hamburgerBtn);
+    } else {
+      hamburgerBtn.onclick = toggleMobileDrawer;
+      if (!rightActions.contains(hamburgerBtn)) rightActions.appendChild(hamburgerBtn);
     }
   }
 

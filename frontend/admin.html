@@ -18,20 +18,18 @@
         <span class="utility-hint">Official Regulatory Screening Engine</span>
       </div>
       <div class="utility-right">
-        <!-- Compact Single Button Device Switcher -->
-        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" title="Toggle Desktop / Mobile view">
+        <!-- Compact Single Button Device Switcher (Desktop mode icon-only) -->
+        <button type="button" class="single-toggle-btn" id="singleDeviceToggle" onclick="toggleDeviceMode()" aria-label="Switch between Desktop and Smartphone Mode" title="Switch Display Mode">
           <span class="toggle-icon" id="deviceToggleIcon">
-            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
           </span>
-          <span class="toggle-label" id="deviceToggleLabel">Desktop</span>
         </button>
 
-        <!-- Compact Single Button Theme Switcher -->
-        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" title="Toggle Dark / Light mode">
+        <!-- Compact Single Button Theme Switcher (Desktop mode icon-only) -->
+        <button type="button" class="single-toggle-btn" id="singleThemeToggle" onclick="toggleThemeMode()" aria-label="Switch Light / Dark Theme" title="Switch Theme">
           <span class="toggle-icon" id="themeToggleIcon">
-            <svg class="toggle-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           </span>
-          <span class="toggle-label" id="themeToggleLabel">Dark</span>
         </button>
       </div>
     </div>
@@ -61,12 +59,24 @@
           <li><a href="admin.html" class="nav-link active">Legal Rules</a></li>
         </ul>
       </nav>
-      <!-- Dedicated Mobile Hamburger Menu Button (Upper-Right Corner) -->
-      <button type="button" class="mobile-menu-toggle" id="mobileMenuToggleBtn" onclick="toggleMobileDrawer()" aria-label="Open navigation menu" title="Navigation Menu">
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-      </button>
+      <!-- Nav Right Actions: Device Mode, Theme Toggle, and Hamburger Menu (Smartphone Mode Header Controls) -->
+      <div class="nav-right-actions" id="navRightActions">
+        <button type="button" class="nav-icon-toggle mobile-only-control" id="navDeviceToggle" onclick="toggleDeviceMode()" aria-label="Switch display mode" title="Switch Display Mode">
+          <span class="nav-icon" id="navDeviceIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </span>
+        </button>
+        <button type="button" class="nav-icon-toggle mobile-only-control" id="navThemeToggle" onclick="toggleThemeMode()" aria-label="Switch theme mode" title="Switch Light/Dark Theme">
+          <span class="nav-icon" id="navThemeIcon">
+            <svg class="toggle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+        </button>
+        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggleBtn" onclick="toggleMobileDrawer()" aria-label="Open navigation menu" title="Navigation Menu">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
     </div>
   </header>
 

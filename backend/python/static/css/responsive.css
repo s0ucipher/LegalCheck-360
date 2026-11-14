@@ -29,6 +29,8 @@
    2. DESKTOP EXCLUSIVITY GUARANTEE (> 768px in Standard Desktop Mode)
    ============================================================================ */
 @media (min-width: 769px) {
+  body:not(.device-mobile-mode) .nav-right-actions,
+  body:not(.device-mobile-mode) .nav-icon-toggle,
   body:not(.device-mobile-mode) .mobile-menu-toggle {
     display: none !important;
   }
@@ -72,84 +74,9 @@
     box-sizing: border-box !important;
   }
 
-  /* --- Top Utility Bar on Mobile: Preserved, Ultra-Compact Single Line with Mode & Theme Switches --- */
+  /* --- Top Utility Bar on Mobile: Hidden to eliminate clutter and save precious vertical screen space --- */
   .top-utility-bar {
-    display: block !important;
-    padding: 0.28rem 0.75rem !important;
-    min-height: 36px !important;
-    background: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    box-sizing: border-box !important;
-  }
-
-  .top-utility-container {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    flex-wrap: nowrap !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    gap: 0.4rem !important;
-  }
-
-  .utility-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    min-width: 0 !important;
-    flex-shrink: 1 !important;
-  }
-
-  .utility-badge {
-    font-size: 0.7rem !important;
-    padding: 0.15rem 0.45rem !important;
-    border-radius: var(--radius-full) !important;
-    background: rgba(59, 130, 246, 0.12) !important;
-    color: #60a5fa !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-  }
-
-  [data-theme="light"] .utility-badge,
-  body.theme-light .utility-badge {
-    background: #dbeafe !important;
-    color: #1d4ed8 !important;
-  }
-
-  .utility-hint {
-    display: none !important; /* Hide long description on mobile so it does not wrap */
-  }
-
-  .utility-right {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.4rem !important;
-    margin-left: auto !important;
-    flex-shrink: 0 !important;
-  }
-
-  .single-toggle-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    padding: 0.25rem 0.6rem !important;
-    height: 28px !important;
-    min-height: 28px !important;
-    font-size: 0.74rem !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    border-radius: var(--radius-full) !important;
-    border: 1px solid var(--border-color) !important;
-    background: var(--bg-card) !important;
-    color: var(--text-main) !important;
-    cursor: pointer !important;
-    user-select: none !important;
-  }
-
-  .single-toggle-btn:active {
-    transform: scale(0.94) !important;
+    display: none !important;
   }
 
   /* --- Top Navbar on Mobile --- */
@@ -160,13 +87,19 @@
   }
 
   .nav-container {
-    min-height: 58px !important;
-    height: 58px !important;
+    min-height: 56px !important;
+    height: 56px !important;
     padding: 0.35rem 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 
   .nav-left-group {
+    display: flex !important;
+    align-items: center !important;
     gap: 0.5rem !important;
+    min-width: 0 !important;
   }
 
   .nav-back-btn {
@@ -196,18 +129,50 @@
     display: none !important;
   }
 
+  /* --- Nav Right Actions (Controls next to LegalCheck 360 in Smartphone Mode) --- */
+  .nav-right-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    margin-left: auto !important;
+  }
+
+  .nav-icon-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border-radius: var(--radius-sm, 8px) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: all var(--transition-fast) !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .nav-icon-toggle:active {
+    transform: scale(0.92) !important;
+  }
+
   /* --- Hamburger Menu Toggle Button (Upper-Right Corner) --- */
   .mobile-menu-toggle {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 4px !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    margin-left: auto !important;
-    border-radius: var(--radius-sm) !important;
+    gap: 4.5px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    margin-left: 0 !important;
+    border-radius: var(--radius-sm, 8px) !important;
     border: 1px solid var(--border-color) !important;
     background: var(--bg-card) !important;
     color: var(--text-main) !important;
@@ -220,29 +185,31 @@
   }
 
   .mobile-menu-toggle:active {
-    transform: scale(0.94) !important;
+    transform: scale(0.92) !important;
   }
 
   .hamburger-bar {
     display: block !important;
-    width: 18px !important;
-    height: 2px !important;
+    width: 20px !important;
+    height: 2.5px !important;
     background: var(--text-main) !important;
     border-radius: 2px !important;
     transition: all 0.25s ease !important;
   }
 
   .mobile-menu-toggle.open .hamburger-bar:nth-child(1) {
-    transform: translateY(6px) rotate(45deg) !important;
+    transform: translateY(7px) rotate(45deg) !important;
   }
   .mobile-menu-toggle.open .hamburger-bar:nth-child(2) {
     opacity: 0 !important;
   }
   .mobile-menu-toggle.open .hamburger-bar:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg) !important;
+    transform: translateY(-7px) rotate(-45deg) !important;
   }
 
-  /* Light mode hamburger toggle */
+  /* Light mode navbar controls */
+  [data-theme="light"] .nav-icon-toggle,
+  body.theme-light .nav-icon-toggle,
   [data-theme="light"] .mobile-menu-toggle,
   body.theme-light .mobile-menu-toggle {
     background: #ffffff !important;
@@ -251,6 +218,8 @@
   }
   [data-theme="light"] .hamburger-bar,
   body.theme-light .hamburger-bar {
+    background: #0f172a !important;
+  }
     background: #0f172a !important;
   }
 
@@ -1311,16 +1280,9 @@ body.device-mobile-mode body {
   padding-bottom: 0 !important;
 }
 
+/* In Smartphone Mode, hide top utility bar completely to eliminate clutter and save vertical space */
 body.device-mobile-mode .top-utility-bar {
-  display: block !important;
-  max-width: 440px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  box-sizing: border-box !important;
-  border-left: 1px solid var(--border-color) !important;
-  border-right: 1px solid var(--border-color) !important;
-  border-top: 1px solid var(--border-color) !important;
-  border-radius: 16px 16px 0 0 !important;
+  display: none !important;
 }
 
 body.device-mobile-mode .navbar nav,
@@ -1328,9 +1290,77 @@ body.device-mobile-mode .nav-links {
   display: none !important;
 }
 
+body.device-mobile-mode .nav-right-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  margin-left: auto !important;
+}
+
+body.device-mobile-mode .nav-icon-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
 body.device-mobile-mode .mobile-menu-toggle {
   display: flex !important;
-  margin-left: auto !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 4.5px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  cursor: pointer !important;
+  margin-left: 0 !important;
+}
+
+body.device-mobile-mode .hamburger-bar {
+  display: block !important;
+  width: 20px !important;
+  height: 2.5px !important;
+  background: var(--text-main) !important;
+  border-radius: 2px !important;
+  transition: all 0.25s ease !important;
+}
+
+body.device-mobile-mode.theme-light .hamburger-bar,
+body.device-mobile-mode[data-theme="light"] .hamburger-bar {
+  background: #0f172a !important;
+}
+
+body.device-mobile-mode.theme-light .nav-icon-toggle,
+body.device-mobile-mode[data-theme="light"] .nav-icon-toggle,
+body.device-mobile-mode.theme-light .mobile-menu-toggle,
+body.device-mobile-mode[data-theme="light"] .mobile-menu-toggle {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.device-mobile-mode .mobile-app-drawer {
+  display: flex !important;
+}
+
+body.device-mobile-mode .mobile-drawer-backdrop {
+  display: block !important;
 }
 
 body.device-mobile-mode .mobile-bottom-nav {

@@ -178,8 +178,7 @@
     background: #e2e8f0 radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.12) 0%, #cbd5e1 75%) !important;
   }
 
-  /* Sleek, genuine mobile viewport frame preserving Top Utility Bar & switches */
-  body.device-mobile-mode .top-utility-bar,
+  /* Sleek, genuine mobile viewport frame */
   body.device-mobile-mode .navbar,
   body.device-mobile-mode main,
   body.device-mobile-mode .footer {
@@ -193,15 +192,14 @@
     border-right: 1px solid var(--border-color) !important;
   }
 
+  /* In Smartphone Mode, hide top utility bar completely to eliminate clutter and save vertical space */
   body.device-mobile-mode .top-utility-bar {
-    display: block !important;
-    border-top: 1px solid var(--border-color) !important;
-    border-radius: 16px 16px 0 0 !important;
+    display: none !important;
   }
 
   body.device-mobile-mode .navbar {
-    border-top: none !important;
-    border-radius: 0 !important;
+    border-top: 1px solid var(--border-color) !important;
+    border-radius: 16px 16px 0 0 !important;
   }
 
   body.device-mobile-mode .footer {
@@ -331,15 +329,18 @@ body.device-mobile-mode .table-container {
   gap: 1rem;
 }
 
-/* Compact Modern Toggle Buttons (Device & Theme) */
+/* Compact Modern Icon-Only Toggle Buttons (Device & Theme) */
 .single-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.65rem;
-  height: 30px;
-  border-radius: var(--radius-full);
-  font-size: 0.78rem;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border-color);
@@ -360,7 +361,7 @@ body.device-mobile-mode .table-container {
 }
 
 .single-toggle-btn:active {
-  transform: translateY(0);
+  transform: scale(0.92);
 }
 
 .single-toggle-btn .toggle-icon {
@@ -371,8 +372,8 @@ body.device-mobile-mode .table-container {
 }
 
 .single-toggle-btn .toggle-svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
@@ -382,13 +383,13 @@ body.device-mobile-mode .table-container {
 }
 
 .single-toggle-btn:hover .toggle-svg {
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
-.single-toggle-btn .toggle-label {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  font-size: 0.76rem;
+/* Hide text label completely across all modes to maintain clean, professional aesthetic */
+.single-toggle-btn .toggle-label,
+.toggle-label {
+  display: none !important;
 }
 
 /* Light mode specific styling for compact buttons */
@@ -413,6 +414,66 @@ body.theme-light .single-toggle-btn:hover {
 
 [data-theme="light"] .single-toggle-btn:hover .toggle-svg {
   stroke: #1d4ed8;
+}
+
+/* Navbar Right Actions (Smartphone Mode Controls next to LegalCheck 360) */
+.nav-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.nav-icon-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-icon-toggle:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.nav-icon-toggle:active {
+  transform: scale(0.92);
+}
+
+.nav-icon-toggle .nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.nav-icon-toggle .toggle-svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Light mode for nav icon toggles */
+[data-theme="light"] .nav-icon-toggle,
+body.theme-light .nav-icon-toggle {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
 /* Sun icon accent in light mode */
@@ -670,7 +731,8 @@ body.theme-light .nav-back-btn:hover {
   color: var(--navbar-accent);
 }
 
-/* Mobile Menu Toggle Button: Hidden on desktop; styled and displayed on mobile / device-mobile-mode */
+/* Mobile Nav Actions: Hidden by default on desktop; styled and displayed on mobile / device-mobile-mode */
+.nav-right-actions,
 .mobile-menu-toggle {
   display: none;
 }
