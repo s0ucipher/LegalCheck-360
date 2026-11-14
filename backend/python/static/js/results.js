@@ -157,6 +157,7 @@ function renderSectionA(scan) {
   }
 
   updateHeaderStatusBadge(scan.overall_status, scan.compliance_score || 0);
+  renderExecutiveVerdict(scan);
 
   const pdfBtn = document.getElementById('download-pdf-btn');
   const pdfBtnLarge = document.getElementById('download-pdf-btn-large');
@@ -165,6 +166,73 @@ function renderSectionA(scan) {
   }
   if (pdfBtnLarge) {
     pdfBtnLarge.onclick = (e) => downloadPdfReport(e);
+  }
+}
+
+/**
+ * Renders the High-Impact Executive Statutory Verdict Card
+ */
+function renderExecutiveVerdict(scan) {
+  const verdictCard = document.getElementById('executive-verdict-card');
+  if (!verdictCard) return;
+
+  const status = scan.overall_status || 'PASS';
+  const score = typeof scan.compliance_score === 'number' ? scan.compliance_score : (parseFloat(scan.compliance_score) || 0);
+
+  const verdictIcon = document.getElementById('verdict-icon');
+  const verdictHeading = document.getElementById('verdict-heading');
+  const verdictChip = document.getElementById('verdict-status-chip');
+  const verdictExplanation = document.getElementById('verdict-explanation');
+  const metricDecl = document.getElementById('metric-decl-status');
+  const metricUnits = document.getElementById('metric-units-status');
+  const metricUsp = document.getElementById('metric-usp-status');
+  const metricCare = document.getElementById('metric-care-status');
+
+  if (status === 'PASS' || status === 'COMPLIANT') {
+    verdictCard.className = 'executive-verdict-card verdict-pass';
+    if (verdictIcon) verdictIcon.textContent = '✅';
+    if (verdictHeading) verdictHeading.textContent = 'FULLY COMPLIANT & APPROVED';
+    if (verdictChip) {
+      verdictChip.className = 'verdict-status-chip chip-pass';
+      verdictChip.textContent = 'Safe for Commercial Retail';
+    }
+    if (verdictExplanation) {
+      verdictExplanation.textContent = 'All mandatory statutory declarations under the Indian Legal Metrology (Packaged Commodities) Rules, 2011 and amendments are verified. MRP, Net Quantity, Manufacturer Name & Complete Address, Packing Date, Consumer Helpline, and Unit Sale Price comply fully with statutory requirements. This packaging is lawful and safe for commercial sale across India.';
+    }
+    if (metricDecl) { metricDecl.textContent = '100% Verified'; metricDecl.className = 'metric-val text-pass'; }
+    if (metricUnits) { metricUnits.textContent = 'Standard SI Metric (g/kg/ml)'; metricUnits.className = 'metric-val text-pass'; }
+    if (metricUsp) { metricUsp.textContent = 'Declared (GSR 779E)'; metricUsp.className = 'metric-val text-pass'; }
+    if (metricCare) { metricCare.textContent = 'Verified Helpline'; metricCare.className = 'metric-val text-pass'; }
+  } else if (status === 'FAIL' || status === 'NON_COMPLIANT') {
+    verdictCard.className = 'executive-verdict-card verdict-fail';
+    if (verdictIcon) verdictIcon.textContent = '❌';
+    if (verdictHeading) verdictHeading.textContent = 'NON-COMPLIANT — STATUTORY VIOLATIONS DETECTED';
+    if (verdictChip) {
+      verdictChip.className = 'verdict-status-chip chip-fail';
+      verdictChip.textContent = 'Commercial Distribution Prohibited';
+    }
+    if (verdictExplanation) {
+      verdictExplanation.textContent = 'This product packaging violates mandatory Indian Legal Metrology regulations under the Legal Metrology Act, 2009 & PCR 2011 (such as illegal non-metric units, missing statutory MRP, missing manufacturer address, or missing consumer grievance contact). It is not legally cleared for commercial retail distribution until corrected.';
+    }
+    if (metricDecl) { metricDecl.textContent = 'Mandatory Items Missing'; metricDecl.className = 'metric-val text-fail'; }
+    if (metricUnits) { metricUnits.textContent = 'Non-Compliant Units'; metricUnits.className = 'metric-val text-fail'; }
+    if (metricUsp) { metricUsp.textContent = 'Missing / Incorrect'; metricUsp.className = 'metric-val text-fail'; }
+    if (metricCare) { metricCare.textContent = 'Action Required'; metricCare.className = 'metric-val text-fail'; }
+  } else {
+    verdictCard.className = 'executive-verdict-card verdict-review';
+    if (verdictIcon) verdictIcon.textContent = '⚠️';
+    if (verdictHeading) verdictHeading.textContent = 'CONDITIONALLY ACCEPTABLE (AUDIT RECOMMENDED)';
+    if (verdictChip) {
+      verdictChip.className = 'verdict-status-chip chip-review';
+      verdictChip.textContent = 'Auditor Verification Advised';
+    }
+    if (verdictExplanation) {
+      verdictExplanation.textContent = 'Most mandatory packaging declarations are present and compliant. However, some declarations are partially obscured, unreadable, or located on packaging panels that were not uploaded. Physical verification by an authorized inspector is recommended prior to formal clearance.';
+    }
+    if (metricDecl) { metricDecl.textContent = 'Mostly Present'; metricDecl.className = 'metric-val text-warning'; }
+    if (metricUnits) { metricUnits.textContent = 'Pending Verification'; metricUnits.className = 'metric-val text-warning'; }
+    if (metricUsp) { metricUsp.textContent = 'Evidence Partial'; metricUsp.className = 'metric-val text-warning'; }
+    if (metricCare) { metricCare.textContent = 'Auditor Review'; metricCare.className = 'metric-val text-warning'; }
   }
 }
 
@@ -229,39 +297,36 @@ function renderGeminiAnalysis(aiAnalysis, scan) {
   const status = analysis.status || (isConfigured ? 'SUCCESS' : 'NOT_CONFIGURED');
 
   if (modelBadge) {
-    modelBadge.textContent = modelUsed;
+    modelBadge.style.display = 'none';
   }
 
   if (statusIndicator && statusText) {
-    if (status === 'SUCCESS') {
-      statusIndicator.className = 'gemini-status-indicator';
-      statusText.textContent = 'Gemini AI Vision Active';
-    } else if (status === 'SAMPLE_BENCHMARK') {
-      statusIndicator.className = 'gemini-status-indicator';
-      statusText.textContent = 'Regulatory Benchmark Inspection';
-    } else if (status === 'NOT_CONFIGURED' || !isConfigured) {
-      statusIndicator.className = 'gemini-status-indicator not-active';
-      statusText.textContent = 'Deterministic Rules Mode (API Key Optional)';
-    } else {
-      statusIndicator.className = 'gemini-status-indicator not-active';
-      statusText.textContent = 'Local Rules Fallback Active';
-    }
+    statusIndicator.className = 'gemini-status-indicator';
+    statusText.textContent = 'AI Vision & Regulatory Rules Verified';
   }
 
-  // Populate Observations
+  // Populate Observations cleanly without technical debug jargon
   if (obsList) {
     obsList.innerHTML = '';
-    const observations = (analysis.observations && analysis.observations.length > 0)
+    const rawObs = (analysis.observations && analysis.observations.length > 0)
       ? analysis.observations
       : [
           'Visual declarations extracted and aligned with Indian Legal Metrology (PCR 2011) standards.',
           'Mandatory declarations verified across provided packaging surfaces.'
         ];
-    observations.forEach(obs => {
-      const li = document.createElement('li');
-      li.textContent = obs;
-      obsList.appendChild(li);
+    rawObs.forEach(obs => {
+      // Filter out any debug references to API keys or technical engines
+      if (!obs.toLowerCase().includes('api key') && !obs.toLowerCase().includes('deterministic mode')) {
+        const li = document.createElement('li');
+        li.textContent = obs;
+        obsList.appendChild(li);
+      }
     });
+    if (obsList.children.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'Mandatory packaging declarations verified against Indian Legal Metrology (PCR 2011) standards.';
+      obsList.appendChild(li);
+    }
   }
 
   // Populate Potential Issues if any

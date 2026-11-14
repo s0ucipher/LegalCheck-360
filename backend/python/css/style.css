@@ -2308,3 +2308,129 @@ body.theme-light .gemini-analysis-card {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
+/* ==========================================================================
+   Executive Statutory Verdict Card (Clear, Genuine Safety Determination)
+   ========================================================================== */
+.executive-verdict-card {
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-md, 12px);
+  border: 1.5px solid transparent;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.executive-verdict-card.verdict-pass {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.04) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.executive-verdict-card.verdict-review {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.04) 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.executive-verdict-card.verdict-fail {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.04) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.verdict-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.65rem;
+}
+
+.verdict-badge-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verdict-emoji {
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.verdict-caption {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.verdict-heading {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.verdict-status-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chip-pass {
+  background: rgba(16, 185, 129, 0.18);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.chip-review {
+  background: rgba(245, 158, 11, 0.18);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.chip-fail {
+  background: rgba(239, 68, 68, 0.18);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.verdict-explanation {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-main);
+  margin: 0 0 1rem 0;
+}
+
+.verdict-key-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.verdict-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.metric-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.text-pass { color: #10b981; }
+.text-warning { color: #f59e0b; }
+.text-fail { color: #ef4444; }
+
+

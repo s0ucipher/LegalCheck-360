@@ -1543,3 +1543,27 @@ body.device-mobile-mode .rule-decision-row {
 body.device-mobile-mode .rule-status-selector {
   width: 100% !important;
 }
+
+body.device-mobile-mode .executive-verdict-card {
+  padding: 1.15rem 0.85rem !important;
+  margin-top: 1rem !important;
+}
+
+body.device-mobile-mode .verdict-header-row {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+}
+
+body.device-mobile-mode .verdict-heading {
+  font-size: 1.05rem !important;
+}
+
+body.device-mobile-mode .verdict-explanation {
+  font-size: 0.84rem !important;
+}
+
+body.device-mobile-mode .verdict-key-metrics {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.5rem !important;
+}
