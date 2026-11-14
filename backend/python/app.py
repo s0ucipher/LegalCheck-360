@@ -108,11 +108,31 @@ def resolve_file(relative_path):
     return None
 
 # --------------------------------------------------------------------------
-# Database Persistence Helper (Writable /tmp with schema auto-healing)
+# Database Persistence Helper (Persistent Disk Support with Seed Initialization)
 # --------------------------------------------------------------------------
 def get_db_path():
-    tmp_db = os.path.join("/tmp", "legalcheck360.db")
-    if not os.path.exists(tmp_db):
+    """
+    Selects the SQLite database path:
+    1. Reads DB_PATH from environment (e.g. /var/data/legalcheck360.db on Render).
+    2. Falls back to /tmp/legalcheck360.db for local and development environments.
+    3. Automatically creates parent directory if it does not exist.
+    4. On first initialization only, copies seed database without overwriting existing data.
+    """
+    env_path = os.environ.get("DB_PATH", "").strip()
+    target_db = env_path if env_path else os.path.join("/tmp", "legalcheck360.db")
+
+    # Automatically create the parent directory if it does not exist
+    db_dir = os.path.dirname(target_db)
+    if db_dir:
+        try:
+            os.makedirs(db_dir, exist_ok=True)
+        except Exception:
+            # If the custom directory cannot be created (e.g. permission error), fall back safely to /tmp
+            target_db = os.path.join("/tmp", os.path.basename(target_db) or "legalcheck360.db")
+
+    # On first initialization only, copy the existing seed database
+    # Never overwrite an existing database or existing inspection records
+    if not os.path.exists(target_db):
         for seed_candidate in [
             os.path.join(PROJECT_ROOT, "database", "legalcheck360.db"),
             os.path.join(CUR_DIR, "legalcheck360.db"),
@@ -121,16 +141,22 @@ def get_db_path():
             if os.path.exists(seed_candidate):
                 try:
                     import shutil
-                    shutil.copy2(seed_candidate, tmp_db)
+                    shutil.copy2(seed_candidate, target_db)
                     break
                 except Exception:
                     pass
-    return tmp_db
+    return target_db
 
 def get_db():
     db_path = get_db_path()
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA busy_timeout = 5000")
+    except Exception:
+        pass
     with conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS scans (

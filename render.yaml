@@ -2,11 +2,18 @@ services:
   - type: web
     name: legalcheck360-python-api
     env: python
+    plan: starter
     buildCommand: pip install -r backend/python/requirements.txt
     startCommand: gunicorn --chdir backend/python app:app --bind 0.0.0.0:$PORT
+    disk:
+      name: legalcheck-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: DB_PATH
+        value: /var/data/legalcheck360.db
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
       - key: GEMINI_API_KEY
