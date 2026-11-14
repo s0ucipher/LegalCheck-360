@@ -178,7 +178,8 @@
     background: #e2e8f0 radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.12) 0%, #cbd5e1 75%) !important;
   }
 
-  /* Sleek, genuine mobile viewport frame without artificial fake notches */
+  /* Sleek, genuine mobile viewport frame preserving Top Utility Bar & switches */
+  body.device-mobile-mode .top-utility-bar,
   body.device-mobile-mode .navbar,
   body.device-mobile-mode main,
   body.device-mobile-mode .footer {
@@ -192,9 +193,15 @@
     border-right: 1px solid var(--border-color) !important;
   }
 
-  body.device-mobile-mode .navbar {
+  body.device-mobile-mode .top-utility-bar {
+    display: block !important;
     border-top: 1px solid var(--border-color) !important;
     border-radius: 16px 16px 0 0 !important;
+  }
+
+  body.device-mobile-mode .navbar {
+    border-top: none !important;
+    border-radius: 0 !important;
   }
 
   body.device-mobile-mode .footer {
@@ -204,11 +211,7 @@
   }
 }
 
-/* Smartphone Mode Navigation & Utility Rules */
-body.device-mobile-mode .top-utility-bar {
-  display: none !important;
-}
-
+/* Smartphone Mode Navigation Rules */
 body.device-mobile-mode .navbar nav,
 body.device-mobile-mode .nav-links {
   display: none !important;
@@ -665,6 +668,11 @@ body.theme-light .nav-back-btn:hover {
 
 .brand-text span {
   color: var(--navbar-accent);
+}
+
+/* Mobile Menu Toggle Button: Hidden on desktop; styled and displayed on mobile / device-mobile-mode */
+.mobile-menu-toggle {
+  display: none;
 }
 
 .nav-links {

@@ -82,15 +82,15 @@ function setThemeMode(mode) {
     localStorage.setItem('legalcheck_theme', 'dark');
   }
 
-  // Update Single Theme Toggle button (Icon + Label)
+  // Update Single Theme Toggle button (Shows target action)
   const themeIcon = document.getElementById('themeToggleIcon');
   const themeLabel = document.getElementById('themeToggleLabel');
   const singleThemeBtn = document.getElementById('singleThemeToggle');
   if (themeIcon && themeLabel) {
-    themeIcon.innerHTML = isLight ? SVG_ICONS.sun : SVG_ICONS.moon;
-    themeLabel.textContent = isLight ? 'Light' : 'Dark';
+    themeIcon.innerHTML = isLight ? SVG_ICONS.moon : SVG_ICONS.sun;
+    themeLabel.textContent = isLight ? 'Dark' : 'Light';
     if (singleThemeBtn) {
-      singleThemeBtn.title = isLight ? 'Light Mode (Click for Dark)' : 'Dark Mode (Click for Light)';
+      singleThemeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
     }
   }
 
@@ -131,15 +131,15 @@ function setDeviceMode(mode) {
     localStorage.setItem('legalcheck_device', 'desktop');
   }
 
-  // Update Single Device Toggle button (Icon + Label)
+  // Update Single Device Toggle button (Shows target action)
   const devIcon = document.getElementById('deviceToggleIcon');
   const devLabel = document.getElementById('deviceToggleLabel');
   const singleDevBtn = document.getElementById('singleDeviceToggle');
   if (devIcon && devLabel) {
-    devIcon.innerHTML = isMobile ? SVG_ICONS.mobile : SVG_ICONS.desktop;
-    devLabel.textContent = isMobile ? 'Mobile' : 'Desktop';
+    devIcon.innerHTML = isMobile ? SVG_ICONS.desktop : SVG_ICONS.mobile;
+    devLabel.textContent = isMobile ? 'Desktop' : 'Mobile';
     if (singleDevBtn) {
-      singleDevBtn.title = isMobile ? 'Mobile View (Click for Desktop)' : 'Desktop View (Click for Mobile)';
+      singleDevBtn.title = isMobile ? 'Switch to Desktop Mode' : 'Switch to Smartphone Mode';
     }
   }
 
@@ -166,6 +166,12 @@ function toggleDeviceMode() {
   setDeviceMode(next);
   showToast(next === 'mobile' ? 'Mobile View activated' : 'Desktop View restored', 'info');
 }
+
+// Explicit global exports for HTML inline onclick handlers
+window.toggleDeviceMode = toggleDeviceMode;
+window.setDeviceMode = setDeviceMode;
+window.toggleThemeMode = toggleThemeMode;
+window.setThemeMode = setThemeMode;
 
 /**
  * ============================================================================
@@ -395,7 +401,7 @@ function initMobileNavigation() {
         </a>
         <a href="admin.html" class="drawer-nav-item" data-page="admin" onclick="closeMobileDrawer()">
           <span class="drawer-nav-icon">⚖️</span>
-          <span class="drawer-nav-label">Legal Rules (PCR 2011)</span>
+          <span class="drawer-nav-label">Catalogue & Legal Rules (PCR 2011)</span>
           <span class="drawer-nav-chevron">›</span>
         </a>
         <a href="review.html" class="drawer-nav-item" data-page="review" onclick="closeMobileDrawer()">
