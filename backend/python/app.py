@@ -21,6 +21,7 @@ Dual Capabilities:
 import os
 import sys
 import json
+import base64
 import sqlite3
 import datetime
 import mimetypes
@@ -842,8 +843,8 @@ def gemini_status():
     return jsonify({
         "configured": is_conf,
         "status": "READY" if is_conf else "NOT_CONFIGURED",
-        "preferred_model": "gemini-2.5-flash",
-        "fallback_models": ["gemini-2.0-flash", "gemini-1.5-flash"],
+        "preferred_model": gemini_service.SUPPORTED_MODELS[0] if getattr(gemini_service, "SUPPORTED_MODELS", None) else "gemini-3.5-flash-lite",
+        "fallback_models": gemini_service.SUPPORTED_MODELS[1:] if getattr(gemini_service, "SUPPORTED_MODELS", None) else ["gemini-3.1-flash-lite", "gemini-3-flash-preview"],
         "message": "Google Gemini multimodal packaging vision is active." if is_conf else "GEMINI_API_KEY environment variable is not configured. Running in resilient local rules mode."
     })
 
@@ -870,7 +871,25 @@ def gemini_direct_analyze():
 @app.route("/api/scans", methods=["POST"])
 @optional_auth
 def create_scan():
-    data = request.get_json() or {}
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form.to_dict()
+        uploaded_files = []
+        for key in request.files:
+            file_item = request.files[key]
+            if file_item and file_item.filename:
+                file_bytes = file_item.read()
+                if file_bytes:
+                    mime = file_item.mimetype or "image/jpeg"
+                    b64 = base64.b64encode(file_bytes).decode("utf-8")
+                    uploaded_files.append({
+                        "filename": file_item.filename,
+                        "view_type": key.replace("images_", "").replace("image_", "").split("_")[0],
+                        "data": f"data:{mime};base64,{b64}"
+                    })
+        if uploaded_files:
+            data["images"] = uploaded_files
     product_name = (data.get("product_name") or "").strip()
     category = data.get("category", "packaged_food")
     custom_category = (data.get("custom_category") or "").strip()
@@ -931,7 +950,8 @@ def create_scan():
                     gemini_meta = {
                         "status": "SUCCESS",
                         "configured": True,
-                        "model_used": g_res.get("model_used", "gemini-2.5-flash"),
+                        "model": g_res.get("model_used", "gemini-3.5-flash-lite"),
+                        "model_used": g_res.get("model_used", "gemini-3.5-flash-lite"),
                         "message": g_res.get("message", "Multimodal packaging vision inspection completed via Google Gemini."),
                         "observations": g_data.get("ai_observations") or [],
                         "potential_compliance_issues": g_data.get("potential_compliance_issues") or [],
