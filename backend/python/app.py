@@ -113,22 +113,42 @@ def resolve_file(relative_path):
 def get_db_path():
     """
     Selects the SQLite database path:
-    1. Reads DB_PATH from environment (e.g. /var/data/legalcheck360.db on Render).
-    2. Falls back to /tmp/legalcheck360.db for local and development environments.
-    3. Automatically creates parent directory if it does not exist.
-    4. On first initialization only, copies seed database without overwriting existing data.
+    1. If DB_PATH is explicitly set (e.g. /var/data/legalcheck360.db on Render):
+       - Uses target_db exactly as specified.
+       - Ensures parent directory exists and is writable.
+       - Fails fast and raises RuntimeError/PermissionError if inaccessible.
+       - NEVER silently falls back to /tmp when DB_PATH is explicitly configured.
+    2. If DB_PATH is absent or empty:
+       - Preserves the existing /tmp/legalcheck360.db fallback for local development.
+    3. On first initialization only, copies the seed database without overwriting existing data.
     """
     env_path = os.environ.get("DB_PATH", "").strip()
-    target_db = env_path if env_path else os.path.join("/tmp", "legalcheck360.db")
+    is_explicit = bool(env_path)
+    target_db = env_path if is_explicit else os.path.join("/tmp", "legalcheck360.db")
 
-    # Automatically create the parent directory if it does not exist
+    # Resolve parent directory
     db_dir = os.path.dirname(target_db)
     if db_dir:
         try:
             os.makedirs(db_dir, exist_ok=True)
-        except Exception:
-            # If the custom directory cannot be created (e.g. permission error), fall back safely to /tmp
+        except Exception as e:
+            if is_explicit:
+                raise RuntimeError(
+                    f"[CRITICAL DATABASE CONFIGURATION ERROR] Configured DB_PATH directory '{db_dir}' "
+                    f"cannot be created or accessed: {e}. Refusing to start with silent fallback to prevent data loss."
+                ) from e
             target_db = os.path.join("/tmp", os.path.basename(target_db) or "legalcheck360.db")
+            db_dir = "/tmp"
+
+    # Verify write permissions on directory
+    check_dir = db_dir if db_dir else "."
+    if not os.access(check_dir, os.W_OK):
+        if is_explicit:
+            raise PermissionError(
+                f"[CRITICAL DATABASE CONFIGURATION ERROR] Configured DB_PATH directory '{check_dir}' "
+                f"is not writable. Verify Render persistent disk mount permissions."
+            )
+        target_db = os.path.join(os.getcwd(), "legalcheck360.db")
 
     # On first initialization only, copy the existing seed database
     # Never overwrite an existing database or existing inspection records
@@ -138,12 +158,16 @@ def get_db_path():
             os.path.join(CUR_DIR, "legalcheck360.db"),
             os.path.join(os.getcwd(), "database", "legalcheck360.db")
         ]:
-            if os.path.exists(seed_candidate):
+            if os.path.exists(seed_candidate) and os.path.abspath(seed_candidate) != os.path.abspath(target_db):
                 try:
                     import shutil
                     shutil.copy2(seed_candidate, target_db)
                     break
-                except Exception:
+                except Exception as e:
+                    if is_explicit:
+                        raise RuntimeError(
+                            f"[CRITICAL DATABASE ERROR] Failed to copy initial seed database to '{target_db}': {e}"
+                        ) from e
                     pass
     return target_db
 
@@ -199,6 +223,30 @@ def get_db():
                 ('LMC-2026-REV-003', NULL, NULL, 0, 'Darjeeling Green Tea Premium Blend', 'beverages', 'REVIEW_REQUIRED', 0.0, '{}', '2026-11-07 23:36:00')
             """)
     return conn
+
+def verify_database_readiness():
+    """
+    Validates database path, directory accessibility, write permissions,
+    and schema readiness on startup.
+    Fails fast if explicitly configured DB_PATH is not accessible or writable.
+    """
+    db_path = get_db_path()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA schema_version")
+        conn.close()
+    except Exception as e:
+        env_path = os.environ.get("DB_PATH", "").strip()
+        if env_path:
+            raise RuntimeError(
+                f"[CRITICAL DATABASE READINESS ERROR] Failed to initialize configured database at '{db_path}': {e}. "
+                f"Verify persistent disk mount and permissions."
+            ) from e
+        raise e
+
+# Verify database write readiness on application load
+verify_database_readiness()
 
 # --------------------------------------------------------------------------
 # Authentic Indian Legal Metrology Rules (Seed Reference)
