@@ -72,7 +72,15 @@ CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CUR_DIR, "..", ".."))
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB payload threshold for multimodal uploads
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+@app.errorhandler(413)
+def request_entity_too_large(e):
+    return jsonify({
+        "success": False,
+        "error": "Uploaded payload exceeds maximum allowed size (25MB)."
+    }), 413
 
 # --------------------------------------------------------------------------
 # File Resolution Helper (Locates static files across various deployment roots)
@@ -879,15 +887,17 @@ def create_scan():
         for key in request.files:
             file_item = request.files[key]
             if file_item and file_item.filename:
-                file_bytes = file_item.read()
-                if file_bytes:
-                    mime = file_item.mimetype or "image/jpeg"
-                    b64 = base64.b64encode(file_bytes).decode("utf-8")
-                    uploaded_files.append({
-                        "filename": file_item.filename,
-                        "view_type": key.replace("images_", "").replace("image_", "").split("_")[0],
-                        "data": f"data:{mime};base64,{b64}"
-                    })
+                ext = file_item.filename.rsplit(".", 1)[-1].lower() if "." in file_item.filename else ""
+                if ext in {"jpg", "jpeg", "png", "webp"}:
+                    file_bytes = file_item.read()
+                    if file_bytes:
+                        mime = file_item.mimetype or "image/jpeg"
+                        b64 = base64.b64encode(file_bytes).decode("utf-8")
+                        uploaded_files.append({
+                            "filename": file_item.filename,
+                            "view_type": key.replace("images_", "").replace("image_", "").split("_")[0],
+                            "data": f"data:{mime};base64,{b64}"
+                        })
         if uploaded_files:
             data["images"] = uploaded_files
     product_name = (data.get("product_name") or "").strip()
