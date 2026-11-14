@@ -5,7 +5,10 @@ build/
 legalcheck360_server
 database/*.db-wal
 database/*.db-shm
+.env
+*.env
 backend/.env
+backend/python/.env
 .DS_Store
 
 __pycache__/
