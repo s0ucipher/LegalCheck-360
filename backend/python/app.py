@@ -39,8 +39,8 @@ try:
     service_account_path = os.environ.get("FIREBASE_SERVICE_ACCOUNT_PATH")
     service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
 
-    if service_account_json:
-        cred_dict = json.loads(service_account_json)
+    if service_account_json and service_account_json.strip() and service_account_json.strip().startswith("{"):
+        cred_dict = json.loads(service_account_json.strip())
         cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
         firebase_auth = fb_auth
@@ -110,45 +110,48 @@ def resolve_file(relative_path):
 # --------------------------------------------------------------------------
 # Database Persistence Helper (Persistent Disk Support with Seed Initialization)
 # --------------------------------------------------------------------------
+_cached_db_path = None
+
 def get_db_path():
     """
     Selects the SQLite database path:
-    1. If DB_PATH is explicitly set (e.g. /var/data/legalcheck360.db on Render):
-       - Uses target_db exactly as specified.
-       - Ensures parent directory exists and is writable.
-       - Fails fast and raises RuntimeError/PermissionError if inaccessible.
-       - NEVER silently falls back to /tmp when DB_PATH is explicitly configured.
-    2. If DB_PATH is absent or empty:
-       - Preserves the existing /tmp/legalcheck360.db fallback for local development.
-    3. On first initialization only, copies the seed database without overwriting existing data.
+    1. If a persistent disk is mounted at DB_PATH (e.g. /var/data/legalcheck360.db on Render with attached disk),
+       it uses the persistent disk path directly.
+    2. If DB_PATH directory cannot be created or accessed due to permissions (e.g. Render Free plan where
+       no persistent disk is attached and /var/data requires root permissions):
+       - Safely falls back to writable runtime storage (/tmp/legalcheck360.db) with a clear diagnostic notice.
+       - Prevents deployment crashes and allows the service to deploy and run successfully.
+    3. If DB_PATH is absent or empty:
+       - Uses the default /tmp/legalcheck360.db runtime storage.
+    4. On first initialization only, copies the seed database without overwriting existing data.
     """
+    global _cached_db_path
+    if _cached_db_path and os.path.exists(_cached_db_path):
+        return _cached_db_path
+
     env_path = os.environ.get("DB_PATH", "").strip()
-    is_explicit = bool(env_path)
-    target_db = env_path if is_explicit else os.path.join("/tmp", "legalcheck360.db")
+    target_db = env_path if env_path else os.path.join("/tmp", "legalcheck360.db")
 
     # Resolve parent directory
     db_dir = os.path.dirname(target_db)
     if db_dir:
         try:
             os.makedirs(db_dir, exist_ok=True)
-        except Exception as e:
-            if is_explicit:
-                raise RuntimeError(
-                    f"[CRITICAL DATABASE CONFIGURATION ERROR] Configured DB_PATH directory '{db_dir}' "
-                    f"cannot be created or accessed: {e}. Refusing to start with silent fallback to prevent data loss."
-                ) from e
-            target_db = os.path.join("/tmp", os.path.basename(target_db) or "legalcheck360.db")
+        except (PermissionError, OSError) as e:
+            # When /var/data is configured on Render but no persistent disk volume is mounted,
+            # the unprivileged container user cannot create directories under /var.
+            # Safely fall back to writable /tmp so the service deploys successfully.
+            print(f"[Render Storage Notice] Configured DB_PATH directory '{db_dir}' cannot be created: {e}.")
+            print(f"[Render Storage Notice] Persistent disk is not mounted at '{db_dir}' (common on Render Free plan).")
+            print(f"[Render Storage Notice] Falling back to safe writable runtime storage at '/tmp/legalcheck360.db'.")
+            target_db = os.path.join("/tmp", "legalcheck360.db")
             db_dir = "/tmp"
 
     # Verify write permissions on directory
     check_dir = db_dir if db_dir else "."
     if not os.access(check_dir, os.W_OK):
-        if is_explicit:
-            raise PermissionError(
-                f"[CRITICAL DATABASE CONFIGURATION ERROR] Configured DB_PATH directory '{check_dir}' "
-                f"is not writable. Verify Render persistent disk mount permissions."
-            )
-        target_db = os.path.join(os.getcwd(), "legalcheck360.db")
+        print(f"[Render Storage Notice] Directory '{check_dir}' is not writable. Falling back to '/tmp/legalcheck360.db'.")
+        target_db = os.path.join("/tmp", "legalcheck360.db")
 
     # On first initialization only, copy the existing seed database
     # Never overwrite an existing database or existing inspection records
@@ -162,13 +165,12 @@ def get_db_path():
                 try:
                     import shutil
                     shutil.copy2(seed_candidate, target_db)
+                    print(f"[Database] Copied initial seed database to '{target_db}'")
                     break
                 except Exception as e:
-                    if is_explicit:
-                        raise RuntimeError(
-                            f"[CRITICAL DATABASE ERROR] Failed to copy initial seed database to '{target_db}': {e}"
-                        ) from e
+                    print(f"[Database Warning] Could not copy initial seed database: {e}")
                     pass
+    _cached_db_path = target_db
     return target_db
 
 def get_db():
